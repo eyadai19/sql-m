@@ -1,3 +1,5 @@
+"use client";
+
 import { LoginFormError } from "@/lib/types/userSchema";
 import { zodResolver } from "@hookform/resolvers/zod";
 import Link from "next/link";
