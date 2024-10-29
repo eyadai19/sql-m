@@ -1,7 +1,8 @@
 import { LoginForm } from "@/components/LoginForm";
 import { lucia } from "@/lib/auth";
 import { db } from "@/lib/db";
-import { LoginFormError, loginSchema } from "@/lib/types/userSchema";
+import { LoginFormError, loginFormSchema } from "@/lib/types/userSchema";
+import hash from "@/lib/utils";
 import { cookies } from "next/headers";
 import { z } from "zod";
 
@@ -16,23 +17,22 @@ export default function LoginPage() {
 }
 
 async function LoginAction(
-	input: z.infer<typeof loginSchema>,
+	input: z.infer<typeof loginFormSchema>,
 ): Promise<LoginFormError | undefined> {
 	"use server";
 
 	try {
-		const data = await loginSchema.parseAsync(input);
+		const data = await loginFormSchema.parseAsync(input);
 
 		const user = await db.query.TB_user.findFirst({
 			where: (user, { eq }) => eq(user.username, data.username), // edit to email/username
 		});
 
-		// if (!user || user.password != hash(data.password)) {
-		// 	return { field: "root", message: "Email or password is incorrect" };
-		// }
+		if (!user || user.password != hash(data.password)) {
+			return { field: "root", message: "Email or password is incorrect" };
+		}
 
-		// const session = await lucia.createSession(user.id, {});
-		const session = await lucia.createSession(user!.id, {});
+		const session = await lucia.createSession(user.id, {});
 		const sessionCookie = lucia.createSessionCookie(session.id);
 		cookies().set(
 			sessionCookie.name,

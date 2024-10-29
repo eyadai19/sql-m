@@ -4,7 +4,7 @@ interface PageBath {
 }
 
 const basic: PageBath[] = [
-	{ name: "dataType", path: "../app/basic/dataType" },
+	{ name: "dataType", path: "@app/basic/dataType" },
 	{ name: "reference", path: "../app/basic/reference" },
 	{ name: "ERD", path: "../app/basic/ERD" },
 ];
@@ -56,12 +56,10 @@ const allPath: GroupPath[] = [
 ];
 
 /*
-
-allPath.map(group => {
-    console.log(`Group: ${group.name}`);
-    group.data.map(page => {
-        console.log(`  Name: ${page.name}, Path: ${page.path}`);
-    });
+allPath.map((group) => {
+	console.log(`Group: ${group.name}`);
+	group.data.map((page) => {
+		console.log(`  Name: ${page.name}, Path: ${page.path}`);
+	});
 });
-
 */

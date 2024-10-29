@@ -1,6 +1,6 @@
 "use client";
 
-import { LoginFormError } from "@/lib/types/userSchema";
+import { RegisterFormError, registerFormSchema } from "@/lib/types/userSchema";
 import { zodResolver } from "@hookform/resolvers/zod";
 import Link from "next/link";
 import { useForm } from "react-hook-form";
@@ -9,28 +9,23 @@ import { Button } from "./ui/button";
 import { Form, FormControl, FormField, FormItem, FormMessage } from "./ui/form";
 import { Input } from "./ui/input";
 
-const loginFormSchema = z.object({
-	username: z.string().email(),
-	password: z.string().min(8).max(32),
-});
-
-export function LoginForm({
-	loginAction,
+export default function RegisterForm({
+	registerAction,
 }: {
-	loginAction: (
-		input: z.infer<typeof loginFormSchema>,
-	) => Promise<LoginFormError | undefined>;
+	registerAction: (
+		input: z.infer<typeof registerFormSchema>,
+	) => Promise<RegisterFormError | undefined>;
 }) {
-	const form = useForm<z.infer<typeof loginFormSchema>>({
-		resolver: zodResolver(loginFormSchema),
+	const form = useForm<z.infer<typeof registerFormSchema>>({
+		resolver: zodResolver(registerFormSchema),
 		defaultValues: {
 			username: "",
 			password: "",
 		},
 	});
 
-	async function onSubmit(values: z.infer<typeof loginFormSchema>) {
-		const error = await loginAction(values);
+	async function onSubmit(values: z.infer<typeof registerFormSchema>) {
+		const error = await registerAction(values);
 
 		if (error) {
 			form.setError(
@@ -38,6 +33,7 @@ export function LoginForm({
 				{ message: error.message },
 				{ shouldFocus: true },
 			);
+
 			return;
 		}
 	}
@@ -46,11 +42,11 @@ export function LoginForm({
 		<Form {...form}>
 			<form onSubmit={form.handleSubmit(onSubmit)} className="w-full space-y-8">
 				<div className="flex flex-col gap-1">
-					<span className="text-2xl font-medium">تسجيل الدخول</span>
+					<span className="text-2xl font-medium">إنشاء حساب</span>
 					<span className="text-sm text-muted-foreground">
-						ليس لديك حساب؟{" "}
-						<Link className="font-medium text-blue-400" href="/register">
-							انشاء حساب جديد{" "}
+						لديك حساب ؟{" "}
+						<Link className="font-medium text-blue-400" href="/login">
+							تسجيل الدخول
 						</Link>
 						.
 					</span>
@@ -61,7 +57,7 @@ export function LoginForm({
 					render={({ field }) => (
 						<FormItem>
 							<FormControl>
-								<Input placeholder="البريد الالكتروني" {...field} />
+								<Input placeholder="اسم المستخدم" {...field} />
 							</FormControl>
 							<FormMessage />
 						</FormItem>
@@ -79,24 +75,14 @@ export function LoginForm({
 						</FormItem>
 					)}
 				/>
-				<div className="space-y-2">
-					<Button
-						disabled={form.formState.isSubmitting}
-						className="w-full"
-						type="submit"
-					>
-						تسجيل الدخول
-					</Button>
 
-					<Button
-						disabled={form.formState.isSubmitting}
-						className="w-full"
-						type="submit"
-						variant="outline"
-					>
-						تسجيل الدخول كضيف
-					</Button>
-				</div>
+				<Button
+					disabled={form.formState.isSubmitting}
+					className="w-full"
+					type="submit"
+				>
+					تسجيل حساب
+				</Button>
 			</form>
 		</Form>
 	);
