@@ -2,7 +2,7 @@ import RegisterForm from "@/components/RegisterForm";
 import { lucia } from "@/lib/auth";
 import { db } from "@/lib/db";
 import { TB_user } from "@/lib/schema";
-import { RegisterFormError, registerFormSchema } from "@/lib/types/userSchema";
+import { RegisterFormError, registerFormSchema } from "@/lib/types/authSchemas";
 import hash from "@/lib/utils";
 import { nanoid } from "nanoid";
 import { cookies } from "next/headers";
