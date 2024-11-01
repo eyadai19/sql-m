@@ -179,5 +179,3 @@ export const RE_user_db = relations(TB_user_db, ({ one }) => ({
 		references: [TB_user.id],
 	}),
 }));
-
-//dds
