@@ -7,7 +7,7 @@ UNIQUE
 export default function dataType() {
 	return (
 		<div className="p-4 text-base md:text-lg lg:text-xl">
-			eyad
+			ahmad
 		</div>
 	);
 }
