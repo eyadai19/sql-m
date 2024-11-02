@@ -1,73 +1,56 @@
-'use client'
-
+"use client";
 import {
-  Sidebar,
-  SidebarContent,
-  SidebarFooter,
-  SidebarGroup,
-  SidebarGroupContent,
-  SidebarGroupLabel,
-  SidebarHeader,
-  SidebarMenu,
-  SidebarMenuButton,
-  SidebarMenuItem,
-  SidebarMenuSub,
-  SidebarMenuSubButton,
-  SidebarMenuSubItem,
-} from "@/components/ui/sidebar"
-
-import { sidebarItems } from "@/app/dashboard/layout";
+	Sidebar,
+	SidebarContent,
+	SidebarGroup,
+	SidebarGroupContent,
+	SidebarGroupLabel,
+	SidebarMenu,
+	SidebarMenuButton,
+	SidebarMenuItem,
+} from "@/components/ui/sidebar";
+import { allPath } from "@/utils/path";
+import Link from "next/link";
 import { usePathname } from "next/navigation";
 
-
 export function AppSidebar() {
-  const pathname = usePathname();
+	const pathname = usePathname();
 
-  return (
-    <Sidebar className="w-64 bg-gray-100 h-full p-4">
-    <SidebarContent>
-      <SidebarMenu>
-        {sidebarItems.map((item) =>
-          item.children ? (
-            <SidebarGroup key={item.title}>
-              <SidebarGroupLabel>{item.title}</SidebarGroupLabel>
-              <SidebarGroupContent>
-                {item.children.map((subItem) => {
-                  const isActive = pathname === subItem.url;
-                  return (
-                    <SidebarMenuItem key={subItem.title}>
-                      <SidebarMenuButton asChild>
-                        <a
-                          href={subItem.url}
-                          className={`block text-gray-800 hover:bg-gray-200 p-2 rounded-md ${
-                            isActive ? "bg-gray-200 p-2" : ""
-                          }`}
-                        >
-                          {subItem.title}
-                        </a>
-                      </SidebarMenuButton>
-                    </SidebarMenuItem>
-                  );
-                })}
-              </SidebarGroupContent>
-            </SidebarGroup>
-          ) : (
-            <SidebarMenuItem key={item.title}>
-              <SidebarMenuButton asChild>
-                <a
-                  href={item.url}
-                  className={`block text-gray-800 hover:bg-gray-200 p-2 rounded-md s ${
-                    item.title === "Dashboard Home" ? "font-semibold text-lg p-2 hover:bg-gray-100" : ""
-                  }`}
-                >
-                  {item.title}
-                </a>
-              </SidebarMenuButton>
-            </SidebarMenuItem>
-          )
-        )}
-      </SidebarMenu>
-    </SidebarContent>
-  </Sidebar>
-  );
+	return (
+		<Sidebar className="h-full w-64 bg-gray-100 p-4">
+			<SidebarContent>
+				<SidebarMenu>
+					{allPath.map((group, groupIndex) => (
+						<SidebarGroup key={groupIndex}>
+							<SidebarGroupLabel>{group.name}</SidebarGroupLabel>
+							<SidebarGroupContent>
+								{group.data.map((page, pageIndex) => {
+									const isActive = pathname.endsWith(
+										page.path.split("/").pop() || "",
+									);
+									return (
+										<SidebarMenuItem key={pageIndex}>
+											<SidebarMenuButton asChild>
+												<Link
+													href={page.path}
+													prefetch={false}
+													className={`block rounded-md p-2 ${
+														isActive
+															? "bg-gray-300 font-semibold text-blue-800"
+															: "text-gray-800"
+													} hover:bg-gray-200`}
+												>
+													{page.name}
+												</Link>
+											</SidebarMenuButton>
+										</SidebarMenuItem>
+									);
+								})}
+							</SidebarGroupContent>
+						</SidebarGroup>
+					))}
+				</SidebarMenu>
+			</SidebarContent>
+		</Sidebar>
+	);
 }
