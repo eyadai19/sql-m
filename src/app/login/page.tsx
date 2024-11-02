@@ -4,6 +4,7 @@ import { db } from "@/lib/db";
 import { LoginFormError, loginFormSchema } from "@/lib/types/authSchemas";
 import hash from "@/lib/utils";
 import { cookies } from "next/headers";
+import { redirect } from "next/navigation";
 import { z } from "zod";
 
 export default function LoginPage() {
@@ -46,5 +47,5 @@ async function LoginAction(
 		};
 	}
 
-	// redirect("/trips");
+	redirect("/src/app/page.tsx");
 }

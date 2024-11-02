@@ -47,7 +47,7 @@ interface GroupPath {
 	name: string;
 	data: PageBath[];
 }
-const allPath: GroupPath[] = [
+export const allPath: GroupPath[] = [
 	{ name: "basic", data: basic },
 	{ name: "DDL", data: DDL },
 	{ name: "DML", data: DML },
