@@ -4,6 +4,7 @@ import {
 	integer,
 	json,
 	pgTable,
+	serial,
 	text,
 	timestamp,
 } from "drizzle-orm/pg-core";
@@ -51,6 +52,7 @@ export const TB_level = pgTable("level", {
 export const TB_stage = pgTable("stage", {
 	id: text("id").primaryKey(),
 	stage: text("stage").notNull(),
+	index: serial("index"),
 });
 
 export const TB_quiz = pgTable("quiz", {

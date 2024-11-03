@@ -1,5 +1,5 @@
 /*
-in navbar pass the userId and redirect to /profile 
+when click the profile icon on the top of home you must pass the userId and redirect to /profile 
 */
 import { getUser } from "@/lib/auth";
 import { db } from "@/lib/db";
@@ -25,6 +25,15 @@ export default async function profile({ params }: ProfileInfo) {
 			stage: true,
 		},
 	});
+
+	// for app-sidebar:
+	// const userStage = await db.query.TB_user.findFirst({
+	// 	where: (info, { eq }) => eq(info.id, params.id),
+	// 	with: {
+	// 		stage: true,
+	// 	},
+	// });
+	// const userStageIndex = userStage?.stage.index;
 
 	return (
 		<div>
