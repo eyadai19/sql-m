@@ -76,4 +76,3 @@ export const allPath: GroupPath[] = [
 // }
 
 const x = 1;
-//
