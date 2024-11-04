@@ -1,5 +1,5 @@
 
-
+import Link from "next/link";
 export function HomeComponent() {
 	return (
 
@@ -17,10 +17,12 @@ export function HomeComponent() {
       did yoy ever try AI supported learning ?
     </p>
     <div className="mt-6">
-      <button className="px-6 py-3 font-bold rounded-lg mr-4 text-sm p-4 bg-[#00203F] text-[#ADF0D1]">
-        Get Started
-      </button>
-      <button className="px-6 py-3 font-bold border border-solid border-gray rounded-lg text-sm">Discover</button>
+    <Link href="/register">
+  <button className="px-6 py-3 font-bold rounded-lg mr-4 text-sm p-4 bg-[#00203F] text-[#ADF0D1]">
+    Get Started
+  </button>
+</Link>
+      <button className="px-6 py-3 font-bold border border-solid border-[#00203F] rounded-lg text-sm">Discover</button>
     </div>
   </div>
   <div className="md:w-[60%] bg-black text-white text-center">

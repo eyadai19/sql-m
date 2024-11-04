@@ -8,7 +8,7 @@ import { Footer } from "@/components/Footer";
 
 // my-navbar-app/pages/navbar-test.tsx
 
-export default function NavbarTestPage() {
+export default function HomePage() {
 	return (
 		<div className="h-screen bg-gray-100">
 			<Navbar />

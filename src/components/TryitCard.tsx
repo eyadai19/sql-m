@@ -38,9 +38,9 @@ export function TryitCard() {
   return (
     <div className=" bg-[#ADF0D1] flex justify-evenly p-6" id="try">
     <><div className="  max-w-lg mx-auto p-6 bg-[#00203F] text-white rounded-lg shadow-lg ">
-      <h2 className="text-2xl font-bold mb-4">activity</h2>
+      <h2 className="text-2xl font-bold mb-4">Activity</h2>
       <div className="bg-[#000000] p-6 rounded-lg">
-        <h3 className="text-xl font-semibold mb-2">Exercise:</h3>
+        <h3 className="text-xl font-semibold mb-2">get data</h3>
         <p className="mb-4">
           Insert the missing statement to get all the columns from the <span className="text-[#ADF0D1]">Customers</span> table.
         </p>
@@ -71,7 +71,7 @@ export function TryitCard() {
     <div className="max-w-lg mx-auto p-6 bg-[#00203F] text-white rounded-lg shadow-lg">
         <h2 className="text-2xl font-bold mb-4">Activity</h2>
         <div className="bg-[#000000] p-6 rounded-lg">
-          <h3 className="text-xl font-semibold mb-2">Exercise:</h3>
+          <h3 className="text-xl font-semibold mb-2">delete data</h3>
           <p className="mb-4">
             Insert the missing statement to delete all rows in the <span className="text-[#ADF0D1]">students</span> table, without deleting the table.
           </p>
