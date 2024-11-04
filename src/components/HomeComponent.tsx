@@ -1,36 +1,39 @@
-
 import Link from "next/link";
+
 export function HomeComponent() {
-	return (
-
-<div className="section bg-[#ADF0D1]" id="home">
-  <div className="md:flex items-center
-   justify-center">
-   <div>
-    <div className="font-bold text-xs text-Teal 
-    mb-4">
-        </div>
-    <div className="sm:text-[2.5rem] text-[1.825rem] font-bold">
-      This is <br /> the new way <br /> to learn SQL
-    </div>
-    <p className="text-sm leading-7 text-gray max-w-sm">
-      did yoy ever try AI supported learning ?
-    </p>
-    <div className="mt-6">
-    <Link href="/register">
-  <button className="px-6 py-3 font-bold rounded-lg mr-4 text-sm p-4 bg-[#00203F] text-[#ADF0D1]">
-    Get Started
-  </button>
-</Link>
-      <button className="px-6 py-3 font-bold border border-solid border-[#00203F] rounded-lg text-sm">Discover</button>
-    </div>
-  </div>
-  <div className="md:w-[60%] bg-black text-white text-center">
-  <img src={""} alt="Home Component" className="w-full h-auto" />
-</div>
-
-</div>
-</div>
-
+  return (
+    <div className="section bg-[#ADF0D1] py-8 px-4" id="home">
+      <div className=" justify-evenly flex flex-col md:flex-row items-center md:space-x-6">
         
-    )}
+        {/* Text Content */}
+        <div className="text-center md:text-left md:max-w-lg">
+          <h2 className="font-bold text-xs text-teal-500 mb-2">Learn SQL Like Never Before</h2>
+          <h1 className="text-[1.825rem] sm:text-[2.5rem] font-bold leading-tight">
+            This is <br /> the new way <br /> to learn SQL
+          </h1>
+          <p className="text-sm leading-7 text-gray-700 max-w-md mt-4">
+            Have you ever tried AI-supported learning?
+          </p>
+          
+          {/* Buttons */}
+          <div className="mt-6 flex justify-center md:justify-start space-x-4">
+            <Link href="/register">
+              <button className="px-6 py-3 font-bold rounded-lg text-sm bg-[#00203F] text-[#ADF0D1] hover:bg-[#004466] transition-colors">
+                Get Started
+              </button>
+            </Link>
+            <button className="px-6 py-3 font-bold border border-solid border-[#00203F] rounded-lg text-sm hover:bg-[#00203F] hover:text-[#ADF0D1] transition-colors">
+              Discover
+            </button>
+          </div>
+        </div>
+
+        {/* Image */}
+        <div className="w-full md:w-[50%] mt-8 md:mt-0">
+          <img src={""} alt="Home Component" className="w-full h-auto object-cover rounded-lg shadow-lg" />
+        </div>
+
+      </div>
+    </div>
+  );
+}
