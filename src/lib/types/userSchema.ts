@@ -14,8 +14,20 @@ export const userViewSchema = userSchema.pick({
 });
 
 export const userExcerciseAnswerSchema = z.object({
-	query: z.string().min(1),
+	time: z.date(), // تحويل إلى Date
+	is_show_ans: z.boolean(),
+	trials: z.number().int().min(1), // تحويل إلى integer
 });
+export const userExcerciseAnswerSchemaForInput = z.object({
+	query: z.string().min(1),
+	is_show_ans: z.boolean(),
+});
+
+// export const userExcerciseAnswerSchema = createSelectSchema(TB_user_excercise_summary, {
+// 	time: (schema) => schema.time,
+// 	trials: (schema) => schema.trials.min(1),
+// 	is_show_ans : (schema) => schema.is_show_ans,
+// });
 
 export const userCreateTabelSchema = z.object({
 	query: z.string().min(1),

@@ -31,6 +31,7 @@ export async function RegisterAction(
 			id: nanoid(),
 			...data,
 			password: hash(data.password),
+			stageId: "",
 		};
 
 		try {
