@@ -3,27 +3,27 @@ interface PagePath {
 	path: string;
 }
 
-const basic: PageBath[] = [
+const basic: PagePath[] = [
 	{ name: "dataType", path: "../basic/dataType" },
 	{ name: "reference", path: "../basic/reference" },
 	{ name: "ERD", path: "../basic/ERD" },
 ];
 
-const DDL: PageBath[] = [
+const DDL: PagePath[] = [
 	{ name: "table", path: "../DDL/table" },
 	{ name: "schema", path: "../DDL/schema" },
 	{ name: "alter", path: "../DDL/alter" },
 	{ name: "drop", path: "../DDL/drop" },
 ];
 
-const DML: PageBath[] = [
+const DML: PagePath[] = [
 	{ name: "delete", path: "../DML/delete" },
 	{ name: "insert", path: "../DML/insert" },
 	{ name: "update", path: "../DML/update" },
 	{ name: "select", path: "../DML/select" },
 ];
 
-const select: PageBath[] = [
+const select: PagePath[] = [
 	{ name: "aggregateFunction", path: "../select/aggregateFunction" },
 	{ name: "between", path: "../select/between" },
 	{ name: "distinct", path: "../select/distinct" },
@@ -34,7 +34,7 @@ const select: PageBath[] = [
 	{ name: "where", path: "../select/where" },
 ];
 
-const joins: PageBath[] = [
+const joins: PagePath[] = [
 	{ name: "innerJoin", path: "../joins/innerJoin" },
 	{ name: "join", path: "../joins/join" },
 	{ name: "leftJoin", path: "../joins/leftJoin" },
@@ -47,7 +47,6 @@ interface GroupPath {
 	name: string;
 	data: PagePath[];
 }
-export const allPath: GroupPath[] = [
 export const allPath: GroupPath[] = [
 	{ name: "basic", data: basic },
 	{ name: "DDL", data: DDL },
