@@ -44,6 +44,7 @@ export function DataType({
 	async function onSubmit(
 		values: z.infer<typeof userExcerciseAnswerSchemaForInput>,
 	) {
+		// move to server??
 		const endTime = new Date();
 		const timeElapsed =
 			endTime.getTime() - (startTime?.getTime() || endTime.getTime());

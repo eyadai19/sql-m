@@ -74,10 +74,7 @@ export const TB_user_excercise_summary = pgTable("user_excercise_summary", {
 	userId: text("user_id")
 		.notNull()
 		.references(() => TB_user.id, { onDelete: "cascade" }),
-	time: timestamp("time", {
-		withTimezone: true,
-		mode: "date",
-	}),
+	time: integer("time"),
 	trials: integer("trials"),
 	is_show_ans: boolean("is_show_ans").notNull(),
 });

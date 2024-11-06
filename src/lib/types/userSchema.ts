@@ -14,7 +14,7 @@ export const userViewSchema = userSchema.pick({
 });
 
 export const userExcerciseAnswerSchema = z.object({
-	time: z.date(), // تحويل إلى Date
+	time: z.number(), // تحويل إلى Date
 	is_show_ans: z.boolean(),
 	trials: z.number().int().min(1), // تحويل إلى integer
 });

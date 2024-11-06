@@ -1,13 +1,13 @@
 import { nanoid } from "nanoid";
 import { redirect } from "next/navigation";
 import { z } from "zod";
-import { getUser } from "./auth";
-import { db } from "./db";
-import { TB_user_excercise_summary } from "./schema";
+import { getUser } from "../auth";
+import { db } from "../db";
+import { TB_user_excercise_summary } from "../schema";
 import {
 	userExcerciseAnswerError,
 	userExcerciseAnswerSchema,
-} from "./types/userSchema";
+} from "../types/userSchema";
 
 export async function UserExcerciseAnswerAction(
 	input: z.infer<typeof userExcerciseAnswerSchema>,
@@ -16,7 +16,7 @@ export async function UserExcerciseAnswerAction(
 
 	const query = await userExcerciseAnswerSchema.parseAsync({
 		...input,
-		time: new Date(input.time),
+		time: input.time,
 	});
 
 	const level = await db.query.TB_level.findFirst({
@@ -35,14 +35,14 @@ export async function UserExcerciseAnswerAction(
 	const data = {
 		id: nanoid(),
 		userId: user.id,
-		...query,
 		levelId: levelID,
+		...query,
 	};
 
 	try {
 		await db.insert(TB_user_excercise_summary).values(data);
 	} catch {
-		return { field: "root", message: "Email is already used" };
+		return { field: "root", message: "cannot calc input" };
 	}
 
 	redirect("/src/app/page.tsx");
