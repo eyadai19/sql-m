@@ -1,6 +1,6 @@
 "use client";
 
-import { RegisterFormError, registerFormSchema } from "@/lib/types/authSchemas";
+import { RegisterFormError, registerFormSchema } from "@/lib/types/userSchema";
 import { zodResolver } from "@hookform/resolvers/zod";
 import Link from "next/link";
 import { useForm } from "react-hook-form";
@@ -40,15 +40,15 @@ export default function RegisterForm({
 	}
 
 	return (
-		<div className="bg-[#00203F] min-h-screen flex flex-col">
-			<nav className="w-full fixed top-0 left-0 flex items-center justify-center p-4 bg-[#ADF0D1]">
+		<div className="flex min-h-screen flex-col bg-[#00203F]">
+			<nav className="fixed left-0 top-0 flex w-full items-center justify-center bg-[#ADF0D1] p-4">
 				<div className="text-xl font-bold text-[#00203F]">My Logo</div>
 			</nav>
-			<div className="flex flex-row items-center justify-center flex-1 p-8 pt-20">
+			<div className="flex flex-1 flex-row items-center justify-center p-8 pt-20">
 				<img
 					src="/path/to/your/image.jpg"
 					alt="Illustration"
-					className="w-2/3 h-auto object-cover mr-8"
+					className="mr-8 h-auto w-2/3 object-cover"
 				/>
 				<div className="w-full max-w-md">
 					<Form {...form}>
@@ -81,7 +81,11 @@ export default function RegisterForm({
 								render={({ field }) => (
 									<FormItem>
 										<FormControl>
-											<Input type="email" placeholder="البريد الإلكتروني" {...field} />
+											<Input
+												type="email"
+												placeholder="البريد الإلكتروني"
+												{...field}
+											/>
 										</FormControl>
 										<FormMessage />
 									</FormItem>
@@ -93,7 +97,11 @@ export default function RegisterForm({
 								render={({ field }) => (
 									<FormItem>
 										<FormControl>
-											<Input type="password" placeholder="كلمة المرور" {...field} />
+											<Input
+												type="password"
+												placeholder="كلمة المرور"
+												{...field}
+											/>
 										</FormControl>
 										<FormMessage />
 									</FormItem>
@@ -105,7 +113,11 @@ export default function RegisterForm({
 								render={({ field }) => (
 									<FormItem>
 										<FormControl>
-											<Input type="password" placeholder="تأكيد كلمة المرور" {...field} />
+											<Input
+												type="password"
+												placeholder="تأكيد كلمة المرور"
+												{...field}
+											/>
 										</FormControl>
 										<FormMessage />
 									</FormItem>
