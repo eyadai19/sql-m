@@ -1,4 +1,4 @@
-interface PageBath {
+interface PagePath {
 	name: string;
 	path: string;
 }
@@ -45,8 +45,9 @@ const joins: PageBath[] = [
 
 interface GroupPath {
 	name: string;
-	data: PageBath[];
+	data: PagePath[];
 }
+export const allPath: GroupPath[] = [
 export const allPath: GroupPath[] = [
 	{ name: "basic", data: basic },
 	{ name: "DDL", data: DDL },
