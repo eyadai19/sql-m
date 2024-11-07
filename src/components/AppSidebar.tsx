@@ -17,9 +17,9 @@ export function AppSidebar() {
 	const pathname = usePathname();
 
 	return (
-		<Sidebar className="h-full w-64 bg-sailorBlue p-2">
+		<Sidebar className="h-full w-60 bg-sailorBlue p-2 border-0">
 			<SidebarContent>
-				<SidebarMenu className="bg-sailorBlue p-0">
+				<SidebarMenu className="bg-sailorBlue p-0 border-0">
 					{allPath.map((group, groupIndex) => (
 						<SidebarGroup key={groupIndex}>
 							<SidebarGroupLabel className="text-gray-400 uppercase ">{group.name}</SidebarGroupLabel>

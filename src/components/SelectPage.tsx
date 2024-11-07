@@ -7,7 +7,6 @@ import Explanation from './Explanation';
 export default function SelectPage() {
 
   const exerciseParams = {
-    title: "SQL Exercise: Select Query",
     prompt: "Write a SQL query to retrieve all employees from the employees table with a salary greater than $50,000. Make sure to include the columns: id, name, and salary.",
     tips: "Tip: Use SELECT * FROM employees WHERE salary > 50000 to complete this exercise.",
     initialColumns: ['id', 'name', 'salary'],
@@ -35,7 +34,6 @@ export default function SelectPage() {
 
 
   const explanationParams = {
-		title: "SELECT Statement: Fetching Data from a Database",
 		howItWorks: "The SELECT statement is a fundamental SQL query used to retrieve specific data from one or more tables in a database.",
 		syntax: `SELECT column1, column2, ...
 		FROM table_name;`,
@@ -53,6 +51,8 @@ export default function SelectPage() {
 	  };
   return (
     <div>
+
+
 		<Explanation {...explanationParams} />
 
     <Exercise {...exerciseParams} />

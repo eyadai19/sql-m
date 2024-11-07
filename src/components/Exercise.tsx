@@ -13,7 +13,7 @@ type ResultType = {
 type ErrorType = string | null;
 
 type ExerciseProps = {
-  title: string;
+  title?: string;
   prompt: string;
   tips: string;
   initialColumns: string[];
@@ -22,7 +22,7 @@ type ExerciseProps = {
 }
 
 export default function Exercise({
-  title,
+  title = "Exercise",
   prompt,
   tips,
   initialColumns,
@@ -53,13 +53,13 @@ export default function Exercise({
   }
 
   return (
-    <Card className="w-full max-w-4xl mx-auto mb-3">
+    <Card className="w-full max-w-4xl mx-auto mb-3 backdrop-blur-xl bg-white/40 ">
       <CardHeader>
-        <CardTitle className="text-2xl font-bold">{title}</CardTitle>
+        <CardTitle className="text-2xl font-bold text-sailorBlue">{title}</CardTitle>
       </CardHeader>
       <CardContent className="space-y-6">
         {/* Prompt Section */}
-        <section className="bg-gray-50 p-4 rounded-lg">
+        <section className="bg-gray-100/40 p-4 rounded-lg">
           <h2 className="text-lg font-semibold mb-2">Task:</h2>
           <p className="text-gray-700">{prompt}</p>
         </section>
@@ -71,7 +71,7 @@ export default function Exercise({
           </Label>
           <textarea
             id="sql-editor"
-            className="w-full h-40 p-2 font-mono text-sm bg-gray-100 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            className="w-full h-40 p-2 font-mono text-sm bg-gray-100/40 focus:outline-none border border-gray-300/40 rounded-md  "
             value={sqlQuery}
             onChange={(e) => setSqlQuery(e.target.value)}
             placeholder="Type your SQL query here..."
@@ -80,10 +80,10 @@ export default function Exercise({
 
         {/* Action Buttons Section */}
         <section className="flex justify-between">
-          <Button onClick={handleRunQuery} className="bg-blue-500 hover:bg-blue-600 text-white">
+          <Button onClick={handleRunQuery} className="bg-sailorBlue hover:bg-lightSailorBlue text-gray-200">
             Run Query
           </Button>
-          <Button onClick={resetQuery} variant="outline" className="border-gray-300 text-gray-700 hover:bg-gray-100">
+          <Button onClick={resetQuery} variant="outline" className="border-gray-300 text-gray-700 bg-transparent hover:bg-gray-100">
             Reset
           </Button>
         </section>
@@ -92,7 +92,7 @@ export default function Exercise({
         <section className="mt-6">
           <h2 className="text-lg font-semibold mb-2">Results:</h2>
           {error && (
-            <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative" role="alert">
+            <div className="bg-red-100 border border-red-400 text-red-700 text-sm px-3 py-2 rounded relative" role="alert">
               <strong className="font-bold">Error: </strong>
               <span className="block sm:inline">{error}</span>
             </div>

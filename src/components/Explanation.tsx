@@ -8,7 +8,7 @@ import { AlertCircle } from 'lucide-react'
 import CodeBlock from './CodeBlock'
 
 interface ExplanationProps {
-  title: string
+  title?: string
   howItWorks: string
   syntax: string
   example: {
@@ -20,9 +20,9 @@ interface ExplanationProps {
 
 
 
-export default function Explanation({ title, howItWorks, syntax, example, notes }: ExplanationProps) {
+export default function Explanation({ title = "Getting Started", howItWorks, syntax, example, notes }: ExplanationProps) {
   return (
-    <Card className="w-full max-w-4xl mx-auto bg-white shadow-lg mb-3">
+    <Card className="w-full max-w-4xl mx-auto backdrop-blur-xl bg-white/40 shadow-lg mb-3">
       <CardHeader>
         <CardTitle className="text-2xl font-bold text-sailorBlue">{title}</CardTitle>
       </CardHeader>
@@ -45,7 +45,7 @@ export default function Explanation({ title, howItWorks, syntax, example, notes 
 
         <section className="space-y-2">
           <h2 className="text-xl font-semibold text-sailorBlue">Notes & Tips</h2>
-          <Card className="bg-gray-200 border-sailorBlue">
+          <Card className="bg-gray-100/40 border-sailorBlue/40">
             <CardContent className="p-4">
               <ul className="list-disc pl-5 space-y-2">
                 {notes.map((note, index) => (
