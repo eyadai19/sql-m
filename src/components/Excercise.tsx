@@ -122,7 +122,7 @@ export default function Exercise() {
         </section>
       </CardContent>
       <CardFooter className="text-sm text-gray-500">
-        Tip: Use SELECT * FROM employees WHERE salary > 50000 to complete this exercise.
+        Tip: Use SELECT * FROM employees WHERE salary {/** > */} 50000 to complete this exercise.
       </CardFooter>
     </Card>
   )

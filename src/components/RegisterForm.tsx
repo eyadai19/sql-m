@@ -1,6 +1,6 @@
 "use client";
 
-import { RegisterFormError, registerFormSchema } from "@/lib/types/userSchema";
+import { RegisterFormError, registerFormSchema } from "@/lib/types/authSchemas";
 import { zodResolver } from "@hookform/resolvers/zod";
 import Link from "next/link";
 import { useForm } from "react-hook-form";
@@ -20,7 +20,7 @@ export default function RegisterForm({
 		resolver: zodResolver(registerFormSchema),
 		defaultValues: {
 			username: "",
-			email: "",
+			// email: "",
 			password: "",
 			confirmPassword: "",
 		},
@@ -75,7 +75,7 @@ export default function RegisterForm({
 									</FormItem>
 								)}
 							/>
-							<FormField
+							{/* <FormField
 								control={form.control}
 								name="email"
 								render={({ field }) => (
@@ -90,7 +90,7 @@ export default function RegisterForm({
 										<FormMessage />
 									</FormItem>
 								)}
-							/>
+							/> */}
 							<FormField
 								control={form.control}
 								name="password"
