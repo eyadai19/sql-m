@@ -10,6 +10,8 @@ const config: Config = {
   theme: {
   	extend: {
   		colors: {
+			sailorBlue: '#00203F',
+      		mint: '#ADF0D1',
   			background: 'hsl(var(--background))',
   			foreground: 'hsl(var(--foreground))',
   			card: {
