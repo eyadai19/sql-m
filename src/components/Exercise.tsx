@@ -12,52 +12,56 @@ type ResultType = {
 
 type ErrorType = string | null;
 
-export default function Exercise() {
+type ExerciseProps = {
+  title: string;
+  prompt: string;
+  tips: string;
+  initialColumns: string[];
+  initialRows: (string | number)[][];
+  onRunQuery?: (query: string) => ResultType | ErrorType;
+}
+
+export default function Exercise({
+  title,
+  prompt,
+  tips,
+  initialColumns,
+  initialRows,
+  onRunQuery,
+}: ExerciseProps) {
   const [sqlQuery, setSqlQuery] = useState<string>('')
-  const [result, setResult] = useState<ResultType>(null)
+  const [result, setResult] = useState<ResultType | null>({ columns: initialColumns, rows: initialRows })
   const [error, setError] = useState<ErrorType>(null)
 
-  const runQuery = () => {
-    // This is a mock function. In a real application, you would send the query to a backend.
-    if (sqlQuery.toLowerCase().includes('select')) {
-      setResult({
-        columns: ['id', 'name', 'salary'],
-        rows: [
-          [1, 'John Doe', 60000],
-          [2, 'Jane Smith', 75000],
-          [3, 'Bob Johnson', 55000],
-        ]
-      })
-      setError(null)
-    } else {
-      setError('Error: Invalid SQL query. Please use a SELECT statement.')
-      setResult(null)
+  const handleRunQuery = () => {
+    if (onRunQuery) {
+      const queryResult = onRunQuery(sqlQuery);
+      if (typeof queryResult === 'string') {
+        setError(queryResult);
+        setResult(null);
+      } else {
+        setResult(queryResult);
+        setError(null);
+      }
     }
   }
 
   const resetQuery = () => {
-    setSqlQuery('')
-    setResult(null)
-    setError(null)
+    setSqlQuery('');
+    setResult({ columns: initialColumns, rows: initialRows });
+    setError(null);
   }
 
   return (
     <Card className="w-full max-w-4xl mx-auto">
       <CardHeader>
-        <CardTitle className="text-2xl font-bold">SQL Exercise</CardTitle>
+        <CardTitle className="text-2xl font-bold">{title}</CardTitle>
       </CardHeader>
       <CardContent className="space-y-6">
         {/* Prompt Section */}
         <section className="bg-gray-50 p-4 rounded-lg">
           <h2 className="text-lg font-semibold mb-2">Task:</h2>
-          <p className="text-gray-700">
-            Write a SQL query to retrieve all employees with a salary greater than $50,000.
-          </p>
-          <ul className="list-disc list-inside mt-2 text-sm text-gray-600">
-            <li>Use the <strong>employees</strong> table</li>
-            <li>Include columns: id, name, and salary</li>
-            <li>Use a <strong>WHERE</strong> clause to filter the results</li>
-          </ul>
+          <p className="text-gray-700">{prompt}</p>
         </section>
 
         {/* SQL Editor Section */}
@@ -76,7 +80,7 @@ export default function Exercise() {
 
         {/* Action Buttons Section */}
         <section className="flex justify-between">
-          <Button onClick={runQuery} className="bg-blue-500 hover:bg-blue-600 text-white">
+          <Button onClick={handleRunQuery} className="bg-blue-500 hover:bg-blue-600 text-white">
             Run Query
           </Button>
           <Button onClick={resetQuery} variant="outline" className="border-gray-300 text-gray-700 hover:bg-gray-100">
@@ -122,7 +126,7 @@ export default function Exercise() {
         </section>
       </CardContent>
       <CardFooter className="text-sm text-gray-500">
-        Tip: Use SELECT * FROM employees WHERE salary > 50000 to complete this exercise.
+        {tips}
       </CardFooter>
     </Card>
   )
