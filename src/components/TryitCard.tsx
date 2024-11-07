@@ -32,7 +32,7 @@ export function TryitCard() {
   }
 
   return (
-    <div className="bg-[#ADF0D1] flex flex-col md:flex-row justify-evenly p-6 space-y-6 md:space-y-0" id="try">
+    <div className=" flex flex-col md:flex-row justify-evenly p-6 space-y-6 md:space-y-0" id="try">
       {/* First Activity Card */}
       <div className="max-w-lg p-6 bg-[#00203F] text-white rounded-lg shadow-lg">
         <h2 className="text-2xl font-bold mb-4">Activity</h2>

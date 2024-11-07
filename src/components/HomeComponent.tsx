@@ -2,17 +2,17 @@ import Link from "next/link";
 
 export function HomeComponent() {
   return (
-    <div className="section bg-[#ADF0D1] py-8 px-4" id="home">
+    <div className="section  py-8 px-4" id="home">
       <div className=" justify-evenly flex flex-col md:flex-row items-center md:space-x-6">
         
         {/* Text Content */}
         <div className="text-center md:text-left md:max-w-lg">
-          <h2 className="font-bold text-xs text-teal-500 mb-2">Learn SQL Like Never Before</h2>
+          <h2 className="text-[#00203F] font-bold text-xs  mb-2">Learn SQL Like Never Before</h2>
           <h1 className="text-[1.825rem] sm:text-[2.5rem] font-bold leading-tight">
-            This is <br /> the new way <br /> to learn SQL
+          Have you ever tried  <br /> <span className=" font-semibold text-[#ADF0D1]"> AI-supported </span> <br /> learning?
           </h1>
           <p className="text-sm leading-7 text-gray-700 max-w-md mt-4">
-            Have you ever tried AI-supported learning?
+          This is the new way to learn SQL
           </p>
           
           {/* Buttons */}
@@ -23,14 +23,16 @@ export function HomeComponent() {
               </button>
             </Link>
             <button className="px-6 py-3 font-bold border border-solid border-[#00203F] rounded-lg text-sm hover:bg-[#00203F] hover:text-[#ADF0D1] transition-colors">
-              Discover
+            <Link href="#try" className="hover:text-white transition-colors">
+          Discover
+        </Link>
             </button>
           </div>
         </div>
 
         {/* Image */}
         <div className="w-full md:w-[50%] mt-8 md:mt-0">
-          <img src={""} alt="Home Component" className="w-full h-auto object-cover rounded-lg shadow-lg" />
+          <img src={"../image/HomeImages/HomeComponent.jpg"} alt="Home Component" className="w-full h-auto object-cover rounded-lg shadow-lg" />
         </div>
 
       </div>

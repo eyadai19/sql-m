@@ -10,7 +10,7 @@ import { Footer } from "@/components/Footer";
 
 export default function HomePage() {
 	return (
-		<div className="h-screen bg-gray-100">
+		<div className="h-screen ">
 			<Navbar />
 
 			<HomeComponent />
