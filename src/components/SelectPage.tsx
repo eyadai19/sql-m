@@ -1,9 +1,9 @@
 'use client'
 
 import React from 'react'
-import Exercise from '../Exercise'
+import Exercise from './Exercise'
 
-export default function ExercisePage() {
+export default function SelectPage() {
   return (
     <div>
         <Exercise

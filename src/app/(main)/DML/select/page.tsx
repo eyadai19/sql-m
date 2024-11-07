@@ -5,10 +5,10 @@ as
 into
 */
 
-import ExercisePage from "@/components/ui/ExercisePage";
+import SelectPage from "@/components/SelectPage";
 
 export default function select() {
 	return <div className="p-4 text-base md:text-lg lg:text-xl">
-		<ExercisePage />
+		<SelectPage />
 	</div>;
 }
