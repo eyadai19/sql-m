@@ -4,11 +4,11 @@ select
 as
 into
 */
-import ExercisePage from "@/components/ExercisePage";
+import SelectPage from "@/components/SelectPage"
 export default function select() {
 	return (
 		<div className="p-4 text-base md:text-lg lg:text-xl">
-			<ExercisePage />
+			<SelectPage />
 		</div>
 	);
 }
