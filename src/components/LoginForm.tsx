@@ -10,7 +10,7 @@ import { Form, FormControl, FormField, FormItem, FormMessage } from "./ui/form";
 import { Input } from "./ui/input";
 
 const loginFormSchema = z.object({
-	username: z.string().email(),
+	username: z.string(),
 	password: z.string().min(8).max(32),
 });
 
@@ -38,8 +38,12 @@ export function LoginForm({
 				{ message: error.message },
 				{ shouldFocus: true },
 			);
+			console.log("error");
+			
 			return;
 		}
+		console.log("suc");
+		
 	}
 
 	return (
@@ -61,7 +65,7 @@ export function LoginForm({
 					render={({ field }) => (
 						<FormItem>
 							<FormControl>
-								<Input placeholder="البريد الالكتروني" {...field} />
+								<Input placeholder="اسم  المستخدم" {...field} />
 							</FormControl>
 							<FormMessage />
 						</FormItem>

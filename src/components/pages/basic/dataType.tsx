@@ -1,14 +1,5 @@
 "use client";
-
-import { Button } from "@/components/ui/button";
-import {
-	Form,
-	FormControl,
-	FormField,
-	FormItem,
-	FormMessage,
-} from "@/components/ui/form";
-import { Input } from "@/components/ui/input";
+import Exercise from "@/components/Exercise";
 import {
 	userExcerciseAnswerError,
 	userExcerciseAnswerSchema,
@@ -26,6 +17,14 @@ export function DataType({
 		input: z.infer<typeof userExcerciseAnswerSchema>,
 	) => Promise<userExcerciseAnswerError | undefined>;
 }) {
+	const [startTime, setStartTime] = useState<Date | null>(null);
+	const [trials, setTrials] = useState(1); // Track number of trials
+	const [showAnswer, setShowAnswer] = useState(false); // Flag for showing answer
+
+	useEffect(() => {
+		setStartTime(new Date()); // Start timer when component is loaded
+	}, []);
+
 	const form = useForm<z.infer<typeof userExcerciseAnswerSchemaForInput>>({
 		resolver: zodResolver(userExcerciseAnswerSchemaForInput),
 		defaultValues: {
@@ -33,18 +32,8 @@ export function DataType({
 		},
 	});
 
-	const [startTime, setStartTime] = useState<Date | null>(null);
-	const [trials, setTrials] = useState(1);
-	const [showAnswer, setShowAnswer] = useState(false);
-
-	useEffect(() => {
-		setStartTime(new Date()); // Start timing when the component loads
-	}, []);
-
-	async function onSubmit(
-		values: z.infer<typeof userExcerciseAnswerSchemaForInput>,
-	) {
-		// move to server??
+	// Submit the form with trial count and time elapsed
+	async function onSubmit() {
 		const endTime = new Date();
 		const timeElapsed =
 			endTime.getTime() - (startTime?.getTime() || endTime.getTime());
@@ -57,62 +46,49 @@ export function DataType({
 
 		const error = await userExcerciseAnswerAction(newValue);
 
+		// Only update trials if there's an error (wrong answer)
 		if (error) {
-			// Increase trial count if there’s an error
-			setTrials(trials + 1);
-			return;
+			setTrials((prevTrials) => prevTrials + 1); // Increment trials
 		}
 	}
 
 	const handleShowAnswer = () => {
-		setShowAnswer(true);
+		setShowAnswer(true); // Set flag to show answer
 	};
 
 	return (
-		<Form {...form}>
-			<form onSubmit={form.handleSubmit(onSubmit)} className="w-full space-y-8">
-				<div className="flex flex-col gap-1">
-					<span className="text-2xl font-medium">تسجيل الدخول</span>
-					<span className="text-sm text-muted-foreground">
-						what the type of number ?
-					</span>
-				</div>
-				<div>what the type of number ? {/*question*/}</div>
-				<FormField
-					control={form.control}
-					name="query"
-					render={({ field }) => (
-						<FormItem>
-							<FormControl>
-								<Input type="text" placeholder="answer" {...field} />
-							</FormControl>
-							<FormMessage />
-						</FormItem>
-					)}
-				/>
-				<div className="space-y-2">
-					<Button
-						disabled={form.formState.isSubmitting}
-						className="w-full"
-						type="submit"
-					>
-						submit
-					</Button>
-					<Button
-						variant="secondary"
-						className="w-full"
-						onClick={handleShowAnswer}
-						type="button"
-					>
-						Show Answer
-					</Button>
-					{showAnswer && (
-						<div className="text-sm text-muted-foreground">
-							Answer: مرحبا وسهلا{/* Display correct answer here */}
-						</div>
-					)}
-				</div>
-			</form>
-		</Form>
+		<Exercise
+			title="SQL Exercise: Select Query"
+			prompt="Write a SQL query to retrieve all employees from the employees table with a salary greater than $50,000. Make sure to include the columns: id, name, and salary."
+			initialColumns={["id", "name", "salary"]}
+			initialRows={[
+				[1, "John Doe", 60000],
+				[2, "Jane Smith", 75000],
+				[3, "Alice Johnson", 80000],
+			]}
+			onRunQuery={(query) => {
+				// Check if the query is correct
+				if (
+					query.toLowerCase() ===
+					"SELECT * FROM employees WHERE salary > 50000".toLowerCase()
+				) {
+					onSubmit(); // Submit if correct query
+					return {
+						columns: ["id", "name", "salary"],
+						rows: [
+							[1, "John Doe", 60000],
+							[2, "Jane Smith", 75000],
+							[3, "Alice Johnson", 80000],
+						],
+					};
+				} else {
+					// Return error message if query is incorrect
+					return "Syntax error in SQL query.";
+				}
+			}}
+			answer="SELECT * FROM employees WHERE salary > 50000" // Correct query
+			showAnswer={showAnswer} // Pass state to Exercise component
+			handleShowAnswer={handleShowAnswer} // Handler to show answer
+		/>
 	);
 }

@@ -26,7 +26,7 @@ async function LoginAction(
 		const data = await loginFormSchema.parseAsync(input);
 
 		const user = await db.query.TB_user.findFirst({
-			where: (user, { eq }) => eq(user.username, data.username), // edit to email/username
+			where: (user, { eq }) => eq(user.username, data.username),
 		});
 
 		if (!user || user.password != hash(data.password)) {
@@ -47,5 +47,5 @@ async function LoginAction(
 		};
 	}
 
-	redirect("/src/app/page.tsx");
+	redirect("/basic/dataType");
 }

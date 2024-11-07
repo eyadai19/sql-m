@@ -1,5 +1,4 @@
 import { nanoid } from "nanoid";
-import { redirect } from "next/navigation";
 import { z } from "zod";
 import { getUser } from "../auth";
 import { db } from "../db";
@@ -45,5 +44,5 @@ export async function UserExcerciseAnswerAction(
 		return { field: "root", message: "cannot calc input" };
 	}
 
-	redirect("/src/app/page.tsx");
+	// redirect("/src/app/page.tsx");
 }

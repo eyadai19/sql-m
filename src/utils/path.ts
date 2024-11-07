@@ -54,25 +54,3 @@ export const allPath: GroupPath[] = [
 	{ name: "select", data: select },
 	{ name: "joins", data: joins },
 ];
-
-// export default async function insert_satge_level() {
-// 	allPath.forEach((stage) => {
-// 		const id = nanoid();
-// 		var index = 0;
-// 		await db.insert(TB_stage).values({
-// 			id: id,
-// 			stage: stage.name,
-// 			index: 0,
-// 		});
-// 		index++;
-// 		stage.data.forEach((level) => {
-// 			await db.insert(TB_level).values({
-// 				id: nanoid(),
-// 				level: level.name,
-// 				stageId: id,
-// 			});
-// 		});
-// 	});
-// }
-
-const x = 1;

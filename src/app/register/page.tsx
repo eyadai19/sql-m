@@ -27,11 +27,18 @@ export async function RegisterAction(
 	try {
 		const data = await registerFormSchema.parseAsync(input);
 
+		const stage = await db.query.TB_stage.findFirst({
+			where: (stage, { eq }) => eq(stage.index, 0),
+		});
+		const stageID = stage?.id;
+		if (!stageID) {
+			return;
+		}
 		const newUser = {
 			id: nanoid(),
 			...data,
 			password: hash(data.password),
-			stageId: "",
+			stageId: stageID,
 		};
 
 		try {
@@ -54,5 +61,5 @@ export async function RegisterAction(
 		};
 	}
 
-	return redirect("/src/app/basic/dataType");
+	return redirect("/basic/dataType");
 }
