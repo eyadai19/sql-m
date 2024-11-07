@@ -12,6 +12,8 @@ const config: Config = {
   		colors: {
 			sailorBlue: '#00203F',
       		mint: '#ADF0D1',
+			lightSailorBlue: '#608FBF',
+			
   			background: 'hsl(var(--background))',
   			foreground: 'hsl(var(--foreground))',
   			card: {

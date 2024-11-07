@@ -53,7 +53,7 @@ export default function Exercise({
   }
 
   return (
-    <Card className="w-full max-w-4xl mx-auto">
+    <Card className="w-full max-w-4xl mx-auto mb-3">
       <CardHeader>
         <CardTitle className="text-2xl font-bold">{title}</CardTitle>
       </CardHeader>
