@@ -8,12 +8,14 @@ interface DashboardLayoutProps {
 
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
 	return (
-		<SidebarProvider>
-			<AppSidebar />
-			<main>
-				<SidebarTrigger />
-				{children}
-			</main>
-		</SidebarProvider>
+		<div className="background-image: linear-gradient(to bottom, var(--tw-gradient-stops));">
+			<SidebarProvider>
+				<AppSidebar />
+				<main>
+					<SidebarTrigger />
+					{children}
+				</main>
+			</SidebarProvider>
+		</div>
 	);
 };
