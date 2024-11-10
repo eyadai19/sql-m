@@ -8,11 +8,7 @@ import { redirect } from "next/navigation";
 import { z } from "zod";
 
 export default function LoginPage() {
-	return (
-		
-				<LoginForm loginAction={LoginAction} />
-		
-	);
+	return <LoginForm loginAction={LoginAction} />;
 }
 
 async function LoginAction(

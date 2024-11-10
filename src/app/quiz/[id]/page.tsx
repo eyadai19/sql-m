@@ -9,65 +9,27 @@ import {
 import { nanoid } from "nanoid";
 import { z } from "zod";
 
-interface QuizPageProps {
-	params: {
-		stageId: string;
-	};
-}
-
-export default function quiz({ params }: QuizPageProps) {
-	return (
-		<SqlQuiz
-			quizAction={quizAction}
-			quizQuestionAction={quizQuestionAction.bind(null, params.stageId)}
-		/>
-	);
-}
-
-async function quizQuestionAction(
-	stageId: string,
-): Promise<
-	{ question: string }[] | { field: string; message: string } | undefined
-> {
-	"use server";
-	try {
-		const levels = await db.query.TB_level.findMany({
-			where: (level, { eq }) => eq(level.stageId, stageId),
-		});
-
-		if (!levels || levels.length === 0) return [];
-		const levelIds = levels.map((level) => level.id);
-		const questions = await db.query.TB_question_bank.findMany({
-			where: (question, { inArray }) => inArray(question.levelId, levelIds),
-		});
-		return questions.map((q) => ({ question: q.question }));
-	} catch {
-		return { field: "root", message: "error" };
-	}
+export default function Quiz() {
+	return <SqlQuiz />;
 }
 
 async function quizAction(
 	input: z.infer<typeof userQuizAnswerSchema>,
-): Promise<
-	| { score: number; correctAnswers: string[] }
-	| userExcerciseAnswerError
-	| undefined
-> {
+): Promise<userExcerciseAnswerError | undefined> {
 	"use server";
 
 	try {
 		const data = await userQuizAnswerSchema.parseAsync(input);
-		const correctAnswers: string[] = [];
 		const que = await db.query.TB_question_bank.findFirst({
 			where: (question, { eq }) => eq(question.question, data.question[0]), // edit s to param
 		});
 		if (!que) return;
 		const leveId = await db.query.TB_level.findFirst({
-			where: (level, { eq }) => eq(level.id, que.levelId),
+			where: (level, { eq }) => eq(level.id, que.id),
 		});
 		if (!leveId) return;
 
-		let score = 0;
+		var score = 0;
 		for (let index = 0; index < data.question.length; index++) {
 			const question = await db.query.TB_question_bank.findFirst({
 				where: (question, { eq }) =>
@@ -92,12 +54,10 @@ async function quizAction(
 		} catch {
 			return { field: "root", message: "error" };
 		}
-
-		return { score, correctAnswers };
 	} catch (e) {
 		return {
 			field: "root",
-			message: "An unexpected error occurred, please try again later",
+			message: "An unexpected error occured, please try again later",
 		};
 	}
 }

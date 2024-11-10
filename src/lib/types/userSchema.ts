@@ -27,9 +27,16 @@ export const userCreateTabelSchema = z.object({
 	query: z.string().min(1),
 });
 
+export const userQuizAnswerSchema = z.object({
+	question: z.array(z.string()),
+	answer: z.array(z.string()),
+});
+
 export type UserView = z.infer<typeof userViewSchema>;
 export type User = z.infer<typeof userSchema>;
 
 export type userExcerciseAnswerError = BaseZodError<
 	typeof userExcerciseAnswerSchema
 >;
+
+export type userQuizAnswerError = BaseZodError<typeof userQuizAnswerSchema>;
