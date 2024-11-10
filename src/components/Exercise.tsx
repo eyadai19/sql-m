@@ -89,12 +89,14 @@ export default function Exercise({
 	};
 
 	return (
-		<Card className="mx-auto w-full max-w-4xl">
+		<Card className="mx-auto mb-3 w-full max-w-4xl bg-white/40 backdrop-blur-xl">
 			<CardHeader>
-				<CardTitle className="text-2xl font-bold">{title}</CardTitle>
+				<CardTitle className="text-sailorBlue text-2xl font-bold">
+					{title}
+				</CardTitle>
 			</CardHeader>
 			<CardContent className="space-y-6">
-				<section className="rounded-lg bg-gray-50 p-4">
+				<section className="rounded-lg bg-gray-100/40 p-4">
 					<h2 className="mb-2 text-lg font-semibold">Task:</h2>
 					<p className="text-gray-700">{prompt}</p>
 				</section>
@@ -108,7 +110,7 @@ export default function Exercise({
 					</Label>
 					<textarea
 						id="sql-editor"
-						className="h-40 w-full rounded-md border border-gray-300 bg-gray-100 p-2 font-mono text-sm focus:border-transparent focus:ring-2 focus:ring-blue-500"
+						className="h-40 w-full rounded-md border border-gray-300/40 bg-gray-100/40 p-2 font-mono text-sm focus:outline-none"
 						value={sqlQuery}
 						onChange={(e) => setSqlQuery(e.target.value)}
 						placeholder="Type your SQL query here..."
@@ -118,25 +120,24 @@ export default function Exercise({
 				<section className="flex justify-between">
 					<Button
 						onClick={handleRunQuery}
-						className="bg-blue-500 text-white hover:bg-blue-600"
+						className="bg-sailorBlue hover:bg-lightSailorBlue text-gray-200"
 					>
 						Run Query
 					</Button>
 
 					<Button
-						variant="secondary"
-						className="bg-green-500 text-white hover:bg-green-600"
+						variant="outline"
+						className="border-gray-300 bg-transparent text-gray-700 hover:bg-gray-100"
 						onClick={handleShowAnswerClick}
 						type="button"
 					>
 						Show Answer
 					</Button>
 				</section>
-
 				{isIncorrectAnswer && error && (
 					<section className="mt-6">
 						<div
-							className="relative rounded border border-red-400 bg-red-100 px-4 py-3 text-red-700"
+							className="relative rounded border border-red-400 bg-red-100 px-3 py-2 text-sm text-red-700"
 							role="alert"
 						>
 							<strong className="font-bold">Error: </strong>
