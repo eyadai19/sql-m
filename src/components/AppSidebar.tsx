@@ -17,12 +17,12 @@ export function AppSidebar() {
 	const pathname = usePathname();
 
 	return (
-		<Sidebar className="h-full w-64 bg-gray-100 p-4">
+		<Sidebar className="h-full w-60 bg-sailorBlue p-2 border-0">
 			<SidebarContent>
-				<SidebarMenu>
+				<SidebarMenu className="bg-sailorBlue p-0 border-0">
 					{allPath.map((group, groupIndex) => (
 						<SidebarGroup key={groupIndex}>
-							<SidebarGroupLabel>{group.name}</SidebarGroupLabel>
+							<SidebarGroupLabel className="text-gray-400 uppercase ">{group.name}</SidebarGroupLabel>
 							<SidebarGroupContent>
 								{group.data.map((page, pageIndex) => {
 									const isActive = pathname.endsWith(
@@ -34,11 +34,11 @@ export function AppSidebar() {
 												<Link
 													href={page.path}
 													prefetch={false}
-													className={`block rounded-md p-2 ${
+													className={`block rounded-md p-2 hover:bg-mint my-1 text-sm ${
 														isActive
-															? "bg-gray-300 font-semibold text-blue-800"
-															: "text-gray-800"
-													} hover:bg-gray-200`}
+															? "bg-mint text-sailorBlue "
+															: "text-gray-300"
+													}`}
 												>
 													{page.name}
 												</Link>

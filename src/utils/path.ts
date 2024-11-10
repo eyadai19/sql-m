@@ -2,55 +2,55 @@ interface PagePath {
 	name: string;
 	path: string;
 }
-
 const basic: PagePath[] = [
-	{ name: "dataType", path: "../basic/dataType" },
-	{ name: "reference", path: "../basic/reference" },
-	{ name: "ERD", path: "../basic/ERD" },
+	{ name: "Data Types", path: "../basic/dataType" },
+	{ name: "References", path: "../basic/reference" },
+	{ name: "Entity Relationship Diagram", path: "../basic/ERD" },
 ];
 
 const DDL: PagePath[] = [
-	{ name: "table", path: "../DDL/table" },
-	{ name: "schema", path: "../DDL/schema" },
-	{ name: "alter", path: "../DDL/alter" },
-	{ name: "drop", path: "../DDL/drop" },
+	{ name: "Create Table", path: "../DDL/table" },
+	{ name: "Schema Definition", path: "../DDL/schema" },
+	{ name: "Alter Table", path: "../DDL/alter" },
+	{ name: "Drop Table", path: "../DDL/drop" },
 ];
 
 const DML: PagePath[] = [
-	{ name: "delete", path: "../DML/delete" },
-	{ name: "insert", path: "../DML/insert" },
-	{ name: "update", path: "../DML/update" },
-	{ name: "select", path: "../DML/select" },
+	{ name: "Delete Records", path: "../DML/delete" },
+	{ name: "Insert Records", path: "../DML/insert" },
+	{ name: "Update Records", path: "../DML/update" },
+	{ name: "Select Query", path: "../DML/select" },
 ];
 
 const select: PagePath[] = [
-	{ name: "aggregateFunction", path: "../select/aggregateFunction" },
-	{ name: "between", path: "../select/between" },
-	{ name: "distinct", path: "../select/distinct" },
-	{ name: "GroupBy", path: "../select/GroupBy" },
-	{ name: "Like", path: "../select/Like" },
-	{ name: "operator", path: "../select/operator" },
-	{ name: "subQuery", path: "../select/subQuery" },
-	{ name: "where", path: "../select/where" },
+	{ name: "Aggregate Functions", path: "../select/aggregateFunction" },
+	{ name: "Between Operator", path: "../select/between" },
+	{ name: "Distinct Clause", path: "../select/distinct" },
+	{ name: "Group By Clause", path: "../select/GroupBy" },
+	{ name: "Like Operator", path: "../select/Like" },
+	{ name: "Logical Operators", path: "../select/operator" },
+	{ name: "Subqueries", path: "../select/subQuery" },
+	{ name: "Where Clause", path: "../select/where" },
 ];
 
 const joins: PagePath[] = [
-	{ name: "innerJoin", path: "../joins/innerJoin" },
-	{ name: "join", path: "../joins/join" },
-	{ name: "leftJoin", path: "../joins/leftJoin" },
-	{ name: "outerJoin", path: "../joins/outerJoin" },
-	{ name: "rightJoin", path: "../joins/rightJoin" },
-	{ name: "selfJoin", path: "../joins/selfJoin" },
+	{ name: "Inner Join", path: "../joins/innerJoin" },
+	{ name: "General Join", path: "../joins/join" },
+	{ name: "Left Join", path: "../joins/leftJoin" },
+	{ name: "Outer Join", path: "../joins/outerJoin" },
+	{ name: "Right Join", path: "../joins/rightJoin" },
+	{ name: "Self Join", path: "../joins/selfJoin" },
 ];
 
 interface GroupPath {
 	name: string;
 	data: PagePath[];
 }
+
 export const allPath: GroupPath[] = [
-	{ name: "basic", data: basic },
-	{ name: "DDL", data: DDL },
-	{ name: "DML", data: DML },
-	{ name: "select", data: select },
-	{ name: "joins", data: joins },
+	{ name: "Basic Concepts", data: basic },
+	{ name: "Data Definition Language (DDL)", data: DDL },
+	{ name: "Data Manipulation Language (DML)", data: DML },
+	{ name: "Select Queries", data: select },
+	{ name: "Join Operations", data: joins },
 ];

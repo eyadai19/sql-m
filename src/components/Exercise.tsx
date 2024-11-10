@@ -88,18 +88,17 @@ export default function Exercise({
 		setShowAnswer(true); // Set the flag to show answer
 	};
 
-	return (
-		<Card className="mx-auto mb-3 w-full max-w-4xl bg-white/40 backdrop-blur-xl">
-			<CardHeader>
-				<CardTitle className="text-sailorBlue text-2xl font-bold">
-					{title}
-				</CardTitle>
-			</CardHeader>
-			<CardContent className="space-y-6">
-				<section className="rounded-lg bg-gray-100/40 p-4">
-					<h2 className="mb-2 text-lg font-semibold">Task:</h2>
-					<p className="text-gray-700">{prompt}</p>
-				</section>
+  return (
+    <Card className="w-full max-w-4xl mx-auto mb-3 backdrop-blur-xl bg-white/40 ">
+      <CardHeader>
+        <CardTitle className="text-2xl font-bold text-sailorBlue">{title}</CardTitle>
+      </CardHeader>
+      <CardContent className="space-y-6">
+        {/* Prompt Section */}
+        <section className="bg-gray-100/40 p-4 rounded-lg">
+          <h2 className="text-lg font-semibold mb-2">Task:</h2>
+          <p className="text-gray-700">{prompt}</p>
+        </section>
 
 				<section>
 					<Label
