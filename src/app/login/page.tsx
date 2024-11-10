@@ -8,13 +8,7 @@ import { redirect } from "next/navigation";
 import { z } from "zod";
 
 export default function LoginPage() {
-	return (
-		<div className="absolute inset-0">
-			<div className="mx-auto flex h-full w-full max-w-xs items-center md:max-w-sm">
-				<LoginForm loginAction={LoginAction} />
-			</div>
-		</div>
-	);
+	return <LoginForm loginAction={LoginAction} />;
 }
 
 async function LoginAction(

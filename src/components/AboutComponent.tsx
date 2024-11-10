@@ -1,10 +1,11 @@
 export function AboutComponent() {
   return (
-    <div className="section bg-[#ADF0D1] py-12 px-4" id="about">
+    <div className="section  py-12 px-4" id="about">
       <div className="grid md:grid-cols-2 gap-8 items-center max-w-screen-lg mx-auto">
-        <div className="rounded-lg border border-solid border-teal-500 bg-gray-200 h-64 flex items-center justify-center text-gray-700 font-semibold">
-         صورة
-        </div>
+      <div className=" items-center border-[3px] rounded-lg border-solid border-[#00203F]">
+  <img src="../image/HomeImages/AboutComponent.jpg" alt="About" className=" p-4" />
+</div>
+
         
         <div>
           <h2 className="font-bold text-[1.5rem] sm:text-[1.875rem] mb-5 leading-snug">
