@@ -45,7 +45,7 @@ export default function SqlQuiz({
 
 	useEffect(() => {
 		const fetchQuestions = async () => {
-			const fetchedQuestions = await quizQuestionAction();
+			const fetchedQuestions = await quizQuestionAction;
 			if (Array.isArray(fetchedQuestions)) {
 				setQuestions(fetchedQuestions);
 				setResults(Array(fetchedQuestions.length).fill(null));
