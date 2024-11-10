@@ -1,3 +1,4 @@
+"use server";
 import { nanoid } from "nanoid";
 import { z } from "zod";
 import { getUser } from "../auth";
@@ -11,8 +12,6 @@ import {
 export async function UserExcerciseAnswerAction(
 	input: z.infer<typeof userExcerciseAnswerSchema>,
 ): Promise<userExcerciseAnswerError | undefined> {
-	"use server";
-
 	const query = await userExcerciseAnswerSchema.parseAsync({
 		...input,
 		time: input.time,

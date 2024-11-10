@@ -4,13 +4,12 @@
 UNIQUE
 */
 import { DataType } from "@/components/pages/basic/dataType";
-import { UserExcerciseAnswerAction } from "@/lib/ServerAction/userExcerciseAnswerAction";
 
 export default function dataTypePage() {
 	return (
 		<div className="p-4 text-base md:text-lg lg:text-xl">
 			<div>eyad</div>
-			<DataType userExcerciseAnswerAction={UserExcerciseAnswerAction} />
+			<DataType />
 		</div>
 	);
 }

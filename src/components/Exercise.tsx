@@ -3,7 +3,12 @@
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
-import { useState } from "react";
+import {
+	userExcerciseAnswerError,
+	userExcerciseAnswerSchema,
+} from "@/lib/types/userSchema";
+import { useEffect, useState } from "react";
+import { z } from "zod";
 
 type ResultType = {
 	columns: string[];
@@ -17,10 +22,10 @@ type ExerciseProps = {
 	prompt: string;
 	initialColumns: string[];
 	initialRows: (string | number)[][];
-	onRunQuery: (query: string) => ResultType | ErrorType;
-	answer: string; // Correct SQL answer
-	handleShowAnswer: () => void;
-	showAnswer: boolean;
+	answer: string;
+	userExcerciseAnswerAction: (
+		input: z.infer<typeof userExcerciseAnswerSchema>,
+	) => Promise<userExcerciseAnswerError | undefined>;
 };
 
 export default function Exercise({
@@ -28,37 +33,59 @@ export default function Exercise({
 	prompt,
 	initialColumns,
 	initialRows,
-	onRunQuery,
 	answer,
-	showAnswer,
-	handleShowAnswer,
+	userExcerciseAnswerAction,
 }: ExerciseProps) {
 	const [sqlQuery, setSqlQuery] = useState<string>("");
 	const [result, setResult] = useState<ResultType | null>(null);
 	const [error, setError] = useState<ErrorType>(null);
 	const [isIncorrectAnswer, setIsIncorrectAnswer] = useState<boolean>(false);
 
+	// Track time and trials
+	const [startTime, setStartTime] = useState<Date | null>(null);
+	const [trials, setTrials] = useState(1);
+	const [showAnswer, setShowAnswer] = useState(false);
+
+	useEffect(() => {
+		setStartTime(new Date()); // Start timer on component load
+	}, []);
+
+	// Submit function to handle time and trial count
+	async function onSubmit() {
+		const endTime = new Date();
+		const timeElapsed =
+			endTime.getTime() - (startTime?.getTime() || endTime.getTime());
+
+		const submissionData = {
+			trials: trials,
+			is_show_ans: showAnswer,
+			time: timeElapsed,
+		};
+
+		const error = await userExcerciseAnswerAction(submissionData);
+		setTrials((prevTrials) => prevTrials + 1); // Increment trials if there’s an error
+		//if (error) setTrials((prevTrials) => prevTrials + 1); // Increment trials if there’s an error
+	}
+
 	const handleRunQuery = () => {
 		if (sqlQuery !== answer) {
-			setIsIncorrectAnswer(true); // Set incorrect answer flag
-			setResult(null); // Don't show result
-			setError(null); // Clear previous errors
+			setIsIncorrectAnswer(true);
+			setResult(null);
+			setError("Incorrect answer!");
 		} else {
-			const queryResult = onRunQuery(sqlQuery);
-			if (typeof queryResult === "string") {
-				setError(queryResult);
-				setResult(null); // Don't show result if there's an error
-			} else {
-				setResult(queryResult);
-				setError(null);
-			}
-			setIsIncorrectAnswer(false); // Correct answer
+			setError(null);
+			onSubmit(); // Submit only if the answer is correct
+			setIsIncorrectAnswer(false);
+			setResult({
+				columns: initialColumns,
+				rows: initialRows,
+			});
 		}
 	};
 
 	const handleShowAnswerClick = () => {
-		setSqlQuery(answer); // Set correct answer in text area
-		handleShowAnswer(); // Notify parent component that answer is shown
+		setSqlQuery(answer);
+		setShowAnswer(true); // Set the flag to show answer
 	};
 
 	return (
@@ -106,14 +133,14 @@ export default function Exercise({
 					</Button>
 				</section>
 
-				{isIncorrectAnswer && (
+				{isIncorrectAnswer && error && (
 					<section className="mt-6">
 						<div
 							className="relative rounded border border-red-400 bg-red-100 px-4 py-3 text-red-700"
 							role="alert"
 						>
 							<strong className="font-bold">Error: </strong>
-							<span className="block sm:inline">Incorrect answer!</span>
+							<span className="block sm:inline">{error}</span>
 						</div>
 					</section>
 				)}
@@ -121,53 +148,39 @@ export default function Exercise({
 				{result && (
 					<section className="mt-6">
 						<h2 className="mb-2 text-lg font-semibold">Results:</h2>
-						{error && (
-							<div
-								className="relative rounded border border-red-400 bg-red-100 px-4 py-3 text-red-700"
-								role="alert"
-							>
-								<strong className="font-bold">Error: </strong>
-								<span className="block sm:inline">{error}</span>
-							</div>
-						)}
-
-						{result && (
-							<div className="overflow-x-auto">
-								<table className="min-w-full border border-gray-300 bg-white">
-									<thead>
-										<tr className="bg-gray-100">
-											{result.columns.map((column, index) => (
-												<th
-													key={index}
-													className="px-4 py-2 text-left text-xs font-semibold uppercase tracking-wider text-gray-600"
+						<div className="overflow-x-auto">
+							<table className="min-w-full border border-gray-300 bg-white">
+								<thead>
+									<tr className="bg-gray-100">
+										{result.columns.map((column, index) => (
+											<th
+												key={index}
+												className="px-4 py-2 text-left text-xs font-semibold uppercase tracking-wider text-gray-600"
+											>
+												{column}
+											</th>
+										))}
+									</tr>
+								</thead>
+								<tbody>
+									{result.rows.map((row, rowIndex) => (
+										<tr
+											key={rowIndex}
+											className={rowIndex % 2 === 0 ? "bg-gray-50" : "bg-white"}
+										>
+											{row.map((cell, cellIndex) => (
+												<td
+													key={cellIndex}
+													className="border-t border-gray-300 px-4 py-2 text-sm text-gray-700"
 												>
-													{column}
-												</th>
+													{cell}
+												</td>
 											))}
 										</tr>
-									</thead>
-									<tbody>
-										{result.rows.map((row, rowIndex) => (
-											<tr
-												key={rowIndex}
-												className={
-													rowIndex % 2 === 0 ? "bg-gray-50" : "bg-white"
-												}
-											>
-												{row.map((cell, cellIndex) => (
-													<td
-														key={cellIndex}
-														className="border-t border-gray-300 px-4 py-2 text-sm text-gray-700"
-													>
-														{cell}
-													</td>
-												))}
-											</tr>
-										))}
-									</tbody>
-								</table>
-							</div>
-						)}
+									))}
+								</tbody>
+							</table>
+						</div>
 					</section>
 				)}
 			</CardContent>
