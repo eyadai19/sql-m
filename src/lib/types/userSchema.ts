@@ -27,6 +27,10 @@ export const userCreateTabelSchema = z.object({
 	query: z.string().min(1),
 });
 
+export const userChatBotInputSchema = z.object({
+	question: z.string().min(1, 'enter question'),
+});
+
 export const userQuizAnswerSchema = z.object({
 	question: z.array(z.string()),
 	answer: z.array(z.string()),
@@ -40,3 +44,5 @@ export type userExcerciseAnswerError = BaseZodError<
 >;
 
 export type userQuizAnswerError = BaseZodError<typeof userQuizAnswerSchema>;
+
+export type userChatBotInputError = BaseZodError<typeof userChatBotInputSchema>;
