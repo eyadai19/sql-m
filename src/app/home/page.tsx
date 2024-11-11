@@ -5,12 +5,14 @@ import { AboutComponent } from "@/components/AboutComponent";
 import { HomeComponent } from "@/components/HomeComponent";
 import { TryitCard } from "@/components/TryitCard";
 import { Footer } from "@/components/Footer";
+import Chatbot from '@/components/Chatbot';
+
 
 // my-navbar-app/pages/navbar-test.tsx
 
 export default function HomePage() {
 	return (
-		<div className="h-screen ">
+		<div className= "" >
 			<Navbar />
 
 			<HomeComponent />
@@ -18,8 +20,11 @@ export default function HomePage() {
 			<AboutComponent />
 			
 			<TryitCard/>
+			
+			<Chatbot/>
 
 			<Footer/>
+
 		</div>
 	);
 }
