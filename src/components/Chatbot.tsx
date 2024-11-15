@@ -13,7 +13,6 @@ export default function ChatBot() {
   const [finalAnswer, setFinalAnswer] = useState<string>("");
   const [compiledData, setCompiledData] = useState<any[]>([]); 
 
-
   const chatEndRef = useRef<HTMLDivElement>(null);
 
   const toggleChat = () => {
@@ -35,7 +34,7 @@ export default function ChatBot() {
     if (inChatMode) {
       setInChatMode(false);
       setUserAnswer("");
-      setFinalAnswer(""); // إعادة تعيين الإجابة النهائية
+      setFinalAnswer(""); // Reset the final answer
     } else {
       setLanguage("");
     }
@@ -50,9 +49,9 @@ export default function ChatBot() {
 
   const fetchTestQuestion = () => {
     const questions = [
-      { question: "Please choose an action:", options: ["select", "update", "delete"],finalAnswer:"" },
-      { question: "What would you like to do?", options: ["add", "edit", "remove"],finalAnswer:"gg"  },
-      { question: "test", options: ["1", "2", "3"],finalAnswer:""  },
+      { question: "Please choose an action:", options: ["select", "update", "delete"], finalAnswer: "" },
+      { question: "What would you like to do?", options: ["add", "edit", "remove"], finalAnswer: "gg" },
+      { question: "test", options: ["1", "2", "3"], finalAnswer: "" },
     ];
 
     const randomQuestion = questions[Math.floor(Math.random() * questions.length)];
@@ -93,21 +92,20 @@ export default function ChatBot() {
     setUserAnswer("");
     setQuestionData(null);
     setIsFirstQuestion(true);
-    setFinalAnswer(""); 
+    setFinalAnswer("");
+    setCompiledData([]); // Reset compiledData
     fetchInitialQuestion();
   };
 
-
-
   const handleCompile = () => {
-    // إنشاء بيانات الجدول عند الضغط على الزر
+    // Generate table data when the button is clicked
     const data = [
       { id: 1, name: "John Doe", age: 28, action: "selected option 1" },
       { id: 2, name: "Jane Smith", age: 34, action: "selected option 2" },
       { id: 3, name: "Sam Brown", age: 22, action: "selected option 3" },
     ];
 
-    setCompiledData(data); // تعيين البيانات في حالة compiledData
+    setCompiledData(data); // Set the data into the compiledData state
   };
 
   return (
@@ -116,7 +114,7 @@ export default function ChatBot() {
         className={`bg-[#00203F] text-white w-80 h-[80vh] p-4 transition-all duration-300 ease-in-out ${isOpen ? "opacity-100 translate-y-0" : "opacity-0 translate-y-full pointer-events-none"
           } rounded-t-lg shadow-lg mb-2 flex flex-col justify-between overflow-y-auto custom-scrollbar`}
       >
-        {/* الشريط العلوي الثابت في أعلى الشات تمامًا */}
+        {/* Sticky top bar in the chat */}
         <div className="sticky top-0 bg-[#00203F] z-10 p-2 flex justify-between items-center">
           {language && (
             <button onClick={goBack} className="text-[#ADF0D1] focus:outline-none">
@@ -131,7 +129,7 @@ export default function ChatBot() {
           </button>
         </div>
 
-        {/* محتوى الشات */}
+        {/* Chat content */}
         <div className="flex-1 overflow-y-auto mt-2">
           {!language && !inChatMode && (
             <div className="flex flex-col justify-center items-center h-full">
@@ -214,26 +212,26 @@ export default function ChatBot() {
             </>
           )}
 
-
-
-{compiledData.length > 0 && (
+          {compiledData.length > 0 && (
             <div className="mt-4">
               <table className="w-full table-auto">
                 <thead>
                   <tr>
-                    <th className="border p-2 text-left">ID</th>
-                    <th className="border p-2 text-left">Name</th>
-                    <th className="border p-2 text-left">Age</th>
-                    <th className="border p-2 text-left">Action</th>
+                    {/* Extract columns from the first object in compiledData */}
+                    {Object.keys(compiledData[0]).map((key) => (
+                      <th key={key} className="border p-2 text-left">
+                        {key.charAt(0).toUpperCase() + key.slice(1)} {/* Display column name properly */}
+                      </th>
+                    ))}
                   </tr>
                 </thead>
                 <tbody>
                   {compiledData.map((row, index) => (
                     <tr key={index}>
-                      <td className="border p-2">{row.id}</td>
-                      <td className="border p-2">{row.name}</td>
-                      <td className="border p-2">{row.age}</td>
-                      <td className="border p-2">{row.action}</td>
+                      {/* Display values based on columns */}
+                      {Object.values(row).map((value, i) => (
+                        <td key={i} className="border p-2">{String(value)}</td>
+                      ))}
                     </tr>
                   ))}
                 </tbody>
@@ -241,9 +239,7 @@ export default function ChatBot() {
             </div>
           )}
 
-
-
-          {/* زر مسح المحادثة داخل مربع الـ ChatBot */}
+          {/* Reset chat button inside the ChatBot */}
           {inChatMode && (
             <button
               onClick={resetChat}
