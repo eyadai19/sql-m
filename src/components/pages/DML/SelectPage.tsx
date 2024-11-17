@@ -26,7 +26,6 @@ export default function SelectPage() {
 	return (
 		<div>
 			<Explanation {...explanationParams} />
-
 			<Exercise
 				title="SQL Exercise: Select Query"
 				prompt="Write a SQL query to retrieve all employees from the employees table with a salary greater than $50,000. Make sure to include the columns: id, name, and salary."
