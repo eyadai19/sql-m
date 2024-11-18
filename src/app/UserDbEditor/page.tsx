@@ -2,11 +2,7 @@ import DatabaseManager from "@/components/database/DatabaseManager";
 import { NextPage } from "next";
 
 const UserComp: NextPage = () => {
-	return (
-		<>
-			<DatabaseManager/>
-		</>
-	);
+	return <DatabaseManager />;
 };
 
 export default UserComp;
