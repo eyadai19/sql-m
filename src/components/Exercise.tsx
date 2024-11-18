@@ -18,15 +18,23 @@ type ResultType = {
 type ErrorType = string | null;
 
 type ExerciseProps = {
-	title: string;
+	title?: string; // Optional title not present in ExerciseParams
 	prompt: string;
+	tips: string; // Included to match ExerciseParams
 	initialColumns: string[];
-	initialRows: (string | number)[][];
+	initialRows:Array<Record<string, unknown>>
+
+	difficulty: string; // Included to match ExerciseParams
+	reference: string; // Included to match ExerciseParams
 	answer: string;
 	userExcerciseAnswerAction: (
-		input: z.infer<typeof userExcerciseAnswerSchema>,
-	) => Promise<userExcerciseAnswerError | undefined>;
-};
+	  input: {
+		trials: number;
+		is_show_ans: boolean;
+		time: number;
+	  }
+	) => Promise<string | undefined>; // Returns a string or undefined to match ExerciseParams
+  };
 
 export default function Exercise({
 	title,
@@ -69,19 +77,25 @@ export default function Exercise({
 
 	const handleRunQuery = () => {
 		if (sqlQuery !== answer) {
-			setIsIncorrectAnswer(true);
-			setResult(null);
-			setError("Incorrect answer!");
+		  setIsIncorrectAnswer(true);
+		  setResult(null);
+		  setError("Incorrect answer!");
 		} else {
-			setError(null);
-			onSubmit(); // Submit only if the answer is correct
-			setIsIncorrectAnswer(false);
-			setResult({
-				columns: initialColumns,
-				rows: initialRows,
-			});
+		  setError(null);
+		  onSubmit();
+		  setIsIncorrectAnswer(false);
+	  
+		  const transformedRows: (string | number)[][] = initialRows.map((row) =>
+			Object.values(row) as (string | number)[]
+			);
+
+	  
+		  setResult({
+			columns: initialColumns,
+			rows: transformedRows,
+		  });
 		}
-	};
+	  };
 
 	const handleShowAnswerClick = () => {
 		setSqlQuery(answer);
