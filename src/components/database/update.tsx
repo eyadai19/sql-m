@@ -3,9 +3,8 @@ import React, { useState, useRef, useEffect } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faCopy, faInfoCircle } from "@fortawesome/free-solid-svg-icons";
 
-const SelectData: React.FC = () => {
-  const [selectQuery, setSelectQuery] = useState<string>("");
-  const [selectResults, setSelectResults] = useState<Record<string, string>[]>([]);
+const UpdateData: React.FC = () => {
+  const [updateQuery, setUpdateQuery] = useState<string>("");
   const [popupVisible, setPopupVisible] = useState<boolean>(false);
   const [popupPosition, setPopupPosition] = useState<{ top: number; left: number }>({ top: 0, left: 0 });
 
@@ -16,6 +15,7 @@ const SelectData: React.FC = () => {
       setPopupVisible(false);
     }
   };
+
 
   const copyToClipboard = (text: string) => {
     navigator.clipboard.writeText(text).catch((err) => {
@@ -33,21 +33,28 @@ const SelectData: React.FC = () => {
     };
   }, [popupVisible]);
 
-  const validateAndSelectData = async () => {
-    const regex = /^SELECT\s+([\s\S]+)\s+FROM\s+(\S+)$/i;
-    const match = selectQuery.trim().match(regex);
+  const validateAndUpdateData = async () => {
+    const regex = /^UPDATE\s+(\S+)\s+SET\s+([\s\S]+)\s+WHERE\s+([\s\S]+)$/i;
+    const match = updateQuery.trim().match(regex);
 
     if (!match) {
-      alert("Invalid SELECT query.");
+      alert("تعليمة UPDATE غير صحيحة.");
       return;
     }
 
-    const columnsPart = match[1].trim();
-    const tableName = match[2].trim();
-    const columns = columnsPart.split(",").map((col) => col.trim());
+    const tableName = match[1];
+    const setPart = match[2].trim();
+    const wherePart = match[3].trim();
 
-    if (!tableName || columns.length === 0) {
-      alert("Incomplete SELECT query.");
+    const setColumns = setPart.split(",").map((col) => {
+      const [column, value] = col.split("=").map((part) => part.trim());
+      return { column, value };
+    });
+
+    const whereConditions = wherePart.split("AND").map((condition) => condition.trim());
+
+    if (!tableName || setColumns.length === 0 || whereConditions.length === 0) {
+      alert("معلومات التحديث غير مكتملة.");
       return;
     }
 
@@ -56,24 +63,25 @@ const SelectData: React.FC = () => {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          action: "SELECT",
+          action: "UPDATE",
           tableName,
-          selectColumns: columns,
+          setColumns,
+          whereConditions,
         }),
       });
 
       if (!response.ok) {
         const errorData = await response.json();
-        alert(errorData.error || "Error executing query.");
+        alert(errorData.error || "خطأ أثناء تحديث البيانات.");
         return;
       }
 
       const data = await response.json();
-      setSelectQuery("");
-      setSelectResults(data.data);
+      alert(data.message);
+      setUpdateQuery(""); // مسح الحقل بعد النجاح
     } catch (error) {
-      console.error("Error executing query:", error);
-      alert("An error occurred while executing the query.");
+      console.error("خطأ أثناء تحديث البيانات:", error);
+      alert("حدث خطأ أثناء تحديث البيانات.");
     }
   };
 
@@ -92,16 +100,16 @@ const SelectData: React.FC = () => {
 
   return (
     <div className="mb-8 bg-[#00203F] p-6 rounded-lg">
-      <h2 className="mb-4 text-2xl font-semibold text-[#ADF0D1] text-left">SELECT Query</h2>
+      <h2 className="mb-4 text-2xl font-semibold text-[#ADF0D1] text-left">Update Data</h2>
       <div className="relative">
         <input
           type="text"
-          value={selectQuery}
-          onChange={(e) => setSelectQuery(e.target.value)}
-          placeholder="SELECT query"
+          value={updateQuery}
+          onChange={(e) => setUpdateQuery(e.target.value)}
+          placeholder="UPDATE query"
           className="mb-4 w-full rounded-md border p-3 shadow-sm bg-white text-[#00203F]"
         />
-           <span
+         <span
           className="absolute right-2 top-1/2 transform -translate-y-1/2 flex justify-center items-center w-8 h-8 rounded-full text-[#00203F] cursor-pointer"
           style={{ top: "calc(50% - 8px)" }}
           onClick={handleIconClick}
@@ -110,10 +118,11 @@ const SelectData: React.FC = () => {
         </span>
       </div>
       <button
-        onClick={validateAndSelectData}
+        onClick={validateAndUpdateData}
         className="rounded-md bg-[#ADF0D1] px-4 py-2 text-[#00203F] shadow hover:bg-[#00203F] hover:text-[#ADF0D1]"
       >
-        Execute SELECT Query
+		
+        Update Data
       </button>
 
       {popupVisible && (
@@ -132,14 +141,14 @@ const SelectData: React.FC = () => {
             }}
           >
             <div className="mb-4">
-              <h3 className="text-xl font-semibold text-[#00203F]">How to use SELECT</h3>
+              <h3 className="text-xl font-semibold text-[#00203F]">How to use UPDATE</h3>
               <p className="text-[#00203F] mt-2">
-                To execute a SELECT query, use the following syntax:
+                To execute an UPDATE query, use the following syntax:
               </p>
               <pre className="bg-[#f5f5f5] p-3 rounded-md mt-2">
-                SELECT column1, column2 FROM tableName;
+                UPDATE tableName SET column1 = value1, column2 = value2 WHERE condition;
 				<button
-                  onClick={() => copyToClipboard("SELECT column1, column2 FROM tableName;")}
+                  onClick={() => copyToClipboard("UPDATE tableName SET column1 = value1, column2 = value2 WHERE condition;")}
                   className="ml-4 py-1 px-2 bg-[#ADF0D1] text-[#00203F] rounded-full shadow hover:bg-[#00203F] hover:text-[#ADF0D1]"
                   title="Copy to clipboard"
                 >
@@ -147,7 +156,8 @@ const SelectData: React.FC = () => {
                 </button>
               </pre>
               <p className="text-[#00203F] mt-2">
-                Replace <code>column1, column2</code> with the columns you want to select, and <code>tableName</code> with the name of the table.
+                Replace <code>tableName</code> with the name of your table, and set the column values you wish to
+                update with <code>column1 = value1</code>, <code>column2 = value2</code>.
               </p>
             </div>
             <button
@@ -159,37 +169,8 @@ const SelectData: React.FC = () => {
           </div>
         </>
       )}
-
-      {/* تحسين عرض الجدول */}
-      {selectResults.length > 0 && (
-        <div className="mt-6 bg-white rounded-lg shadow-md p-6">
-          <h3 className="mb-4 text-lg font-medium text-[#00203F]">Query Results:</h3>
-          <table className="text-[#00203F] w-full table-auto border-collapse border border-gray-300 rounded-md">
-            <thead className="bg-[#00203F] text-white">
-              <tr>
-                {Object.keys(selectResults[0]).map((key) => (
-                  <th key={key} className="text-white border px-6 py-4 text-left uppercase text-sm tracking-wider">
-                    {key}
-                  </th>
-                ))}
-              </tr>
-            </thead>
-            <tbody>
-              {selectResults.map((row, index) => (
-                <tr key={index} className="odd:bg-[#f5f5f5] hover:bg-[#e0f7fa]">
-                  {Object.values(row).map((value, idx) => (
-                    <td key={idx} className="text-[#00203F] border px-6 py-4 text-sm">
-                      {value}
-                    </td>
-                  ))}
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      )}
     </div>
   );
 };
 
-export default SelectData;
+export default UpdateData;

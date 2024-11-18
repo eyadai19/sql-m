@@ -3,8 +3,8 @@ import React, { useState, useRef, useEffect } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faCopy, faInfoCircle } from "@fortawesome/free-solid-svg-icons";
 
-const DropTable: React.FC = () => {
-  const [dropQuery, setDropQuery] = useState<string>("");
+const AlterData: React.FC = () => {
+  const [alterQuery, setAlterQuery] = useState<string>("");
   const [popupVisible, setPopupVisible] = useState<boolean>(false);
   const [popupPosition, setPopupPosition] = useState<{ top: number; left: number }>({ top: 0, left: 0 });
 
@@ -17,6 +17,7 @@ const DropTable: React.FC = () => {
       setPopupVisible(false); // إغلاق الـ popup إذا تم النقر خارجها
     }
   };
+
 
   const copyToClipboard = (text: string) => {
     navigator.clipboard.writeText(text).catch((err) => {
@@ -36,36 +37,62 @@ const DropTable: React.FC = () => {
     };
   }, [popupVisible]);
 
-  const validateAndDropTable = async () => {
-    const regex = /^DROP\s+TABLE\s+(\S+)$/i;
-    const match = dropQuery.trim().match(regex);
+  const validateAndAlterData = async () => {
+    // تعبير regex لتحليل تعليمة ALTER
+    const regex =
+      /^ALTER\s+TABLE\s+(\S+)\s+(ADD|DROP)\s+COLUMN\s+(\S+)\s+(\S+)$/i;
+    const match = alterQuery.trim().match(regex);
 
     if (!match) {
-      alert("Invalid DROP query.");
+      alert("Invalid ALTER query.");
       return;
     }
 
-    const tableName = match[1];
+    const tableName = match[1]; // اسم الجدول
+    const action1 = match[2].toUpperCase(); // ADD أو DROP
+    const columnName = match[3]; // اسم العمود
+    const columnType = match[4]; // نوع العمود (فقط في حالة ADD)
 
+    // تحقق من صحة الإدخال
+    if (!tableName || !columnName || !action1) {
+      alert("Incomplete ALTER query.");
+      return;
+    }
+
+    // بناء JSON لإرسال البيانات إلى الخادم
+    const requestData: { [key: string]: any } = {
+      action: "ALTER",
+      tableName,
+      actionType: action1,
+      columnName,
+    };
+
+    // إذا كان الإجراء هو ADD، نضيف نوع العمود
+    if (action1 === "ADD" && columnType) {
+      requestData.columnType = columnType;
+    }
+
+    // إرسال البيانات إلى الخادم
     try {
       const response = await fetch("http://localhost:3000/api/db", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ action: "DROP", tableName }),
+        body: JSON.stringify(requestData),
       });
 
+      // معالجة الرد من الخادم
       if (!response.ok) {
         const errorData = await response.json();
-        alert(errorData.error || "Error while dropping the table.");
+        alert(errorData.error || "Error while altering table structure.");
         return;
       }
 
       const data = await response.json();
-      alert(data.message);
-      setDropQuery(""); // Clear input after success
+      alert(data.message); // عرض رسالة النجاح
+      setAlterQuery(""); // مسح الإدخال بعد النجاح
     } catch (error) {
-      console.error("Error while dropping the table:", error);
-      alert("An error occurred while dropping the table.");
+      console.error("Error while altering table structure:", error);
+      alert("An error occurred while altering the table structure.");
     }
   };
 
@@ -87,13 +114,13 @@ const DropTable: React.FC = () => {
 
   return (
     <div className="mb-8 bg-[#00203F] p-6 rounded-lg">
-      <h2 className="mb-4 text-2xl font-semibold text-[#ADF0D1] text-left">Drop Table</h2>
+      <h2 className="mb-4 text-2xl font-semibold text-[#ADF0D1] text-left">Alter Table Structure</h2>
       <div className="relative">
         <input
           type="text"
-          value={dropQuery}
-          onChange={(e) => setDropQuery(e.target.value)}
-          placeholder="DROP query"
+          value={alterQuery}
+          onChange={(e) => setAlterQuery(e.target.value)}
+          placeholder="ALTER query"
           className="mb-4 w-full rounded-md border p-3 shadow-sm bg-white text-[#00203F]"
         />
         <span
@@ -105,10 +132,10 @@ const DropTable: React.FC = () => {
         </span>
       </div>
       <button
-        onClick={validateAndDropTable}
+        onClick={validateAndAlterData}
         className="rounded-md bg-[#ADF0D1] px-4 py-2 text-[#00203F] shadow hover:bg-[#00203F] hover:text-[#ADF0D1]"
       >
-        Drop Table
+        Alter Table Structure
       </button>
 
       {popupVisible && (
@@ -133,14 +160,14 @@ const DropTable: React.FC = () => {
             }}
           >
             <div className="mb-4">
-              <h3 className="text-xl font-semibold text-[#00203F]">How to use DROP TABLE</h3>
+              <h3 className="text-xl font-semibold text-[#00203F]">How to use ALTER TABLE</h3>
               <p className="text-[#00203F] mt-2">
-                To drop a table from the database, use the following syntax:
+                To alter the structure of a table, use the following syntax:
               </p>
               <pre className="bg-[#f5f5f5] p-3 rounded-md mt-2">
-                DROP TABLE tableName;
-				<button
-                  onClick={() => copyToClipboard("DROP TABLE tableName;")}
+                ALTER TABLE tableName ADD/DROP COLUMN columnName columnType;
+                <button
+                  onClick={() => copyToClipboard("ALTER TABLE tableName ADD/DROP COLUMN columnName columnType;")}
                   className="ml-4 py-1 px-2 bg-[#ADF0D1] text-[#00203F] rounded-full shadow hover:bg-[#00203F] hover:text-[#ADF0D1]"
                   title="Copy to clipboard"
                 >
@@ -148,7 +175,7 @@ const DropTable: React.FC = () => {
                 </button>
               </pre>
               <p className="text-[#00203F] mt-2">
-                Replace <code>tableName</code> with the name of the table you wish to delete. Be cautious, as this action is irreversible.
+                Replace <code>tableName</code> with the name of the table, <code>columnName</code> with the column name, and <code>columnType</code> with the column type (only when adding a column).
               </p>
             </div>
             <button
@@ -164,4 +191,4 @@ const DropTable: React.FC = () => {
   );
 };
 
-export default DropTable;
+export default AlterData;
