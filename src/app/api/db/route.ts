@@ -2,31 +2,133 @@ import { NextRequest, NextResponse } from "next/server";
 import { open } from "sqlite";
 import sqlite3 from "sqlite3";
 
-// دالة لفتح قاعدة البيانات
 const getDb = async () => {
 	return open({
-		filename: "../db",
+		filename: "../db", // تأكد من أن مسار قاعدة البيانات صحيح
 		driver: sqlite3.Database,
 	});
 };
 
-// نقطة النهاية POST للتعامل مع CREATE و DROP و INSERT و SELECT
 export async function POST(req: NextRequest) {
 	try {
 		const db = await getDb();
-		const { action, tableName, columns, values, selectColumns } =
-			await req.json();
+		const {
+			action,
+			tableName,
+			columns,
+			values,
+			selectColumns,
+			actionType,
+			columnName,
+			columnType,
+			setColumns, // الأعمدة التي سيتم تحديثها
+			whereConditions, // شروط WHERE للتحديث
+		} = await req.json();
 
 		if (!tableName) {
 			return NextResponse.json({ error: "اسم الجدول مفقود." }, { status: 400 });
 		}
 
+		// التعامل مع عملية ALTER
+		if (action === "ALTER") {
+			if (!actionType || !columnName) {
+				return NextResponse.json(
+					{ error: "إجراء ALTER غير مكتمل." },
+					{ status: 400 },
+				);
+			}
+
+			let alterQuery = "";
+			if (actionType === "ADD" && columnType) {
+				alterQuery = `ALTER TABLE ${tableName} ADD COLUMN ${columnName} ${columnType}`;
+			} else if (actionType === "DROP") {
+				alterQuery = `ALTER TABLE ${tableName} DROP COLUMN ${columnName}`;
+			} else {
+				return NextResponse.json(
+					{ error: "إجراء ALTER غير صالح." },
+					{ status: 400 },
+				);
+			}
+
+			await db.exec(alterQuery);
+
+			return NextResponse.json(
+				{ message: `تم تعديل هيكل الجدول "${tableName}" بنجاح.` },
+				{ status: 200 },
+			);
+		}
+
+		// التعامل مع عملية DELETE
+		if (action === "DELETE") {
+			if (!whereConditions || whereConditions.length === 0) {
+				return NextResponse.json(
+					{ error: "شروط WHERE مفقودة." },
+					{ status: 400 },
+				);
+			}
+
+			const whereClauses = whereConditions.join(" AND ");
+			const deleteQuery = `DELETE FROM ${tableName} WHERE ${whereClauses}`;
+
+			try {
+				await db.exec(deleteQuery);
+				return NextResponse.json(
+					{ message: `تم حذف البيانات من الجدول "${tableName}" بنجاح.` },
+					{ status: 200 },
+				);
+			} catch (error) {
+				console.error("Error while deleting data:", error);
+				return NextResponse.json(
+					{ error: "حدث خطأ أثناء حذف البيانات." },
+					{ status: 500 },
+				);
+			}
+		}
+
+		// التعامل مع عملية UPDATE
+		if (action === "UPDATE") {
+			if (!setColumns || setColumns.length === 0) {
+				return NextResponse.json(
+					{ error: "الأعمدة التي سيتم تحديثها مفقودة." },
+					{ status: 400 },
+				);
+			}
+
+			if (!whereConditions || whereConditions.length === 0) {
+				return NextResponse.json(
+					{ error: "شروط WHERE مفقودة." },
+					{ status: 400 },
+				);
+			}
+
+			// بناء استعلام UPDATE
+			const setClauses = setColumns
+				.map(
+					({ column, value }: { column: string; value: string }) =>
+						`${column} = ?`,
+				)
+				.join(", ");
+			const whereClauses = whereConditions.join(" AND ");
+
+			const updateQuery = `UPDATE ${tableName} SET ${setClauses} WHERE ${whereClauses}`;
+			const updateValues = setColumns.map(
+				({ value }: { column: string; value: string }) => value,
+			);
+
+			await db.run(updateQuery, ...updateValues);
+
+			return NextResponse.json(
+				{ message: `تم تحديث البيانات في الجدول "${tableName}" بنجاح.` },
+				{ status: 200 },
+			);
+		}
+
+		// العمليات الأخرى (CREATE, DROP, INSERT, SELECT)
 		if (action === "CREATE") {
 			if (!columns || columns.length === 0) {
 				return NextResponse.json({ error: "الأعمدة مفقودة." }, { status: 400 });
 			}
 
-			// تحويل الأعمدة إلى صيغة SQL
 			const columnsSQL = columns
 				.map((col: string) => {
 					const [columnName, columnType] = col.split(" ").map((s) => s.trim());
@@ -42,7 +144,6 @@ export async function POST(req: NextRequest) {
 				{ status: 200 },
 			);
 		} else if (action === "DROP") {
-			// تنفيذ تعليمة DROP
 			await db.exec(`DROP TABLE IF EXISTS ${tableName}`);
 			return NextResponse.json(
 				{ message: `تم حذف الجدول "${tableName}" بنجاح.` },
@@ -53,7 +154,6 @@ export async function POST(req: NextRequest) {
 				return NextResponse.json({ error: "القيم مفقودة." }, { status: 400 });
 			}
 
-			// تحويل القيم إلى صيغة SQL
 			const placeholders = values.map(() => "?").join(", ");
 			const insertQuery = `INSERT INTO ${tableName} (${columns.join(", ")}) VALUES (${placeholders})`;
 
