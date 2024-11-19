@@ -1,6 +1,6 @@
-'use client'
+'use client';
 
-import { useEffect, useState } from 'react'
+import { useEffect, useState } from 'react';
 import {
   Table,
   TableBody,
@@ -9,70 +9,60 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from "@/components/ui/table"
-import getDummyDataSubset from '@/utils/getDummyDataSubset'
+} from '@/components/ui/table';
+import getDummyDataSubset from '@/utils/getDummyDataSubset';
 
-import { EmployeeRow } from '@/utils/dummyData'
-
-interface GenerateTableParams<T> {
-    RowsInterface: T,
-    seed: string,
-    columnsCount: number
+interface GenerateTableParams<T extends object> {
+  rows: T[]; // Add rows as a prop
+  seed: string;
+  rowsCount: number;
+  formatFunctions?: Partial<Record<keyof T, (value: any) => string>>; // Optional formatting functions for specific columns
 }
 
-export default function GenerateTable(RowsInterface, seed, columnsCount :EmployeeRow) {
-interface TableStructure {
-    columns: Array<keyof EmployeeRow>,
-    rows: EmployeeRow
-}
-
-  const [tabledata, setTabledata] = useState<RowsInterface[]>([])
+export default function GenerateTable<T extends object>({
+  rows,
+  seed,
+  rowsCount,
+  formatFunctions,
+}: GenerateTableParams<T>) {
+  const [tabledata, setTabledata] = useState<T[]>([]);
 
   useEffect(() => {
-    // Fetch data when component mounts
-    const data = getDummyDataSubset('some-seed', 5) // Adjust seed and count as needed
-    setTabledata(data)
-  }, [])
-
-  // Function to format salary
-  const formatSalary = (salary: number) => {
-    return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(salary)
-  }
-
-  // Function to format date
-  const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })
-  }
+    // Fetch data when the component mounts
+    const data: T[] = getDummyDataSubset<T>(rows, seed, rowsCount);
+    setTabledata(data);
+  }, [seed, rowsCount]);
 
   return (
     <div className="container mx-auto py-10">
       <Table>
-        <TableCaption>Employee Information</TableCaption>
-        <TableHeader>
+        <TableHeader className="bg-sailorBlue text-white">
           <TableRow>
-
-            // change the heading to be generated using map function 
-            <TableHead className="w-[100px]">ID</TableHead>
-            <TableHead>Name</TableHead>
-            <TableHead>Position</TableHead>
-            <TableHead>Department</TableHead>
-            <TableHead className="text-right">Salary</TableHead>
-            <TableHead className="text-right">Date Hired</TableHead>
+            {/* Generate table headers dynamically */}
+            {tabledata.length > 0 &&
+              (Object.keys(tabledata[0]) as Array<keyof T>).map((key) => (
+                <TableHead key={key.toString()}>{key.toString()}</TableHead>
+              ))}
           </TableRow>
         </TableHeader>
-        <TableBody>
-          {tabledata.map((tableRow) => (
-            <TableRow key={tableRow.id}>
-              <TableCell className="font-medium">{tableRow.id}</TableCell>
-              <TableCell>{tableRow.name}</TableCell>
-              <TableCell>{tableRow.position}</TableCell>
-              <TableCell>{tableRow.department}</TableCell>
-              <TableCell className="text-right">{formatSalary(tableRow.salary)}</TableCell>
-              <TableCell className="text-right">{formatDate(tableRow.date_hired)}</TableCell>
+        <TableBody className="bg-mint">
+          {/* Generate table rows dynamically */}
+          {tabledata.map((tableRow, rowIndex) => (
+            <TableRow key={rowIndex}>
+              {(Object.keys(tableRow) as Array<keyof T>).map((key) => {
+                const value = tableRow[key];
+                const formattedValue =
+                  formatFunctions?.[key] ? formatFunctions[key]!(value) : value;
+                return (
+                  <TableCell key={key.toString()} className="text-sailorBlue">
+                    {String(formattedValue)}
+                  </TableCell>
+                );
+              })}
             </TableRow>
           ))}
         </TableBody>
       </Table>
     </div>
-  )
+  );
 }

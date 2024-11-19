@@ -9,7 +9,9 @@ import {
 } from "@/lib/types/userSchema";
 import { useEffect, useState } from "react";
 import { z } from "zod";
-
+import EmployeesTable from "./EmployeesTable";
+import DepartmentsTable from "./DepartmentsTable";
+const seed = 'someSeed'
 type ResultType = {
 	columns: string[];
 	rows: (string | number)[][];
@@ -20,14 +22,12 @@ type ErrorType = string | null;
 type ExerciseProps = {
 	title?: string; // Optional title not present in ExerciseParams
 	prompt: string;
-	tips: string; // Included to match ExerciseParams
-	initialColumns: string[];
-	initialRows:Array<Record<string, unknown>>
-
+	tips?: string; // Included to match ExerciseParams
+	tables: string[],
 	difficulty: string; // Included to match ExerciseParams
-	reference: string; // Included to match ExerciseParams
+	reference?: string; // Included to match ExerciseParams
 	answer: string;
-	userExcerciseAnswerAction: (
+	userExcerciseAnswerAction?: (
 	  input: {
 		trials: number;
 		is_show_ans: boolean;
@@ -39,8 +39,7 @@ type ExerciseProps = {
 export default function Exercise({
 	title,
 	prompt,
-	initialColumns,
-	initialRows,
+	tables,
 	answer,
 	userExcerciseAnswerAction,
 }: ExerciseProps) {
@@ -60,6 +59,7 @@ export default function Exercise({
 
 	// Submit function to handle time and trial count
 	async function onSubmit() {
+		/*
 		const endTime = new Date();
 		const timeElapsed =
 			endTime.getTime() - (startTime?.getTime() || endTime.getTime());
@@ -73,28 +73,11 @@ export default function Exercise({
 		const error = await userExcerciseAnswerAction(submissionData);
 		setTrials((prevTrials) => prevTrials + 1); // Increment trials if there’s an error
 		//if (error) setTrials((prevTrials) => prevTrials + 1); // Increment trials if there’s an error
+		*/
 	}
 
 	const handleRunQuery = () => {
-		if (sqlQuery !== answer) {
-		  setIsIncorrectAnswer(true);
-		  setResult(null);
-		  setError("Incorrect answer!");
-		} else {
-		  setError(null);
-		  onSubmit();
-		  setIsIncorrectAnswer(false);
-	  
-		  const transformedRows: (string | number)[][] = initialRows.map((row) =>
-			Object.values(row) as (string | number)[]
-			);
-
-	  
-		  setResult({
-			columns: initialColumns,
-			rows: transformedRows,
-		  });
-		}
+		return
 	  };
 
 	const handleShowAnswerClick = () => {
@@ -113,89 +96,87 @@ export default function Exercise({
           <h2 className="text-lg font-semibold mb-2">Task:</h2>
           <p className="text-gray-700">{prompt}</p>
         </section>
+		<section>
+			<EmployeesTable seed={seed} rowsCount={8} />
+			<DepartmentsTable seed={seed} rowsCount={4} />
+		</section>
+		<section>
+			<Label
+				htmlFor="sql-editor"
+				className="mb-2 block text-lg font-semibold"
+			>
+				SQL Editor
+			</Label>
+			<textarea
+				id="sql-editor"
+				className="h-40 w-full rounded-md border border-gray-300/40 bg-gray-100/40 p-2 font-mono text-sm focus:outline-none"
+				value={sqlQuery}
+				onChange={(e) => setSqlQuery(e.target.value)}
+				placeholder="Type your SQL query here..."
+			/>
+		</section>
 
-				<section>
-					<Label
-						htmlFor="sql-editor"
-						className="mb-2 block text-lg font-semibold"
-					>
-						SQL Editor
-					</Label>
-					<textarea
-						id="sql-editor"
-						className="h-40 w-full rounded-md border border-gray-300/40 bg-gray-100/40 p-2 font-mono text-sm focus:outline-none"
-						value={sqlQuery}
-						onChange={(e) => setSqlQuery(e.target.value)}
-						placeholder="Type your SQL query here..."
-					/>
-				</section>
+		<section className="flex justify-between">
+			<Button
+				onClick={handleRunQuery}
+				className="bg-sailorBlue hover:bg-lightSailorBlue text-gray-200"
+			>
+				Run Query
+			</Button>
 
-				<section className="flex justify-between">
-					<Button
-						onClick={handleRunQuery}
-						className="bg-sailorBlue hover:bg-lightSailorBlue text-gray-200"
-					>
-						Run Query
-					</Button>
+			<Button
+				variant="outline"
+				className="border-gray-300 bg-transparent text-gray-700 hover:bg-gray-100"
+				onClick={handleShowAnswerClick}
+				type="button"
+			>
+				Show Answer
+			</Button>
+		</section>
+		{isIncorrectAnswer && error && (
+			<section className="mt-6">
+				<div
+					className="relative rounded border border-red-400 bg-red-100 px-3 py-2 text-sm text-red-700"
+					role="alert"
+				>
+					<strong className="font-bold">Error: </strong>
+					<span className="block sm:inline">{error}</span>
+				</div>
+			</section>
+		)}
 
-					<Button
-						variant="outline"
-						className="border-gray-300 bg-transparent text-gray-700 hover:bg-gray-100"
-						onClick={handleShowAnswerClick}
-						type="button"
-					>
-						Show Answer
-					</Button>
-				</section>
-				{isIncorrectAnswer && error && (
-					<section className="mt-6">
-						<div
-							className="relative rounded border border-red-400 bg-red-100 px-3 py-2 text-sm text-red-700"
-							role="alert"
-						>
-							<strong className="font-bold">Error: </strong>
-							<span className="block sm:inline">{error}</span>
-						</div>
-					</section>
-				)}
-
-				{result && (
-					<section className="mt-6">
-						<h2 className="mb-2 text-lg font-semibold">Results:</h2>
-						<div className="overflow-x-auto">
-							<table className="min-w-full border border-gray-300 bg-white">
-								<thead>
-									<tr className="bg-gray-100">
-										{result.columns.map((column, index) => (
-											<th
-												key={index}
-												className="px-4 py-2 text-left text-xs font-semibold uppercase tracking-wider text-gray-600"
-											>
-												{column}
-											</th>
-										))}
-									</tr>
-								</thead>
-								<tbody>
-									{result.rows.map((row, rowIndex) => (
-										<tr
-											key={rowIndex}
-											className={rowIndex % 2 === 0 ? "bg-gray-50" : "bg-white"}
-										>
-											{row.map((cell, cellIndex) => (
-												<td
-													key={cellIndex}
-													className="border-t border-gray-300 px-4 py-2 text-sm text-gray-700"
-												>
-													{cell}
-												</td>
-											))}
-										</tr>
-									))}
-								</tbody>
-							</table>
-						</div>
-					</section>
+			{result && (
+				<section className="mt-6">
+				<h2 className="mb-2 text-lg font-semibold">Results:</h2>
+				<div className="overflow-x-auto">
+				  {tables.map((table, index) => {
+					switch (table) {
+					  case 'employees':
+						return (
+						  <div key={index}>
+							{/* Render EmployeesTable with 8 columns */}
+							<EmployeesTable seed={seed} rowsCount={8} />
+						  </div>
+						);
+					  case 'departments':
+						return (
+						  <div key={index}>
+							{/* Render EmployeesTable with 4 columns */}
+							<DepartmentsTable seed={seed} rowsCount={4} />
+						  </div>
+						);
+					  default:
+						return (
+						  <div key={index}>
+							{/* Render default table or message */}
+							<p>Default Table</p>
+						  </div>
+						);
+					}
+				  })}
+				</div>
+			  </section>
+			  
 				)}
 			</CardContent>
 		</Card>

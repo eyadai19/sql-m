@@ -1,14 +1,16 @@
 import crypto from "crypto";
-import { DUMMY_EMPLOYEES_TABLE, EmployeeRow } from "./dummyData";
 
 /**
  * Get a deterministic subset of dummy data based on a seed and count.
+ * @param rows - The source data to sample from.
  * @param seed - A unique key to determine the subset.
  * @param count - Number of rows to return.
- * @returns An array of `EmployeeRow`.
+ * @returns An array of `T`.
  */
-export default function getDummyDataSubset(seed: string, count: number): EmployeeRow[] {
-  const rows = DUMMY_EMPLOYEES_TABLE.rows;
+function getDummyDataSubset<T>(rows: T[], seed: string, count: number): T[] {
+  if (!rows || rows.length === 0) {
+    return [];
+  }
 
   // Hash the seed to a numeric value
   const hash = parseInt(crypto.createHash("md5").update(seed).digest("hex").slice(0, 8), 16);
@@ -17,7 +19,7 @@ export default function getDummyDataSubset(seed: string, count: number): Employe
   const startIndex = hash % rows.length;
 
   // Create the subset deterministically
-  const subset: EmployeeRow[] = [];
+  const subset: T[] = [];
   for (let i = 0; i < count; i++) {
     const index = (startIndex + i) % rows.length; // Circular index
     subset.push(rows[index]);
@@ -25,3 +27,5 @@ export default function getDummyDataSubset(seed: string, count: number): Employe
 
   return subset;
 }
+
+export default getDummyDataSubset;
