@@ -10,11 +10,7 @@ import { redirect } from "next/navigation";
 import { z } from "zod";
 
 export default function RegisterPage() {
-	return (
-		
-				<RegisterForm registerAction={RegisterAction} />
-			
-	);
+	return <RegisterForm registerAction={RegisterAction} />;
 }
 
 export async function RegisterAction(
@@ -23,26 +19,34 @@ export async function RegisterAction(
 	"use server";
 
 	try {
-		const data = await registerFormSchema.parseAsync(input);
+		const { photo, ...data } = await registerFormSchema.parseAsync(input);
+
+		let photoBuffer: Buffer | undefined;
+		if (photo) {
+			const arrayBuffer = await photo.arrayBuffer();
+			photoBuffer = Buffer.from(arrayBuffer);
+		}
 
 		const stage = await db.query.TB_stage.findFirst({
 			where: (stage, { eq }) => eq(stage.index, 0),
 		});
 		const stageID = stage?.id;
 		if (!stageID) {
-			return;
+			return { field: "root", message: "No initial stage found" };
 		}
+
 		const newUser = {
 			id: nanoid(),
 			...data,
 			password: hash(data.password),
 			stageId: stageID,
+			photo: photoBuffer,
 		};
 
 		try {
 			await db.insert(TB_user).values(newUser);
 		} catch {
-			return { field: "username", message: "Email is already used" };
+			return { field: "username", message: "Username is already taken" };
 		}
 
 		const session = await lucia.createSession(newUser.id, {});
@@ -52,12 +56,12 @@ export async function RegisterAction(
 			sessionCookie.value,
 			sessionCookie.attributes,
 		);
+
+		return redirect("/basic/dataType");
 	} catch (e) {
 		return {
 			field: "root",
-			message: "An unexpected error occured, please try again later",
+			message: "An unexpected error occurred, please try again later",
 		};
 	}
-
-	return redirect("/basic/dataType");
 }
