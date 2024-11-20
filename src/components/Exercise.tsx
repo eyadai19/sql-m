@@ -91,7 +91,22 @@ export default function Exercise({
     setResult(null);
     setIsIncorrectAnswer(false);
   };
+  const renderTables = () => {
+    if (!tables || tables.length === 0) {
+      return <p className="text-gray-500 italic">No tables available for this exercise.</p>
+    }
 
+    return tables.map((table, index) => (
+      <div key={index} className="mb-4">
+        {table.toLowerCase().includes('employees') && (
+          <EmployeesTable seed={seed} rowsCount={8} />
+        )}
+        {table.toLowerCase().includes('departments') && (
+          <DepartmentsTable seed={seed} rowsCount={4} />
+        )}
+      </div>
+    ))
+  }
   return (
     <Card className="w-full max-w-4xl mx-auto mb-3 backdrop-blur-xl bg-white/40">
       <CardHeader className="flex flex-row items-center justify-between">
@@ -105,16 +120,8 @@ export default function Exercise({
         </section>
 
         <section className="space-y-4">
-          {tables.map((table, index) => (
-            <div key={index}>
-              {table.toLowerCase().includes('employees') && (
-                <EmployeesTable seed={seed} rowsCount={8} />
-              )}
-              {table.toLowerCase().includes('departments') && (
-                <DepartmentsTable seed={seed} rowsCount={4} />
-              )}
-            </div>
-          ))}
+          
+          {renderTables()}
         </section>
 
         <section>
