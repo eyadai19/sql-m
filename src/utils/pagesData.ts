@@ -36,7 +36,7 @@ interface ExplanationParams {
   }
   
   interface SelectParams {
-    exerciseParams: ExerciseParams;
+    //exerciseParams: ExerciseParams;
     explanationParams: ExplanationParams;
   }
   
@@ -47,23 +47,6 @@ interface ExplanationParams {
  // Updated PAGE_DATA
 const PAGE_DATA: PageData = {
     select: {
-      exerciseParams: {
-        prompt: "Write a SQL query to retrieve all employees from the employees table with a salary greater than $50,000. Include the columns: id, name, and salary.",
-        tips: "Tip: Use SELECT * FROM employees WHERE salary > 50000.",
-        initialColumns: DUMMY_EMPLOYEES_TABLE.columns,
-        initialRows: getDummyDataSubset('1', 5),
-        difficulty: "Intermediate",
-        reference: "SQL Documentation, SELECT Statement (https://example.com/sql-doc)",
-        answer: "SELECT id, name, salary FROM employees WHERE salary > 50000;",
-        userExcerciseAnswerAction: async ({ trials, is_show_ans, time }) => { // Corrected spelling here
-          console.log(`Submitting answer: Trials - ${trials}, Time - ${time}ms`);
-          // Simulate server-side logic
-          if (is_show_ans) {
-            return "User has revealed the answer.";
-          }
-          return undefined;
-        },
-      },
       explanationParams: {
         howItWorks: "The SELECT statement retrieves specific data from a database table.",
         syntax: `SELECT column1, column2, ... FROM table_name WHERE condition;`,

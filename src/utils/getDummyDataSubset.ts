@@ -7,13 +7,16 @@ import crypto from "crypto";
  * @param count - Number of rows to return.
  * @returns An array of `T`.
  */
-function getDummyDataSubset<T>(rows: T[], seed: string, count: number): T[] {
+function getDummyDataSubset<T>(rows: T[], seed: string | undefined, count: number): T[] {
   if (!rows || rows.length === 0) {
     return [];
   }
 
+  // Use a default seed if none is provided or if it's empty
+  const safeSeed = seed?.trim() || 'default-seed-' + Date.now().toString();
+
   // Hash the seed to a numeric value
-  const hash = parseInt(crypto.createHash("md5").update(seed).digest("hex").slice(0, 8), 16);
+  const hash = parseInt(crypto.createHash("md5").update(safeSeed).digest("hex").slice(0, 8), 16);
 
   // Determine the starting index using the hash
   const startIndex = hash % rows.length;
