@@ -2,6 +2,7 @@ interface PagePath {
 	name: string;
 	path: string;
 }
+
 const basic: PagePath[] = [
 	{ name: "Data Types", path: "../basic/dataType" },
 	{ name: "References", path: "../basic/reference" },
