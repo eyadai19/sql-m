@@ -45,6 +45,13 @@ const ProfilePage: React.FC = () => {
   const router = useRouter();
 
 
+  const handleReviewClick = () => {
+    const stageId = "123"; 
+    router.push(`/QuizDetalis?stage_id=${stageId}`);
+  };
+
+
+
   
   const info = getMockProfileData();
   const swiperRef = useRef<any>(null);
@@ -203,7 +210,8 @@ const ProfilePage: React.FC = () => {
                            <td className="border px-6 py-4">{stage.name}</td>
                            <td className="border px-6 py-4">{stage.percentage}%</td>
                            <td className="border px-6 py-4 text-center">
-                             <button
+                           <button
+                               onClick={handleReviewClick}
                                className="flex items-center justify-center w-8 h-8 text-[#00203F] bg-white rounded-full shadow-md hover:bg-[#00203F] hover:text-[#ADF0D1] transition duration-300"
                                title="Review Answer"
                              >
