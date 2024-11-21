@@ -10,8 +10,8 @@ import { Form, FormControl, FormField, FormItem, FormMessage } from "./ui/form";
 import { Input } from "./ui/input";
 
 const loginFormSchema = z.object({
-	username: z.string(),
-	password: z.string().min(8).max(32),
+  username: z.string(),
+  password: z.string().min(8).max(32),
 });
 
 export function LoginForm({
@@ -43,83 +43,97 @@ export function LoginForm({
   }
 
   return (
-    <div className="bg-[#00203F] flex min-h-screen flex-col">
-      {/* Logo at the top right */}
-      <div className="fixed top-4 right-4 text-xl font-bold text-[#ADF0D1]">
-        My Logo
-      </div>
-
-      {/* Form Content */}
-      <div className="pt-16 p-4 sm:p-8 transform scale-100 sm:scale-100">
-        {/* Using flex-col on small screens and flex-row on larger screens */}
-        <div className="flex flex-col sm:flex-row-reverse items-center justify-evenly p-8 sm:pt-20">
-          {/* Image with responsive width on the right */}
-          <img
-            src="../image/authImage/LoginImage.jpg"
-            alt="Illustration"
-            className="mr-8 object-cover w-full sm:w-2/3 md:w-1/2 lg:w-1/3 xl:w-1/3"
-          />
-
-          {/* Form container with responsive max width */}
-          <div className="w-full max-w-md">
-		  <Form {...form}>
-  <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8 w-full">
-    <div className="flex flex-col gap-1 text-white">
-      <span className="text-2xl font-medium text-[#ADF0D1]">
-        Welcome again
-      </span>
-      <span className="text-sm text-muted-foreground">
-        Don't have an account?{" "}
-        <Link className="font-medium text-blue-400" href="/register">
-          Create a new account
-        </Link>
-        .
-      </span>
-    </div>
-    <FormField
-      control={form.control}
-      name="username"
-      render={({ field }) => (
-        <FormItem>
-          <FormControl>
-            <Input
-              placeholder="username"
-              {...field}
-              className="text-white" // This changes the text color inside the input field
-            />
-          </FormControl>
-          <FormMessage />
-        </FormItem>
-      )}
-    />
-    <FormField
-      control={form.control}
-      name="password"
-      render={({ field }) => (
-        <FormItem>
-          <FormControl>
-            <Input
-              type="password"
-              placeholder="Password"
-              {...field}
-              className="text-white" // This changes the text color inside the input field
-            />
-          </FormControl>
-          <FormMessage />
-        </FormItem>
-      )}
-    />
-    
-    <Button
-      disabled={form.formState.isSubmitting}
-      className="bg-[#ADF0D1] text-[#00203F] space-y-2 w-full"
-      type="submit"
+    <div
+      className="bg-gradient-to-b from-[#00203F] to-[#00001a] min-h-screen flex items-center justify-center"
+      style={{
+        backgroundSize: "cover",
+        backgroundPosition: "center",
+      }}
     >
-      Login
-    </Button>
-  </form>
-</Form>
+      {/* المربع النصف شفاف */}
+      <div
+        className="rounded-lg p-6 w-[90%] max-w-3xl flex justify-center items-center shadow-lg backdrop-blur-md"
+        style={{
+          backgroundImage: "url('../image/authImage/AuthBG.jpg')",
+          backgroundSize: "cover",
+          backgroundPosition: "center",
+          height: "480px",
+          boxShadow: "0px 10px 20px rgba(255, 255, 255, 0.2)",
+          transform: "translateY(-10px)",
+        }}
+      >
+        <div className="w-full flex flex-col items-center">
+          {/* النص "Welcome Again" */}
+          <h2 className="text-white text-3xl font-semibold mb-6">
+            Welcome Again
+          </h2>
 
+          {/* بطاقة تسجيل الدخول */}
+          <div
+            className="bg-gradient-to-b from-[#003a57] to-[#004a63] rounded-lg p-6 w-full max-w-sm"
+            style={{
+              height: "230px",
+              boxShadow:
+                "0 10px 15px -3px rgba(0, 32, 63, 0.5), 0 4px 6px rgba(0, 32, 63, 0.3)",
+            }}
+          >
+            <Form {...form}>
+              <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+                <FormField
+                  control={form.control}
+                  name="username"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormControl>
+                        <Input
+                          placeholder="Email Address"
+                          {...field}
+                          className="text-gray-800 bg-gray-100 border border-gray-300 rounded px-4 py-2 w-full"
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="password"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormControl>
+                        <Input
+                          type="password"
+                          placeholder="Password"
+                          {...field}
+                          className="text-gray-800 bg-gray-100 border border-gray-300 rounded px-4 py-2 w-full"
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <Button
+                  disabled={form.formState.isSubmitting}
+                  className="hover:text-[#ADF0D1] bg-[#ADF0D1] text-[#00203F] w-full py-2 rounded"
+                  type="submit"
+                >
+                  LOG IN
+                </Button>
+              </form>
+            </Form>
+
+            {/* زر هل لديك حساب مسبقًا */}
+            <div className="text-center mt-4">
+              <span className="text-sm text-black">
+                Don't have an account?{" "}
+              </span>
+              <Link
+                href="/register"
+                className="text-sm text-blue-500 font-medium hover:underline"
+              >
+                Register.
+              </Link>
+            </div>
           </div>
         </div>
       </div>
