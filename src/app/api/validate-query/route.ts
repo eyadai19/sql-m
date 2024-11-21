@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { TempDatabase } from '@/lib/mockDb/db';
+import type { QueryResult } from '@/lib/types/mockDatabase';
 
 export async function POST(req: NextRequest) {
   try {
@@ -22,7 +23,29 @@ export async function POST(req: NextRequest) {
 
     try {
       const result = await db.executeQuery(query);
-      return NextResponse.json(result);
+      
+      // Add operation-specific success messages
+      let successMessage;
+      switch (result.operation.type) {
+        case 'INSERT':
+          successMessage = `Successfully inserted ${result.operation.rowCount} row(s). Showing inserted records:`;
+          break;
+        case 'UPDATE':
+          successMessage = `Successfully updated ${result.operation.rowCount} row(s). Showing updated records:`;
+          break;
+        case 'DELETE':
+          successMessage = `Successfully deleted ${result.operation.rowCount} row(s). Showing deleted records:`;
+          break;
+        default:
+          successMessage = result.rows.length ? `Query returned ${result.rows.length} row(s):` : 'Query executed successfully.';
+      }
+
+      const response: QueryResult = {
+        ...result,
+        successMessage
+      };
+
+      return NextResponse.json(response);
     } finally {
       await db.cleanup();
     }

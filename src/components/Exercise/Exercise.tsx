@@ -1,3 +1,5 @@
+'use client'
+
 import { useState } from "react";
 import { v4 as uuidv4 } from 'uuid';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -12,15 +14,9 @@ import TablesView from "./TablesView";
 import TaskPrompt from "./TaskPrompt";
 import ControlButtons from "./ControlButtons";
 import Hints from "./Hints";
-
-export interface QueryResult {
-  columns: string[];
-  rows: (string | number)[][];
-  successMessage?: string;
-}
+import type { QueryResult } from "@/lib/types/mockDatabase";
 
 export type ResultType = QueryResult | null;
-
 export type ErrorType = string | null;
 
 export interface ExerciseProps {
