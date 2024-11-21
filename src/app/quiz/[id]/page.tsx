@@ -9,39 +9,32 @@ import {
 import { nanoid } from "nanoid";
 import { z } from "zod";
 
-interface QuizPageProps {
-	params: {
-		stageId: string;
-	};
-}
-
-export default function quiz({ params }: QuizPageProps) {
+export default function quiz({ params }: { params: { id: string } }) {
 	return (
 		<SqlQuiz
 			quizAction={quizAction}
-			quizQuestionAction={quizQuestionAction.bind(null, params.stageId)}
+			quizQuestionAction={quizQuestionAction.bind(null, params.id)}
 		/>
 	);
 }
 
-async function quizQuestionAction(
-	stageId: string,
-): Promise<
-	{ question: string }[] | { field: string; message: string } | undefined
-> {
+async function quizQuestionAction(stageId: string) {
 	"use server";
 	try {
 		const levels = await db.query.TB_level.findMany({
-			where: (level, { eq }) => eq(level.stageId, stageId),
+			where: (level, { eq }) => eq(level.stageId, stageId), //stageId
 		});
-
-		if (!levels || levels.length === 0) return [];
+		if (!levels || levels.length === 0) {
+			return [];
+		}
 		const levelIds = levels.map((level) => level.id);
+
 		const questions = await db.query.TB_question_bank.findMany({
 			where: (question, { inArray }) => inArray(question.levelId, levelIds),
 		});
 		return questions.map((q) => ({ question: q.question }));
-	} catch {
+	} catch (error) {
+		console.error("Error fetching questions:", error);
 		return { field: "root", message: "error" };
 	}
 }
@@ -57,8 +50,8 @@ async function quizAction(
 
 	try {
 		const data = await userQuizAnswerSchema.parseAsync(input);
-		const correctAnswers: string[] = [];
 
+		const correctAnswers: string[] = [];
 		const que = await db.query.TB_question_bank.findFirst({
 			where: (question, { eq }) => eq(question.question, data.question[0]),
 		});
@@ -102,6 +95,7 @@ async function quizAction(
 			mark: score,
 			stageId: levelId.stageId,
 		};
+
 		try {
 			await db.insert(TB_quiz).values(newQuiz);
 		} catch {

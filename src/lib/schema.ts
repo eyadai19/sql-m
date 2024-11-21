@@ -104,6 +104,121 @@ export const TB_question_bank = pgTable("question_bank", {
 	answer: text("answer").notNull(),
 });
 
+export const TB_posts = pgTable("posts", {
+	id: text("id").primaryKey(),
+	userId: text("user_id")
+		.notNull()
+		.references(() => TB_user.id, { onDelete: "cascade" }),
+	content: text("content").notNull(),
+	photo: bytea("photo"),
+	createdTime: timestamp("created_time", {
+		withTimezone: true,
+		mode: "date",
+	})
+		.notNull()
+		.defaultNow(),
+	lastUpdateTime: timestamp("last_update_time", {
+		withTimezone: true,
+		mode: "date",
+	})
+		.notNull()
+		.defaultNow(),
+});
+
+export const TB_comments = pgTable("comments", {
+	id: text("id").primaryKey(),
+	postId: text("post_id")
+		.notNull()
+		.references(() => TB_posts.id, { onDelete: "cascade" }),
+	userId: text("user_id")
+		.notNull()
+		.references(() => TB_user.id, { onDelete: "cascade" }),
+	content: text("content").notNull(),
+	photo: bytea("photo"),
+	createdTime: timestamp("created_time", {
+		withTimezone: true,
+		mode: "date",
+	})
+		.notNull()
+		.defaultNow(),
+});
+
+export const TB_post_likes = pgTable("post_likes", {
+	id: text("id").primaryKey(),
+	postId: text("post_id")
+		.notNull()
+		.references(() => TB_posts.id, { onDelete: "cascade" }),
+	userId: text("user_id")
+		.notNull()
+		.references(() => TB_user.id, { onDelete: "cascade" }),
+	createdTime: timestamp("created_time", {
+		withTimezone: true,
+		mode: "date",
+	})
+		.notNull()
+		.defaultNow(),
+});
+
+export const TB_comment_likes = pgTable("comment_likes", {
+	id: text("id").primaryKey(),
+	commentId: text("comment_id")
+		.notNull()
+		.references(() => TB_comments.id, { onDelete: "cascade" }),
+	userId: text("user_id")
+		.notNull()
+		.references(() => TB_user.id, { onDelete: "cascade" }),
+	createdTime: timestamp("created_time", {
+		withTimezone: true,
+		mode: "date",
+	})
+		.notNull()
+		.defaultNow(),
+});
+
+export const RE_comment_likes = relations(TB_comment_likes, ({ one }) => ({
+	comment: one(TB_comments, {
+		fields: [TB_comment_likes.commentId],
+		references: [TB_comments.id],
+	}),
+	user: one(TB_user, {
+		fields: [TB_comment_likes.userId],
+		references: [TB_user.id],
+	}),
+}));
+
+export const RE_post_likes = relations(TB_post_likes, ({ one }) => ({
+	post: one(TB_posts, {
+		fields: [TB_post_likes.postId],
+		references: [TB_posts.id],
+	}),
+	user: one(TB_user, {
+		fields: [TB_post_likes.userId],
+		references: [TB_user.id],
+	}),
+}));
+
+
+export const RE_posts = relations(TB_posts, ({ many, one }) => ({
+	user: one(TB_user, {
+		fields: [TB_posts.userId],
+		references: [TB_user.id],
+	}),
+	comments: many(TB_comments),
+	likes: many(TB_post_likes),
+}));
+
+export const RE_comments = relations(TB_comments, ({ many, one }) => ({
+	post: one(TB_posts, {
+		fields: [TB_comments.postId],
+		references: [TB_posts.id],
+	}),
+	user: one(TB_user, {
+		fields: [TB_comments.userId],
+		references: [TB_user.id],
+	}),
+	likes: many(TB_comment_likes),
+}));
+
 export const RE_user = relations(TB_user, ({ many, one }) => ({
 	sessions: many(TB_session),
 	quizzes: many(TB_quiz),

@@ -45,7 +45,7 @@ export default function SqlQuiz({
 
 	useEffect(() => {
 		const fetchQuestions = async () => {
-			const fetchedQuestions = await quizQuestionAction;
+			const fetchedQuestions = await quizQuestionAction();
 			if (Array.isArray(fetchedQuestions)) {
 				setQuestions(fetchedQuestions);
 				setResults(Array(fetchedQuestions.length).fill(null));
@@ -63,23 +63,37 @@ export default function SqlQuiz({
 	});
 
 	const handleSubmit = async (data: z.infer<typeof userQuizAnswerSchema>) => {
-		const result = await quizAction(data);
+		// تحقق من أن الأسئلة موجودة وجاهزة
+		if (questions.length === 0) {
+			console.error("No questions available.");
+			return;
+		}
+
+		// تأكد من تحديث بيانات الـ `data` من الأسئلة المحملة
+		const updatedData = {
+			...data,
+			question: questions.map((q) => q.question), // تحديث الأسئلة في data
+		};
+
+		// استدعاء quizAction بعد التأكد من تحديث الأسئلة
+		const result = await quizAction(updatedData);
 		if (result && "score" in result && "correctAnswers" in result) {
 			setScore(result.score);
-			setCorrectAnswers(result.correctAnswers); // Store correct answers for reference
+			setCorrectAnswers(result.correctAnswers);
 			setIsSubmitted(true);
 			setShowModal(true);
 
 			const newResults = questions.map(
 				(q, index) =>
 					data.answer[index].trim().toLowerCase() ===
-					result.correctAnswers[index].trim().toLowerCase(), // Use correctAnswers from result
+					result.correctAnswers[index].trim().toLowerCase(),
 			);
 			setResults(newResults);
 		} else if (result && "message" in result) {
 			console.error(result.message);
 		}
 	};
+
 
 	const handleGoBack = () => {
 		router.back();
