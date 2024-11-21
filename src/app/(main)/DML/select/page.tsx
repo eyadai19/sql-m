@@ -4,19 +4,13 @@ select
 as
 into
 */
-import CodeBlock from "@/components/CodeBlock";
-import Explanation from "@/components/Explanation";
-import SelectPage from "@/components/SelectPage"
+import Select from "@/components/pages/DML/select";
 export default function select() {
 
 	
 	return (
 		<div className="p-4 text-base md:text-lg lg:text-xl">
-			<SelectPage />
-		
-			
-
-
+			<Select />
 		</div>
 	);
 }
