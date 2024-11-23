@@ -2,7 +2,7 @@ import ProfilePage from "@/components/profile";
 import { ProfileNavbar } from "@/components/ProfileNavbar";
 import { getUser } from "@/lib/auth";
 import { db } from "@/lib/db";
-import { ProfileData } from "@/lib/types/userSchema";
+import { ProfileData } from "@/lib/types/authSchemas";
 
 export default function Profile() {
 	return (

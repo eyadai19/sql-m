@@ -47,3 +47,38 @@ export async function ChatbotExpAction(
 		return { field: "root", message: "Failed to retrieve answer" };
 	}
 }
+
+export async function ChatbotTrEnToAr(
+	input: z.infer<typeof userChatBotInputSchema>,
+): Promise<{ answer: String } | userExcerciseAnswerError | undefined> {
+	"use server";
+	try {
+		const text = await userChatBotInputSchema.parseAsync({ input });
+		const response = await axios.post("http://localhost:3000/tr-en-to-ar", {
+			text,
+		});
+		if (response.data) return { answer: response.data.answer };
+	} catch (error) {
+		console.error("Error sending question to API:", error);
+		return { field: "root", message: "Failed to retrieve answer" };
+	}
+}
+
+export async function ChatbotTrArToEn(
+	input: z.infer<typeof userChatBotInputSchema>,
+): Promise<{ answer: String } | userExcerciseAnswerError | undefined> {
+	"use server";
+	try {
+		const text = await userChatBotInputSchema.parseAsync({ input });
+		const response = await axios.post("http://localhost:3000/tr-ar-to-en", {
+			text,
+		});
+		if (response.data) return { answer: response.data.answer };
+	} catch (error) {
+		console.error("Error sending question to API:", error);
+		return { field: "root", message: "Failed to retrieve answer" };
+	}
+}
+
+
+// when use ar in nlp => use ChatbotTrArToEn then ChatbotAction then ChatbotTrArToEn

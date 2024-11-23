@@ -46,15 +46,3 @@ export type userExcerciseAnswerError = BaseZodError<
 export type userQuizAnswerError = BaseZodError<typeof userQuizAnswerSchema>;
 
 export type userChatBotInputError = BaseZodError<typeof userChatBotInputSchema>;
-
-export type ProfileData = {
-	id: string;
-	username: string;
-	firstName: string;
-	lastName: string;
-	photo: Buffer | null;
-	createdTime: Date;
-	lastUpdateTime: Date;
-	stage: { id: string; stage: string };
-	quizzes: { id: string; mark: number | null }[];
-};

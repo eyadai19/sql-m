@@ -1,8 +1,5 @@
 import DatabaseManager from "@/components/database/DatabaseManager";
-import { NextPage } from "next";
 
-const UserComp: NextPage = () => {
+export default function UserComp() {
 	return <DatabaseManager />;
-};
-
-export default UserComp;
+}

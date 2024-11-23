@@ -31,3 +31,15 @@ export const registerFormSchema = z
 
 export type LoginFormError = BaseZodError<typeof loginFormSchema>;
 export type RegisterFormError = BaseZodError<typeof registerFormSchema>;
+
+export type ProfileData = {
+	id: string;
+	username: string;
+	firstName: string;
+	lastName: string;
+	photo: Buffer | null;
+	createdTime: Date;
+	lastUpdateTime: Date;
+	stage: { id: string; stage: string };
+	quizzes: { id: string; mark: number | null }[];
+};

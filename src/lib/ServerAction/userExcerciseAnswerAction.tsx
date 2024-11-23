@@ -11,37 +11,31 @@ import {
 
 export async function UserExcerciseAnswerAction(
 	input: z.infer<typeof userExcerciseAnswerSchema>,
+	levelId: string,
 ): Promise<userExcerciseAnswerError | undefined> {
+	if (!levelId) {
+		return { field: "root", message: "Level is missing" };
+	}
+
 	const query = await userExcerciseAnswerSchema.parseAsync({
 		...input,
-		time: input.time,
 	});
-
-	const level = await db.query.TB_level.findFirst({
-		where: (level, { eq }) => eq(level.level, "dataType"),
-	});
-	const levelID = level?.id;
-	if (!levelID) {
-		return { field: "root", message: "Level ID is missing" };
-	}
 
 	const user = await getUser();
 	if (!user) {
-		return;
+		return { field: "root", message: "account error" };
 	}
 
 	const data = {
 		id: nanoid(),
 		userId: user.id,
-		levelId: levelID,
+		levelId: levelId,
 		...query,
 	};
 
 	try {
 		await db.insert(TB_user_excercise_summary).values(data);
 	} catch {
-		return { field: "root", message: "cannot calc input" };
+		return { field: "root", message: "input error" };
 	}
-
-	// redirect("/src/app/page.tsx");
 }

@@ -1,5 +1,5 @@
 "use client";
-import { ProfileData } from "@/lib/types/userSchema";
+import { ProfileData } from "@/lib/types/authSchemas";
 import { faEdit, faMedal } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { useRouter } from "next/navigation";
