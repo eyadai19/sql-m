@@ -21,12 +21,6 @@ export async function RegisterAction(
 	try {
 		const { photo, ...data } = await registerFormSchema.parseAsync(input);
 
-		let photoBuffer: Buffer | undefined;
-		if (photo) {
-			const arrayBuffer = await photo.arrayBuffer();
-			photoBuffer = Buffer.from(arrayBuffer);
-		}
-
 		const stage = await db.query.TB_stage.findFirst({
 			where: (stage, { eq }) => eq(stage.index, 0),
 		});
@@ -40,7 +34,7 @@ export async function RegisterAction(
 			...data,
 			password: hash(data.password),
 			stageId: stageID,
-			photo: photoBuffer,
+			photo: photo,
 		};
 
 		try {

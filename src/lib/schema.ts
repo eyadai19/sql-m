@@ -1,7 +1,6 @@
 import { relations } from "drizzle-orm";
 import {
 	boolean,
-	customType,
 	integer,
 	pgTable,
 	serial,
@@ -9,16 +8,13 @@ import {
 	timestamp,
 } from "drizzle-orm/pg-core";
 
-const bytea = customType<{ data: Buffer }>({
-	dataType: () => "bytea",
-});
 export const TB_user = pgTable("user", {
 	id: text("id").primaryKey(),
 	username: text("username").notNull().unique(),
 	password: text("password").notNull(),
 	firstName: text("first_name").notNull(),
 	lastName: text("last_name").notNull(),
-	photo: bytea("photo"),
+	photo: text("photo_url"),
 	createdTime: timestamp("created_time", {
 		withTimezone: true,
 		mode: "date",
@@ -110,7 +106,7 @@ export const TB_posts = pgTable("posts", {
 		.notNull()
 		.references(() => TB_user.id, { onDelete: "cascade" }),
 	content: text("content").notNull(),
-	photo: bytea("photo"),
+	photo: text("photo_url"),
 	createdTime: timestamp("created_time", {
 		withTimezone: true,
 		mode: "date",
@@ -134,7 +130,7 @@ export const TB_comments = pgTable("comments", {
 		.notNull()
 		.references(() => TB_user.id, { onDelete: "cascade" }),
 	content: text("content").notNull(),
-	photo: bytea("photo"),
+	photo: text("photo_url"),
 	createdTime: timestamp("created_time", {
 		withTimezone: true,
 		mode: "date",
@@ -196,7 +192,6 @@ export const RE_post_likes = relations(TB_post_likes, ({ one }) => ({
 		references: [TB_user.id],
 	}),
 }));
-
 
 export const RE_posts = relations(TB_posts, ({ many, one }) => ({
 	user: one(TB_user, {

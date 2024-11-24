@@ -15,14 +15,7 @@ export const registerFormSchema = z
 			.min(6, "Confirm password must be at least 6 characters"),
 		firstName: z.string().min(1, "First name is required"),
 		lastName: z.string().min(1, "Last name is required"),
-		photo: z
-			.any()
-			.optional()
-			.refine(
-				(file) =>
-					!file || (file instanceof File && file.size <= 2 * 1024 * 1024),
-				{ message: "Photo must be less than 2MB and a valid image" },
-			),
+		photo: z.string(),
 	})
 	.refine((data) => data.password === data.confirmPassword, {
 		message: "Passwords don't match",
@@ -37,7 +30,7 @@ export type ProfileData = {
 	username: string;
 	firstName: string;
 	lastName: string;
-	photo: Buffer | null;
+	photo: string | null;
 	createdTime: Date;
 	lastUpdateTime: Date;
 	stage: { id: string; stage: string };

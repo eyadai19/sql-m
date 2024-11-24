@@ -91,7 +91,7 @@ export default function ProfilePage({
 									<span className="flex h-full items-center justify-center text-gray-500">
 										{info.photo ? (
 											<img
-												src={`data:image/jpeg;base64,${Buffer.from(info.photo).toString("base64")}`}
+												src={info.photo} // عرض الرابط مباشرةً
 												alt="User Profile"
 												className="h-full w-full object-cover"
 											/>

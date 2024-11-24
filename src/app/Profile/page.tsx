@@ -6,15 +6,31 @@ import { ProfileData } from "@/lib/types/authSchemas";
 
 export default function Profile() {
 	return (
-		<>
-			<div>
-				<ProfileNavbar />
-			</div>
-			<div>
-				<ProfilePage ProfileAction={ProfileAction} />
-			</div>
-		</>
+		<div>
+			<ProfileNavbar />
+			<ProfilePage ProfileAction={ProfileAction} />
+		</div>
 	);
+}
+
+async function savePhotoToDB(userId: string, photoUrl: string) {
+	try {
+		const response = await fetch("/api/save-photo", {
+			method: "POST",
+			headers: {
+				"Content-Type": "application/json",
+			},
+			body: JSON.stringify({ userId, photoUrl }),
+		});
+
+		if (!response.ok) {
+			throw new Error("Failed to save photo URL");
+		}
+
+		console.log("Photo URL saved successfully");
+	} catch (error) {
+		console.error("Error saving photo URL:", error);
+	}
 }
 
 async function ProfileAction(): Promise<
