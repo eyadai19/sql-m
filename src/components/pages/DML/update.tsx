@@ -1,25 +1,16 @@
-'use client'
+"use client";
 
-import React from 'react'
-import Exercise from '@/components/Exercise/Exercise';
-import Explanation from '@/components/Explanation/Explanation';
-import PAGE_DATA from '@/utils/pagesData';
+import Exercise from "@/components/Exercise/Exercise";
+import Explanation from "@/components/Explanation/Explanation";
+import PAGE_DATA from "@/utils/pagesData";
 export default function Update() {
-  const { explanationParams, exerciseParams } = PAGE_DATA.update;
+	const { explanationParams, exerciseParams } = PAGE_DATA.update;
 
-  return (
-    <div>
+	return (
+		<div>
+			<Explanation {...explanationParams} />
 
-
-	<Explanation {...explanationParams} />
-
-    <Exercise {...exerciseParams}/>
-
-
-
-    </div>
-  )
-    };
-  
-  
-
+			<Exercise {...exerciseParams} />
+		</div>
+	);
+}

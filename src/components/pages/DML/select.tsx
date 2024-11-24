@@ -1,24 +1,15 @@
+import Exercise from "@/components/Exercise/Exercise";
+import Explanation from "@/components/Explanation/Explanation";
+import PAGE_DATA from "@/utils/pagesData";
 
-import React from 'react'
-import Exercise from '@/components/Exercise/Exercise';
-import Explanation from '@/components/Explanation/Explanation';
-import PAGE_DATA from '@/utils/pagesData';
 export default function Select() {
-  const { explanationParams, exerciseParams } = PAGE_DATA.select;
+	const { explanationParams, exerciseParams } = PAGE_DATA.select;
 
-  return (
-    <div>
+	return (
+		<div>
+			<Explanation {...explanationParams} />
 
-
-	<Explanation {...explanationParams} />
-
-    <Exercise {...exerciseParams}/>
-
-
-
-    </div>
-  )
-    };
-  
-  
-
+			<Exercise {...exerciseParams} />
+		</div>
+	);
+}
