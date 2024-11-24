@@ -1,8 +1,8 @@
 "use client";
 
 import { UserExcerciseAnswerAction } from "@/lib/ServerAction/userExcerciseAnswerAction";
-import Exercise from "../../Exercise";
-import Explanation from "../../Explanation";
+import Exercise from "../../Exercise/Exercise";
+import Explanation from "../../Explanation/Explanation";
 
 export default function SelectPage() {
 	const explanationParams = {
