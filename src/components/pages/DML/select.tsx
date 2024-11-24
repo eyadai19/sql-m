@@ -1,11 +1,10 @@
-'use client'
 
 import React from 'react'
 import Exercise from '@/components/Exercise/Exercise';
 import Explanation from '@/components/Explanation/Explanation';
 import PAGE_DATA from '@/utils/pagesData';
-export default function Insert() {
-  const { explanationParams, exerciseParams } = PAGE_DATA.insert;
+export default function Select() {
+  const { explanationParams, exerciseParams } = PAGE_DATA.select;
 
   return (
     <div>
