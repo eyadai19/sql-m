@@ -117,7 +117,10 @@ export default function Explanation({
 												key={index}
 												className="flex items-start text-base text-sailorBlue"
 											>
+												
+												{note.length > 0 && (
 												<AlertCircle className="mr-2 mt-0.5 h-5 w-5 flex-shrink-0 text-sailorBlue" />
+												)}												
 												<span>{note}</span>
 											</li>
 										))}
@@ -187,7 +190,7 @@ export default function Explanation({
 													href={resource.url}
 													target="_blank"
 													rel="noopener noreferrer"
-													className="flex items-center gap-2 text-sailorBlue transition-colors hover:text-sailorBlue/80"
+													className="flex items-center text-sm gap-2 text-sailorBlue transition-colors hover:text-sailorBlue/80"
 												>
 													<ExternalLink className="h-4 w-4" />
 													{resource.title}

@@ -181,10 +181,15 @@ export default function Exercise({
 						/>
 						{error && (
 							<Alert variant="destructive">
-								<AlertCircle className="h-4 w-4" />
-								<AlertDescription>{error}</AlertDescription>
+								<div className="flex items-center">
+									<AlertCircle className="h-4 w-4 mr-3" />
+									<AlertDescription>{error}</AlertDescription>
+								</div>
+								
 							</Alert>
 						)}
+						
+					
 						{result && <ResultsView result={result} />}
 					</TabsContent>
 

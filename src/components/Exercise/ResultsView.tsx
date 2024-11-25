@@ -18,17 +18,12 @@ export default function ResultsView({ result }: ResultsViewProps) {
   return (
     <section className="mt-6 space-y-4">
       {result.successMessage && (
-        <Alert className={`mb-4 ${
-          result.operation.type === 'SELECT' 
-            ? 'bg-blue-50 text-blue-800 border-blue-200'
-            : 'bg-green-50 text-green-800 border-green-200'
-        }`}>
-          {result.operation.type === 'SELECT' ? (
-            <Info className="h-4 w-4" />
-          ) : (
-            <Trophy className="h-4 w-4" />
-          )}
-          <AlertDescription>{result.successMessage}</AlertDescription>
+        <Alert className={`mb-4 bg-green-50 text-green-800 border-green-200`}>
+          <div className="flex items-center">
+
+              <Trophy className="h-4 w-4 mr-2" />
+            <AlertDescription>{result.successMessage}</AlertDescription>  
+          </div>
         </Alert>
       )}
       
