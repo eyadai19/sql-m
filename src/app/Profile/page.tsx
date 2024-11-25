@@ -13,26 +13,6 @@ export default function Profile() {
 	);
 }
 
-async function savePhotoToDB(userId: string, photoUrl: string) {
-	try {
-		const response = await fetch("/api/save-photo", {
-			method: "POST",
-			headers: {
-				"Content-Type": "application/json",
-			},
-			body: JSON.stringify({ userId, photoUrl }),
-		});
-
-		if (!response.ok) {
-			throw new Error("Failed to save photo URL");
-		}
-
-		console.log("Photo URL saved successfully");
-	} catch (error) {
-		console.error("Error saving photo URL:", error);
-	}
-}
-
 async function ProfileAction(): Promise<
 	ProfileData | { field: string; message: string } | undefined
 > {
@@ -54,6 +34,12 @@ async function ProfileAction(): Promise<
 				stage: true,
 			},
 		});
+
+		if (info?.photo) {
+			// Convert photo from Uint8Array to Base64
+			const base64Photo = `data:image/jpeg;base64,${Buffer.from(info.photo).toString("base64")}`;
+			info.photo = base64Photo;
+		}
 
 		if (info) {
 			return {

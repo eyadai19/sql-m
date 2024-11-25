@@ -19,7 +19,7 @@ export async function RegisterAction(
 	"use server";
 
 	try {
-		const { photo, ...data } = await registerFormSchema.parseAsync(input);
+		const { ...data } = await registerFormSchema.parseAsync(input);
 
 		const stage = await db.query.TB_stage.findFirst({
 			where: (stage, { eq }) => eq(stage.index, 0),
@@ -34,7 +34,7 @@ export async function RegisterAction(
 			...data,
 			password: hash(data.password),
 			stageId: stageID,
-			photo: photo,
+			photo: data.photo,
 		};
 
 		try {

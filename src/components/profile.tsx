@@ -59,7 +59,6 @@ export default function ProfilePage({
 			</div>
 		);
 	}
-
 	return (
 		<div
 			className="flex min-h-screen items-center justify-center px-8"
@@ -91,7 +90,7 @@ export default function ProfilePage({
 									<span className="flex h-full items-center justify-center text-gray-500">
 										{info.photo ? (
 											<img
-												src={info.photo} // عرض الرابط مباشرةً
+												src={info.photo}
 												alt="User Profile"
 												className="h-full w-full object-cover"
 											/>

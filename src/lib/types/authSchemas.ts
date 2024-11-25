@@ -15,7 +15,13 @@ export const registerFormSchema = z
 			.min(6, "Confirm password must be at least 6 characters"),
 		firstName: z.string().min(1, "First name is required"),
 		lastName: z.string().min(1, "Last name is required"),
-		photo: z.string(),
+		// photo: z
+		// 	.instanceof(Buffer)
+		// 	.refine((buffer) => buffer instanceof Buffer, {
+		// 		message: "Photo must be a valid Buffer",
+		// 	})
+		// 	.or(z.literal(null)),
+		photo: z.string().nullable(),
 	})
 	.refine((data) => data.password === data.confirmPassword, {
 		message: "Passwords don't match",

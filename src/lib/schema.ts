@@ -1,6 +1,7 @@
 import { relations } from "drizzle-orm";
 import {
 	boolean,
+	customType,
 	integer,
 	pgTable,
 	serial,
@@ -14,7 +15,7 @@ export const TB_user = pgTable("user", {
 	password: text("password").notNull(),
 	firstName: text("first_name").notNull(),
 	lastName: text("last_name").notNull(),
-	photo: text("photo_url"),
+	photo: text("photo"),
 	createdTime: timestamp("created_time", {
 		withTimezone: true,
 		mode: "date",
