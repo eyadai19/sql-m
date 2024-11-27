@@ -1,5 +1,6 @@
 import { relations } from "drizzle-orm";
 import {
+	numeric,
 	boolean,
 	customType,
 	integer,
@@ -7,6 +8,7 @@ import {
 	serial,
 	text,
 	timestamp,
+	real,
 } from "drizzle-orm/pg-core";
 
 export const TB_user = pgTable("user", {
@@ -66,7 +68,7 @@ export const TB_quiz = pgTable("quiz", {
 	stageId: text("stage_id")
 		.notNull()
 		.references(() => TB_stage.id, { onDelete: "cascade" }),
-	mark: integer("mark"),
+	mark: real("mark"),
 });
 
 export const TB_quiz_questions = pgTable("quiz_questions", {
@@ -76,7 +78,7 @@ export const TB_quiz_questions = pgTable("quiz_questions", {
 		.references(() => TB_quiz.id, { onDelete: "cascade" }),
 	question: text("question").notNull(),
 	answer: text("answer").notNull(),
-	score: integer("score").notNull(),
+	score: real("score").notNull(),
 });
 
 export const TB_user_excercise_summary = pgTable("user_excercise_summary", {

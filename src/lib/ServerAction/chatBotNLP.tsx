@@ -1,4 +1,9 @@
 // "use server";
+import {
+	ngrok_url_ar_to_en,
+	ngrok_url_en_to_ar,
+	ngrok_url_generate_sql,
+} from "@/utils/apis";
 import axios from "axios";
 import { z } from "zod";
 import {
@@ -12,7 +17,7 @@ export async function ChatbotAction(
 	"use server";
 	try {
 		const question = await userChatBotInputSchema.parseAsync({ input });
-		const response = await axios.post("http://localhost:3000/chatbot", {
+		const response = await axios.post(ngrok_url_generate_sql, {
 			question,
 		});
 		return { answer: response.data.answer };
@@ -54,7 +59,7 @@ export async function ChatbotTrEnToAr(
 	"use server";
 	try {
 		const text = await userChatBotInputSchema.parseAsync({ input });
-		const response = await axios.post("http://localhost:3000/tr-en-to-ar", {
+		const response = await axios.post(ngrok_url_en_to_ar, {
 			text,
 		});
 		if (response.data) return { answer: response.data.answer };
@@ -70,7 +75,7 @@ export async function ChatbotTrArToEn(
 	"use server";
 	try {
 		const text = await userChatBotInputSchema.parseAsync({ input });
-		const response = await axios.post("http://localhost:3000/tr-ar-to-en", {
+		const response = await axios.post(ngrok_url_ar_to_en, {
 			text,
 		});
 		if (response.data) return { answer: response.data.answer };
@@ -79,6 +84,5 @@ export async function ChatbotTrArToEn(
 		return { field: "root", message: "Failed to retrieve answer" };
 	}
 }
-
 
 // when use ar in nlp => use ChatbotTrArToEn then ChatbotAction then ChatbotTrArToEn

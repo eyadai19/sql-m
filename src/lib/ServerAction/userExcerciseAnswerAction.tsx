@@ -10,12 +10,19 @@ import {
 } from "../types/userSchema";
 
 export async function UserExcerciseAnswerAction(
+	pageName: string,
 	input: z.infer<typeof userExcerciseAnswerSchema>,
-	levelId: string,
 ): Promise<userExcerciseAnswerError | undefined> {
-	if (!levelId) {
+	if (!pageName) {
 		return { field: "root", message: "Level is missing" };
 	}
+	const level = await db.query.TB_level.findFirst({
+		where: (level, { eq }) => eq(level.level, pageName),
+	});
+	if (!level) {
+		return { field: "root", message: "Level is missing" };
+	}
+	const levelId = level.id;
 
 	const query = await userExcerciseAnswerSchema.parseAsync({
 		...input,

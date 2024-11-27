@@ -6,9 +6,14 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import type { QueryResult } from "@/lib/types/mockDatabase";
+import {
+	userExcerciseAnswerError,
+	userExcerciseAnswerSchema,
+} from "@/lib/types/userSchema";
 import { AlertCircle, BookOpen, Code, Trophy } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { v4 as uuidv4 } from "uuid";
+import { z } from "zod";
 import ControlButtons from "./ControlButtons";
 import Hints from "./Hints";
 import ResultsView from "./ResultsView";
@@ -30,6 +35,9 @@ export interface ExerciseProps {
 	hints?: string[];
 	seed?: string;
 	expectedRowCount?: number;
+	UserExcerciseAnswerAction: (
+		input: z.infer<typeof userExcerciseAnswerSchema>,
+	) => Promise<userExcerciseAnswerError | undefined>;
 }
 
 export default function Exercise({
@@ -42,15 +50,22 @@ export default function Exercise({
 	hints = [],
 	seed = uuidv4(),
 	expectedRowCount,
+	UserExcerciseAnswerAction,
 }: ExerciseProps) {
 	const [sqlQuery, setSqlQuery] = useState<string>("");
 	const [showAnswer, setShowAnswer] = useState(false);
 	const [result, setResult] = useState<ResultType>(null);
 	const [error, setError] = useState<ErrorType>(null);
 	const [isCorrect, setIsCorrect] = useState(false);
-	const [activeHint, setActiveHint] = useState(0);
 	const [attempts, setAttempts] = useState(0);
-	const [showTips, setShowTips] = useState(false);
+	const exerciseStartTime = useRef<number | null>(null);
+
+	// Initialize start time on first attempt
+	useEffect(() => {
+		if (attempts === 1 && exerciseStartTime.current === null) {
+			exerciseStartTime.current = performance.now();
+		}
+	}, [attempts]);
 
 	const difficultyColor = {
 		Easy: "bg-green-100 text-green-800",
@@ -82,19 +97,20 @@ export default function Exercise({
 				}),
 			});
 
-			const data = await response.json();
-
 			if (!response.ok) {
+				const data = await response.json();
 				setError(data.error);
 				return;
 			}
+
+			const data = await response.json();
 
 			const queryResult: QueryResult = {
 				...data,
 				successMessage: undefined,
 			};
 
-			// Check if the result matches expected criteria
+			// Validate if result matches expected criteria
 			const isResultCorrect = expectedRowCount
 				? data.rows.length === expectedRowCount
 				: true;
@@ -102,6 +118,21 @@ export default function Exercise({
 			setIsCorrect(isResultCorrect);
 
 			if (isResultCorrect) {
+				// Calculate total elapsed time
+				const endTime = performance.now();
+				const elapsedTime =
+					exerciseStartTime.current !== null
+						? Math.round((endTime - exerciseStartTime.current) / 1000)
+						: 0;
+
+				// Call UserExcerciseAnswerAction with the required data
+				const inputData = {
+					time: elapsedTime,
+					is_show_ans: showAnswer,
+					trials: attempts, // Total incorrect attempts
+				};
+				await UserExcerciseAnswerAction(inputData);
+
 				queryResult.successMessage =
 					attempts === 1
 						? "Excellent! You solved it on your first try!"
@@ -121,7 +152,8 @@ export default function Exercise({
 		setResult(null);
 		setIsCorrect(false);
 		setShowAnswer(false);
-		setActiveHint(0);
+		setAttempts(0); // Reset attempts
+		exerciseStartTime.current = null; // Reset start time
 	};
 
 	return (
@@ -182,27 +214,23 @@ export default function Exercise({
 						{error && (
 							<Alert variant="destructive">
 								<div className="flex items-center">
-									<AlertCircle className="h-4 w-4 mr-3" />
+									<AlertCircle className="mr-3 h-4 w-4" />
 									<AlertDescription>{error}</AlertDescription>
 								</div>
-								
 							</Alert>
 						)}
-						
-					
+
 						{result && <ResultsView result={result} />}
 					</TabsContent>
 
 					<TabsContent value="help" className="space-y-6">
 						<Hints
 							hints={hints}
-							activeHint={activeHint}
-							onNextHint={() =>
-								setActiveHint((prev) => Math.min(prev + 1, hints.length - 1))
-							}
+							activeHint={0}
+							onNextHint={() => {}}
 							tips={tips}
-							showTips={showTips}
-							onToggleTips={() => setShowTips(!showTips)}
+							showTips={false}
+							onToggleTips={() => {}}
 						/>
 					</TabsContent>
 				</Tabs>

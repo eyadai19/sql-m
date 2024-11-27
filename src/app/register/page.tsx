@@ -51,7 +51,7 @@ export async function RegisterAction(
 			sessionCookie.attributes,
 		);
 
-		return redirect("/basic/dataType");
+		return redirect("/Profile");
 	} catch (e) {
 		return {
 			field: "root",

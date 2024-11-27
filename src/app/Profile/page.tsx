@@ -7,10 +7,29 @@ import { ProfileData } from "@/lib/types/authSchemas";
 export default function Profile() {
 	return (
 		<div>
-			<ProfileNavbar />
+			<ProfileNavbar logoutAction={logoutAction} />
 			<ProfilePage ProfileAction={ProfileAction} />
 		</div>
 	);
+}
+
+import { lucia } from "@/lib/auth";
+import { cookies } from "next/headers";
+import { redirect } from "next/navigation";
+
+export async function logoutAction() {
+	"use server";
+
+	const sessionCookie = cookies().get(lucia.sessionCookieName);
+	if (sessionCookie) {
+		await lucia.invalidateSession(sessionCookie.value);
+		cookies().set({
+			name: lucia.sessionCookieName,
+			value: "",
+			expires: new Date(0),
+		});
+	}
+	redirect("/login");
 }
 
 async function ProfileAction(): Promise<

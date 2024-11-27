@@ -6,6 +6,8 @@ import {
 	userExcerciseAnswerError,
 	userQuizAnswerSchema,
 } from "@/lib/types/userSchema";
+import { ngrok_url_compare } from "@/utils/apis";
+import axios from "axios";
 import { nanoid } from "nanoid";
 import { z } from "zod";
 
@@ -72,11 +74,13 @@ async function quizAction(
 			});
 			if (!question) return;
 
-			const isCorrect =
-				question.answer.trim().toLowerCase() ===
-				data.answer[index].trim().toLowerCase();
-
-			if (isCorrect) score++;
+			const answer = data.answer[index];
+			const realAnswer = question.answer;
+			const response = await axios.post(ngrok_url_compare, {
+				sentence1: answer,
+				sentence2: realAnswer,
+			});
+			const score = response.data.cosine_similarity;
 
 			correctAnswers.push(question.answer);
 			quizQuestions.push({
@@ -84,9 +88,11 @@ async function quizAction(
 				quizId: "",
 				question: data.question[index],
 				answer: data.answer[index],
-				score: isCorrect ? 1 : 0,
+				score: score,
 			});
 		}
+		quizQuestions.forEach((question) => (score += question.score));
+		score = score / data.question.length;
 		const user = await getUser();
 		if (!user) return;
 		const newQuiz = {
@@ -95,15 +101,22 @@ async function quizAction(
 			mark: score,
 			stageId: levelId.stageId,
 		};
+		console.log("New Quiz Data:", newQuiz);
 
 		try {
 			await db.insert(TB_quiz).values(newQuiz);
-		} catch {
-			return { field: "root", message: "error" };
+		} catch (error) {
+			console.error("Error inserting into TB_quiz:", error);
+			return { field: "root", message: "Error inserting quiz data" };
 		}
 		quizQuestions.forEach((question) => (question.quizId = newQuiz.id));
 
-		await db.insert(TB_quiz_questions).values(quizQuestions);
+		try {
+			await db.insert(TB_quiz_questions).values(quizQuestions);
+		} catch (error) {
+			console.error("Error inserting into TB_quiz_questions:", error);
+			return { field: "root", message: "Error inserting quiz questions data" };
+		}
 
 		return { score, correctAnswers };
 	} catch (e) {

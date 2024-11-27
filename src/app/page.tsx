@@ -1,7 +1,15 @@
 "use client";
-import Image from "next/image";
-import React from "react";
+import { redirect } from "next/navigation";
+import { useEffect } from "react";
 
-export default function Home() {
-	return <div>eyad</div>
+export default function HomePage() {
+	useEffect(() => {
+		redirect("/home");
+	}, []);
+
+	return (
+		<div>
+			<p>Redirecting...</p>
+		</div>
+	);
 }

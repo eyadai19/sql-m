@@ -28,6 +28,7 @@ async function LoginAction(
 		}
 
 		const session = await lucia.createSession(user.id, {});
+
 		const sessionCookie = lucia.createSessionCookie(session.id);
 		cookies().set(
 			sessionCookie.name,
@@ -41,5 +42,5 @@ async function LoginAction(
 		};
 	}
 
-	redirect("/basic/dataType");
+	redirect("/Profile");
 }
