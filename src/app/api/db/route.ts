@@ -4,7 +4,7 @@ import sqlite3 from "sqlite3";
 
 const getDb = async () => {
 	return open({
-		filename: "../db", // تأكد من أن مسار قاعدة البيانات صحيح
+		filename: "../db",
 		driver: sqlite3.Database,
 	});
 };
@@ -21,15 +21,14 @@ export async function POST(req: NextRequest) {
 			actionType,
 			columnName,
 			columnType,
-			setColumns, // الأعمدة التي سيتم تحديثها
-			whereConditions, // شروط WHERE للتحديث
+			setColumns,
+			whereConditions,
 		} = await req.json();
 
 		if (!tableName) {
 			return NextResponse.json({ error: "اسم الجدول مفقود." }, { status: 400 });
 		}
 
-		// التعامل مع عملية ALTER
 		if (action === "ALTER") {
 			if (!actionType || !columnName) {
 				return NextResponse.json(
@@ -37,7 +36,6 @@ export async function POST(req: NextRequest) {
 					{ status: 400 },
 				);
 			}
-
 			let alterQuery = "";
 			if (actionType === "ADD" && columnType) {
 				alterQuery = `ALTER TABLE ${tableName} ADD COLUMN ${columnName} ${columnType}`;
@@ -49,16 +47,13 @@ export async function POST(req: NextRequest) {
 					{ status: 400 },
 				);
 			}
-
 			await db.exec(alterQuery);
-
 			return NextResponse.json(
 				{ message: `تم تعديل هيكل الجدول "${tableName}" بنجاح.` },
 				{ status: 200 },
 			);
 		}
 
-		// التعامل مع عملية DELETE
 		if (action === "DELETE") {
 			if (!whereConditions || whereConditions.length === 0) {
 				return NextResponse.json(
@@ -66,10 +61,8 @@ export async function POST(req: NextRequest) {
 					{ status: 400 },
 				);
 			}
-
 			const whereClauses = whereConditions.join(" AND ");
 			const deleteQuery = `DELETE FROM ${tableName} WHERE ${whereClauses}`;
-
 			try {
 				await db.exec(deleteQuery);
 				return NextResponse.json(
@@ -85,7 +78,6 @@ export async function POST(req: NextRequest) {
 			}
 		}
 
-		// التعامل مع عملية UPDATE
 		if (action === "UPDATE") {
 			if (!setColumns || setColumns.length === 0) {
 				return NextResponse.json(
@@ -93,7 +85,6 @@ export async function POST(req: NextRequest) {
 					{ status: 400 },
 				);
 			}
-
 			if (!whereConditions || whereConditions.length === 0) {
 				return NextResponse.json(
 					{ error: "شروط WHERE مفقودة." },
@@ -101,7 +92,6 @@ export async function POST(req: NextRequest) {
 				);
 			}
 
-			// بناء استعلام UPDATE
 			const setClauses = setColumns
 				.map(
 					({ column, value }: { column: string; value: string }) =>
@@ -109,36 +99,29 @@ export async function POST(req: NextRequest) {
 				)
 				.join(", ");
 			const whereClauses = whereConditions.join(" AND ");
-
 			const updateQuery = `UPDATE ${tableName} SET ${setClauses} WHERE ${whereClauses}`;
 			const updateValues = setColumns.map(
 				({ value }: { column: string; value: string }) => value,
 			);
-
 			await db.run(updateQuery, ...updateValues);
-
 			return NextResponse.json(
 				{ message: `تم تحديث البيانات في الجدول "${tableName}" بنجاح.` },
 				{ status: 200 },
 			);
 		}
 
-		// العمليات الأخرى (CREATE, DROP, INSERT, SELECT)
 		if (action === "CREATE") {
 			if (!columns || columns.length === 0) {
 				return NextResponse.json({ error: "الأعمدة مفقودة." }, { status: 400 });
 			}
-
 			const columnsSQL = columns
 				.map((col: string) => {
 					const [columnName, columnType] = col.split(" ").map((s) => s.trim());
 					return `${columnName} ${columnType}`;
 				})
 				.join(", ");
-
 			const createTableQuery = `CREATE TABLE IF NOT EXISTS ${tableName} (${columnsSQL})`;
 			await db.exec(createTableQuery);
-
 			return NextResponse.json(
 				{ message: `تم إنشاء الجدول "${tableName}" بنجاح.` },
 				{ status: 200 },
@@ -153,12 +136,9 @@ export async function POST(req: NextRequest) {
 			if (!values || values.length === 0) {
 				return NextResponse.json({ error: "القيم مفقودة." }, { status: 400 });
 			}
-
 			const placeholders = values.map(() => "?").join(", ");
 			const insertQuery = `INSERT INTO ${tableName} (${columns.join(", ")}) VALUES (${placeholders})`;
-
 			await db.run(insertQuery, ...values);
-
 			return NextResponse.json(
 				{ message: `تم إدخال البيانات في الجدول "${tableName}" بنجاح.` },
 				{ status: 200 },
@@ -170,10 +150,8 @@ export async function POST(req: NextRequest) {
 					{ status: 400 },
 				);
 			}
-
 			const selectQuery = `SELECT ${selectColumns.join(", ")} FROM ${tableName}`;
 			const result = await db.all(selectQuery);
-
 			return NextResponse.json(
 				{ message: "تم جلب البيانات بنجاح.", data: result },
 				{ status: 200 },

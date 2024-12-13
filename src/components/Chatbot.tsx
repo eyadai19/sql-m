@@ -16,6 +16,8 @@ import { z } from "zod";
 export default function ChatBot({
 	ChatbotAction,
 	ChatbotExpAction,
+	ChatbotTrArToEn,
+	ChatbotTrEnToAr,
 }: {
 	ChatbotAction(
 		input: z.infer<typeof userChatBotInputSchema>,
@@ -28,9 +30,15 @@ export default function ChatBot({
 		| userExcerciseAnswerError
 		| undefined
 	>;
+	ChatbotTrArToEn(
+		input: z.infer<typeof userChatBotInputSchema>,
+	): Promise<{ answer: string } | userExcerciseAnswerError | undefined>;
+	ChatbotTrEnToAr(
+		input: z.infer<typeof userChatBotInputSchema>,
+	): Promise<{ answer: string } | userExcerciseAnswerError | undefined>;
 }) {
 	const [isOpen, setIsOpen] = useState(false);
-	const [language, setLanguage] = useState(""); // lang
+	const [language, setLanguage] = useState("");
 	const [inChatMode, setInChatMode] = useState("");
 	const [userAnswer, setUserAnswer] = useState("");
 	const [questionData, setQuestionData] = useState<any>(null);
@@ -42,13 +50,22 @@ export default function ChatBot({
 	const [compiledData, setCompiledData] = useState<any[]>([]);
 	const [userQuery, setUserQuery] = useState("");
 	const [queryResult, setQueryResult] = useState("");
-	const [contextOption, setContextOption] = useState("use my context"); // To track the selected context option
-	const [newContext, setNewContext] = useState(""); // To store the new context if selected
+	const [contextOption, setContextOption] = useState("use my context");
+	const [newContext, setNewContext] = useState("");
 
 	const handleQuerySubmit = async () => {
-		const result = await ChatbotAction({ question: userQuery });
-		if (result && "answer" in result) setQueryResult(result.answer);
-		else return result?.message;
+		if (language == "AR") {
+			const questionEN = await ChatbotTrArToEn({ question: userQuery });
+			if (questionEN && "answer" in questionEN) {
+				const result = await ChatbotAction({ question: questionEN.answer });
+				if (result && "answer" in result) setQueryResult(result.answer);
+				else return result?.message;
+			} else return questionEN?.message;
+		} else {
+			const result = await ChatbotAction({ question: userQuery });
+			if (result && "answer" in result) setQueryResult(result.answer);
+			else return result?.message;
+		}
 	};
 	const handleResultChange = (e: React.ChangeEvent<HTMLInputElement>) => {
 		setQueryResult(e.target.value);
@@ -369,9 +386,16 @@ export default function ChatBot({
 										value={queryResult}
 										onChange={(e) => {
 											handleResultChange;
+											setQueryResult(e.target.value);
 											autoResize(e.target);
 										}}
-										rows={3}
+										ref={(textarea) => {
+											if (textarea) {
+												textarea.style.height = "auto"; // إعادة التهيئة
+												textarea.style.height = `${textarea.scrollHeight}px`; // تعديل الارتفاع بناءً على المحتوى
+											}
+										}}
+										rows={1}
 									/>
 								</div>
 							)}

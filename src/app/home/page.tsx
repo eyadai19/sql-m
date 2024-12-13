@@ -1,31 +1,38 @@
 // my-navbar-app/pages/_app.tsx
-import type { AppProps } from 'next/app';
-import { Navbar } from "@/components/Navbar";
 import { AboutComponent } from "@/components/AboutComponent";
-import { HomeComponent } from "@/components/HomeComponent";
-import { TryitCard } from "@/components/TryitCard";
+import Chatbot from "@/components/Chatbot";
 import { Footer } from "@/components/Footer";
-import Chatbot from '@/components/Chatbot';
-import { ChatbotAction } from '@/lib/ServerAction/chatBotNLP';
-
+import { HomeComponent } from "@/components/HomeComponent";
+import { Navbar } from "@/components/Navbar";
+import { TryitCard } from "@/components/TryitCard";
+import {
+	ChatbotAction,
+	ChatbotExpAction,
+	ChatbotTrArToEn,
+	ChatbotTrEnToAr,
+} from "@/lib/ServerAction/chatBotNLP";
 
 // my-navbar-app/pages/navbar-test.tsx
 
 export default function HomePage() {
 	return (
-		<div className= "" >
+		<div className="">
 			<Navbar />
 
 			<HomeComponent />
 
 			<AboutComponent />
-			
-			<TryitCard/>
-			
-			<Chatbot ChatbotAction={ChatbotAction}/>
 
-			<Footer/>
+			<TryitCard />
 
+			<Chatbot
+				ChatbotAction={ChatbotAction}
+				ChatbotExpAction={ChatbotExpAction}
+				ChatbotTrArToEn={ChatbotTrArToEn}
+				ChatbotTrEnToAr={ChatbotTrEnToAr}
+			/>
+
+			<Footer />
 		</div>
 	);
 }

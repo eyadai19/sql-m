@@ -74,14 +74,14 @@ export async function ChatbotExpAction(
 
 export async function ChatbotTrEnToAr(
 	input: z.infer<typeof userChatBotInputSchema>,
-): Promise<{ answer: String } | userExcerciseAnswerError | undefined> {
+): Promise<{ answer: string } | userExcerciseAnswerError | undefined> {
 	"use server";
 	try {
-		const text = await userChatBotInputSchema.parseAsync({ input });
+		// const text = await userChatBotInputSchema.parseAsync({ input });
 		const response = await axios.post(ngrok_url_en_to_ar, {
-			text,
+			text: input.question,
 		});
-		if (response.data) return { answer: response.data.answer };
+		if (response.data) return { answer: response.data["translated_text"] };
 	} catch (error) {
 		console.error("Error sending question to API:", error);
 		return { field: "root", message: "Failed to retrieve answer" };
@@ -90,14 +90,14 @@ export async function ChatbotTrEnToAr(
 
 export async function ChatbotTrArToEn(
 	input: z.infer<typeof userChatBotInputSchema>,
-): Promise<{ answer: String } | userExcerciseAnswerError | undefined> {
+): Promise<{ answer: string } | userExcerciseAnswerError | undefined> {
 	"use server";
 	try {
-		const text = await userChatBotInputSchema.parseAsync({ input });
+		// const text = await userChatBotInputSchema.parseAsync({ input });
 		const response = await axios.post(ngrok_url_ar_to_en, {
-			text,
+			text: input.question,
 		});
-		if (response.data) return { answer: response.data.answer };
+		if (response.data) return { answer: response.data["translated_text"] };
 	} catch (error) {
 		console.error("Error sending question to API:", error);
 		return { field: "root", message: "Failed to retrieve answer" };
