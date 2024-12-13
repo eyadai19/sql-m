@@ -80,7 +80,7 @@ async function quizAction(
 				sentence1: answer,
 				sentence2: realAnswer,
 			});
-			const score = response.data.cosine_similarity;
+			const score = Math.abs(response.data.cosine_similarity) * 100;
 
 			correctAnswers.push(question.answer);
 			quizQuestions.push({

@@ -6,6 +6,7 @@ import { HomeComponent } from "@/components/HomeComponent";
 import { TryitCard } from "@/components/TryitCard";
 import { Footer } from "@/components/Footer";
 import Chatbot from '@/components/Chatbot';
+import { ChatbotAction } from '@/lib/ServerAction/chatBotNLP';
 
 
 // my-navbar-app/pages/navbar-test.tsx
@@ -21,7 +22,7 @@ export default function HomePage() {
 			
 			<TryitCard/>
 			
-			<Chatbot/>
+			<Chatbot ChatbotAction={ChatbotAction}/>
 
 			<Footer/>
 

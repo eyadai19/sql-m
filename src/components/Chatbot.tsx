@@ -1,266 +1,450 @@
 "use client";
-import React, { useState, useEffect, useRef } from "react";
-import { AiOutlineArrowUp, AiOutlineArrowDown, AiOutlineClose, AiOutlineArrowLeft, AiOutlineReload } from "react-icons/ai";
+import {
+	userChatBotInputSchema,
+	userExcerciseAnswerError,
+} from "@/lib/types/userSchema";
+import React, { useEffect, useRef, useState } from "react";
+import {
+	AiOutlineArrowDown,
+	AiOutlineArrowLeft,
+	AiOutlineArrowUp,
+	AiOutlineClose,
+	AiOutlineReload,
+} from "react-icons/ai";
+import { z } from "zod";
 
-export default function ChatBot() {
-  const [isOpen, setIsOpen] = useState(false);
-  const [language, setLanguage] = useState("");
-  const [inChatMode, setInChatMode] = useState(false);
-  const [userAnswer, setUserAnswer] = useState("");
-  const [questionData, setQuestionData] = useState<any>(null);
-  const [isFirstQuestion, setIsFirstQuestion] = useState(true);
-  const [chatHistory, setChatHistory] = useState<{ question: string; answer: string }[]>([]);
-  const [finalAnswer, setFinalAnswer] = useState<string>("");
-  const [compiledData, setCompiledData] = useState<any[]>([]); 
+export default function ChatBot({
+	ChatbotAction,
+	ChatbotExpAction,
+}: {
+	ChatbotAction(
+		input: z.infer<typeof userChatBotInputSchema>,
+	): Promise<{ answer: string } | userExcerciseAnswerError | undefined>;
+	ChatbotExpAction(
+		input: z.infer<typeof userChatBotInputSchema>,
+	): Promise<
+		| { answer: String }
+		| { question: String; answers: String[] }
+		| userExcerciseAnswerError
+		| undefined
+	>;
+}) {
+	const [isOpen, setIsOpen] = useState(false);
+	const [language, setLanguage] = useState(""); // lang
+	const [inChatMode, setInChatMode] = useState("");
+	const [userAnswer, setUserAnswer] = useState("");
+	const [questionData, setQuestionData] = useState<any>(null);
+	const [isFirstQuestion, setIsFirstQuestion] = useState(true);
+	const [chatHistory, setChatHistory] = useState<
+		{ question: string; answer: string }[]
+	>([]);
+	const [finalAnswer, setFinalAnswer] = useState<string>("");
+	const [compiledData, setCompiledData] = useState<any[]>([]);
+	const [userQuery, setUserQuery] = useState("");
+	const [queryResult, setQueryResult] = useState("");
+	const [contextOption, setContextOption] = useState("use my context"); // To track the selected context option
+	const [newContext, setNewContext] = useState(""); // To store the new context if selected
 
-  const chatEndRef = useRef<HTMLDivElement>(null);
+	const handleQuerySubmit = async () => {
+		const result = await ChatbotAction({ question: userQuery });
+		if (result && "answer" in result) setQueryResult(result.answer);
+		else return result?.message;
+	};
+	const handleResultChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+		setQueryResult(e.target.value);
+	};
 
-  const toggleChat = () => {
-    setIsOpen(!isOpen);
-  };
+	const chatEndRef = useRef<HTMLDivElement>(null);
 
-  const handleLanguageSelect = (selectedLanguage: React.SetStateAction<string>) => {
-    setLanguage(selectedLanguage);
-  };
+	const toggleChat = () => {
+		setIsOpen(!isOpen);
+	};
 
-  const handleOptionSelect = (option: string) => {
-    if (option === "Syntax") {
-      setInChatMode(true);
-      setIsFirstQuestion(true);
-    }
-  };
+	const handleLanguageSelect = (
+		selectedLanguage: React.SetStateAction<string>,
+	) => {
+		setLanguage(selectedLanguage);
+	};
 
-  const goBack = () => {
-    if (inChatMode) {
-      setInChatMode(false);
-      setUserAnswer("");
-      setFinalAnswer(""); // Reset the final answer
-    } else {
-      setLanguage("");
-    }
-  };
+	const handleOptionSelect = (option: string) => {
+		if (option === "Syntax") {
+			setInChatMode("Syntax");
+			setIsFirstQuestion(true);
+		} else setInChatMode("Query");
+	};
 
-  const fetchInitialQuestion = () => {
-    setQuestionData({
-      question: "Welcome to the chat! What would you like to start with?",
-      options: ["Introduction", "Tutorial", "FAQ"],
-    });
-  };
+	const goBack = () => {
+		if (inChatMode) {
+			setInChatMode("");
+			setUserAnswer("");
+			setFinalAnswer("");
+		} else {
+			setLanguage("");
+		}
+	};
 
-  const fetchTestQuestion = () => {
-    const questions = [
-      { question: "Please choose an action:", options: ["select", "update", "delete"], finalAnswer: "" },
-      { question: "What would you like to do?", options: ["add", "edit", "remove"], finalAnswer: "gg" },
-      { question: "test", options: ["1", "2", "3"], finalAnswer: "" },
-    ];
+	const fetchInitialQuestion = () => {
+		setQuestionData({
+			question: "Welcome to the chat! What would you like to start with?",
+			options: ["Introduction", "Tutorial", "FAQ"],
+		});
+	};
 
-    const randomQuestion = questions[Math.floor(Math.random() * questions.length)];
-    setQuestionData({
-      question: randomQuestion.question,
-      options: randomQuestion.options,
-      finalAnswer: setFinalAnswer(randomQuestion.finalAnswer),
-    });
-  };
+	const fetchTestQuestion = () => {
+		const questions = [
+			{
+				question: "Please choose an action:",
+				options: ["select", "update", "delete"],
+				finalAnswer: "",
+			},
+			{
+				question: "What would you like to do?",
+				options: ["add", "edit", "remove"],
+				finalAnswer: "gg",
+			},
+			{ question: "test", options: ["1", "2", "3"], finalAnswer: "" },
+		];
 
-  useEffect(() => {
-    if (inChatMode && isFirstQuestion) {
-      fetchInitialQuestion();
-      setIsFirstQuestion(false);
-    }
-  }, [inChatMode, isFirstQuestion]);
+		const randomQuestion =
+			questions[Math.floor(Math.random() * questions.length)];
+		setQuestionData({
+			question: randomQuestion.question,
+			options: randomQuestion.options,
+			finalAnswer: setFinalAnswer(randomQuestion.finalAnswer),
+		});
+	};
 
-  const handleButtonClick = (option: string) => {
-    setChatHistory((prevHistory) => [
-      ...prevHistory,
-      { question: questionData.question, answer: option },
-    ]);
+	useEffect(() => {
+		if (inChatMode && isFirstQuestion) {
+			fetchInitialQuestion();
+			setIsFirstQuestion(false);
+		}
+	}, [inChatMode, isFirstQuestion]);
 
-    setUserAnswer(option);
-    setQuestionData(null);
+	const handleButtonClick = (option: string) => {
+		setChatHistory((prevHistory) => [
+			...prevHistory,
+			{ question: questionData.question, answer: option },
+		]);
 
-    fetchTestQuestion();
-  };
+		setUserAnswer(option);
+		setQuestionData(null);
 
-  useEffect(() => {
-    if (chatEndRef.current) {
-      chatEndRef.current.scrollIntoView({ behavior: "smooth" });
-    }
-  }, [chatHistory]);
+		fetchTestQuestion();
+	};
 
-  const resetChat = () => {
-    setChatHistory([]);
-    setUserAnswer("");
-    setQuestionData(null);
-    setIsFirstQuestion(true);
-    setFinalAnswer("");
-    setCompiledData([]); // Reset compiledData
-    fetchInitialQuestion();
-  };
+	useEffect(() => {
+		if (chatEndRef.current) {
+			chatEndRef.current.scrollIntoView({ behavior: "smooth" });
+		}
+	}, [chatHistory]);
 
-  const handleCompile = () => {
-    // Generate table data when the button is clicked
-    const data = [
-      { id: 1, name: "John Doe", age: 28, action: "selected option 1" },
-      { id: 2, name: "Jane Smith", age: 34, action: "selected option 2" },
-      { id: 3, name: "Sam Brown", age: 22, action: "selected option 3" },
-    ];
+	const resetChat = () => {
+		setChatHistory([]);
+		setUserAnswer("");
+		setQuestionData(null);
+		setIsFirstQuestion(true);
+		setFinalAnswer("");
+		setCompiledData([]); // Reset compiledData
+		fetchInitialQuestion();
+	};
 
-    setCompiledData(data); // Set the data into the compiledData state
-  };
+	const handleCompile = () => {
+		// Generate table data when the button is clicked
+		const data = [
+			{ id: 1, name: "John Doe", age: 28, action: "selected option 1" },
+			{ id: 2, name: "Jane Smith", age: 34, action: "selected option 2" },
+			{ id: 3, name: "Sam Brown", age: 22, action: "selected option 3" },
+		];
 
-  return (
-    <div className="fixed right-4 bottom-4 z-50 flex flex-col items-end">
-      <div
-        className={`bg-[#00203F] text-white w-80 h-[80vh] p-4 transition-all duration-300 ease-in-out ${isOpen ? "opacity-100 translate-y-0" : "opacity-0 translate-y-full pointer-events-none"
-          } rounded-t-lg shadow-lg mb-2 flex flex-col justify-between overflow-y-auto custom-scrollbar`}
-      >
-        {/* Sticky top bar in the chat */}
-        <div className="sticky top-0 bg-[#00203F] z-10 p-2 flex justify-between items-center">
-          {language && (
-            <button onClick={goBack} className="text-[#ADF0D1] focus:outline-none">
-              <AiOutlineArrowLeft />
-            </button>
-          )}
+		setCompiledData(data);
+	};
 
-          <h2 className="text-lg font-semibold flex-1 text-center">Mentor</h2>
+	const autoResize = (element: HTMLTextAreaElement) => {
+		element.style.height = "auto"; // إعادة تعيين الارتفاع
+		element.style.height = `${element.scrollHeight}px`; // تعيين الارتفاع الجديد
+	};
+	const handleContextChange = (value: string) => {
+		setContextOption(value);
+		setNewContext("");
+		setUserQuery("");
+		setQueryResult("");
+	};
+	return (
+		<div className="fixed bottom-4 right-4 z-50 flex flex-col items-end">
+			<div
+				className={`h-[80vh] w-80 bg-[#00203F] p-4 text-white transition-all duration-300 ease-in-out ${
+					isOpen
+						? "translate-y-0 opacity-100"
+						: "pointer-events-none translate-y-full opacity-0"
+				} custom-scrollbar mb-2 flex flex-col justify-between overflow-y-auto rounded-t-lg shadow-lg`}
+			>
+				{/* Sticky top bar in the chat */}
+				<div className="sticky top-0 z-10 flex items-center justify-between bg-[#00203F] p-2">
+					{language && (
+						<button
+							onClick={goBack}
+							className="text-[#ADF0D1] focus:outline-none"
+						>
+							<AiOutlineArrowLeft />
+						</button>
+					)}
 
-          <button onClick={toggleChat} className="text-[#ADF0D1] focus:outline-none">
-            <AiOutlineClose />
-          </button>
-        </div>
+					<h2 className="flex-1 text-center text-lg font-semibold">Mentor</h2>
 
-        {/* Chat content */}
-        <div className="flex-1 overflow-y-auto mt-2">
-          {!language && !inChatMode && (
-            <div className="flex flex-col justify-center items-center h-full">
-              <h3 className="text-md font-semibold text-center mb-4">Choose Language</h3>
+					<button
+						onClick={toggleChat}
+						className="text-[#ADF0D1] focus:outline-none"
+					>
+						<AiOutlineClose />
+					</button>
+				</div>
 
-              <div className="flex flex-col space-y-4">
-                <button onClick={() => handleLanguageSelect("AR")} className="w-40 p-2 rounded-md bg-[#ADF0D1] text-[#00203F] font-semibold">
-                  العربية (AR)
-                </button>
-                <button onClick={() => handleLanguageSelect("EN")} className="w-40 p-2 rounded-md bg-[#ADF0D1] text-[#00203F] font-semibold">
-                  English (EN)
-                </button>
-              </div>
-            </div>
-          )}
+				{/* Chat content */}
+				<div className="mt-2 flex-1 overflow-y-auto">
+					{!language && !inChatMode && (
+						<div className="flex h-full flex-col items-center justify-center">
+							<h3 className="text-md mb-4 text-center font-semibold">
+								Choose Language
+							</h3>
 
-          {language && !inChatMode && (
-            <div className="flex flex-col justify-center items-center h-full">
-              <h3 className="text-md font-semibold text-center mt-4 mb-4">
-                {language === "AR" ? "اختر الخدمة" : "Choose Service"}
-              </h3>
+							<div className="flex flex-col space-y-4">
+								<button
+									onClick={() => handleLanguageSelect("AR")}
+									className="w-40 rounded-md bg-[#ADF0D1] p-2 font-semibold text-[#00203F]"
+								>
+									العربية (AR)
+								</button>
+								<button
+									onClick={() => handleLanguageSelect("EN")}
+									className="w-40 rounded-md bg-[#ADF0D1] p-2 font-semibold text-[#00203F]"
+								>
+									English (EN)
+								</button>
+							</div>
+						</div>
+					)}
 
-              <div className="flex flex-col space-y-4">
-                <button onClick={() => handleOptionSelect("Syntax")} className="w-40 p-2 rounded-md bg-[#ADF0D1] text-[#00203F] font-semibold">
-                  {language === "AR" ? "بناء الجملة" : "Syntax"}
-                </button>
-                <button onClick={() => handleOptionSelect("Query")} className="w-40 p-2 rounded-md bg-[#ADF0D1] text-[#00203F] font-semibold">
-                  {language === "AR" ? "الاستعلام" : "Query"}
-                </button>
-              </div>
-            </div>
-          )}
+					{language && !inChatMode && (
+						<div className="flex h-full flex-col items-center justify-center">
+							<h3 className="text-md mb-4 mt-4 text-center font-semibold">
+								{language === "AR" ? "اختر الخدمة" : "Choose Service"}
+							</h3>
 
-          {inChatMode && questionData && (
-            <>
-              <div className="mb-4">
-                {chatHistory.map((entry, index) => (
-                  <div key={index} className="mb-2">
-                    <div className="flex justify-start">
-                      <p className="bg-[#D3D3D3] text-[#00203F] p-2 rounded-md inline-block max-w-xs">{entry.question}</p>
-                    </div>
-                    <div className="flex justify-end mt-1">
-                      <p className="bg-[#ADF0D1] text-[#00203F] p-2 rounded-md inline-block max-w-xs">{entry.answer}</p>
-                    </div>
-                  </div>
-                ))}
-              </div>
+							<div className="flex flex-col space-y-4">
+								<button
+									onClick={() => handleOptionSelect("Syntax")}
+									className="w-40 rounded-md bg-[#ADF0D1] p-2 font-semibold text-[#00203F]"
+								>
+									{language === "AR" ? "بناء الجملة" : "Syntax"}
+								</button>
+								<button
+									onClick={() => handleOptionSelect("Query")}
+									className="w-40 rounded-md bg-[#ADF0D1] p-2 font-semibold text-[#00203F]"
+								>
+									{language === "AR" ? "الاستعلام" : "Query"}
+								</button>
+							</div>
+						</div>
+					)}
 
-              <div className="mb-4 flex justify-center">
-                <p className="text-sm mt-2">{questionData?.question}</p>
-              </div>
+					{inChatMode == "Syntax" && questionData && (
+						<>
+							<div className="mb-4">
+								{chatHistory.map((entry, index) => (
+									<div key={index} className="mb-2">
+										<div className="flex justify-start">
+											<p className="inline-block max-w-xs rounded-md bg-[#D3D3D3] p-2 text-[#00203F]">
+												{entry.question}
+											</p>
+										</div>
+										<div className="mt-1 flex justify-end">
+											<p className="inline-block max-w-xs rounded-md bg-[#ADF0D1] p-2 text-[#00203F]">
+												{entry.answer}
+											</p>
+										</div>
+									</div>
+								))}
+							</div>
 
-              {finalAnswer === "" ? (
-                <div className="mb-4 flex justify-center">
-                  <div className="flex flex-col space-y-4 items-center">
-                    {questionData?.options.map((option: string) => (
-                      <button
-                        key={option}
-                        onClick={() => handleButtonClick(option)}
-                        className="w-40 p-2 rounded-md bg-[#ADF0D1] text-[#00203F] font-semibold text-center"
-                      >
-                        {option}
-                      </button>
-                    ))}
-                  </div>
-                </div>
-              ) : (
-                <div className="flex flex-col items-center justify-center mt-4">
-                  <p className="bg-[#D3D3D3] text-[#00203F] p-2 rounded-md w-3/4 text-center mt-4">
-                    {finalAnswer}
-                  </p>
-                  <button
-                    onClick={handleCompile}
-                    className="w-40 p-2 mt-4 rounded-md bg-[#ADF0D1] text-[#00203F] font-semibold"
-                  >
-                    Compile
-                  </button>
-                </div>
-              )}
-            </>
-          )}
+							<div className="mb-4 flex justify-center">
+								<p className="mt-2 text-sm">{questionData?.question}</p>
+							</div>
 
-          {compiledData.length > 0 && (
-            <div className="mt-4">
-              <table className="w-full table-auto">
-                <thead>
-                  <tr>
-                    {/* Extract columns from the first object in compiledData */}
-                    {Object.keys(compiledData[0]).map((key) => (
-                      <th key={key} className="border p-2 text-left">
-                        {key.charAt(0).toUpperCase() + key.slice(1)} {/* Display column name properly */}
-                      </th>
-                    ))}
-                  </tr>
-                </thead>
-                <tbody>
-                  {compiledData.map((row, index) => (
-                    <tr key={index}>
-                      {/* Display values based on columns */}
-                      {Object.values(row).map((value, i) => (
-                        <td key={i} className="border p-2">{String(value)}</td>
-                      ))}
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          )}
+							{finalAnswer === "" ? (
+								<div className="mb-4 flex justify-center">
+									<div className="flex flex-col items-center space-y-4">
+										{questionData?.options.map((option: string) => (
+											<button
+												key={option}
+												onClick={() => handleButtonClick(option)}
+												className="w-40 rounded-md bg-[#ADF0D1] p-2 text-center font-semibold text-[#00203F]"
+											>
+												{option}
+											</button>
+										))}
+									</div>
+								</div>
+							) : (
+								<div className="mt-4 flex flex-col items-center justify-center">
+									<p className="mt-4 w-3/4 rounded-md bg-[#D3D3D3] p-2 text-center text-[#00203F]">
+										{finalAnswer}
+									</p>
+									<button
+										onClick={handleCompile}
+										className="mt-4 w-40 rounded-md bg-[#ADF0D1] p-2 font-semibold text-[#00203F]"
+									>
+										Compile
+									</button>
+								</div>
+							)}
+						</>
+					)}
+					{/* When query */}
+					{inChatMode === "Query" && (
+						<div className="mt-4 flex flex-col items-center justify-center">
+							<div className="mb-4">
+								<label>
+									<input
+										type="radio"
+										name="contextOption"
+										value="use my context"
+										checked={contextOption === "use my context"}
+										onChange={() => handleContextChange("use my context")}
+									/>
+									Use My Context
+								</label>
+								<label className="ml-4">
+									<input
+										type="radio"
+										name="contextOption"
+										value="use new context"
+										checked={contextOption === "use new context"}
+										onChange={() => handleContextChange("use new context")}
+									/>
+									Use New Context
+								</label>
+							</div>
 
-          {/* Reset chat button inside the ChatBot */}
-          {inChatMode && (
-            <button
-              onClick={resetChat}
-              className="absolute bottom-4 left-4 bg-[#ADF0D1] text-[#00203F] p-2 rounded-full"
-            >
-              <AiOutlineReload />
-            </button>
-          )}
+							{contextOption === "use new context" && (
+								<div className="m-3 mt-4 flex w-3/4 flex-col">
+									<textarea
+										placeholder="Enter your new context"
+										className="resize-none overflow-hidden rounded-md bg-[#D3D3D3] p-2 text-[#00203F]"
+										value={newContext}
+										onChange={(e) => {
+											setNewContext(e.target.value);
+											autoResize(e.target); // لتغيير حجم الحقل تلقائيًا
+										}}
+										rows={3} // تعيين عدد الصفوف الافتراضي
+									/>
+								</div>
+							)}
 
-          <div ref={chatEndRef} />
-        </div>
-      </div>
+							{/* Input Field */}
+							<div className="m-3 mt-4 flex w-3/4 flex-col">
+								<textarea
+									placeholder="Enter your query here"
+									className="resize-none overflow-hidden rounded-md bg-[#D3D3D3] p-2 text-[#00203F]"
+									value={userQuery}
+									onChange={(e) => {
+										setUserQuery(e.target.value);
+										autoResize(e.target); // لتغيير حجم الحقل تلقائيًا
+									}}
+									rows={1}
+								/>
+							</div>
+							{/* Submit Button */}
+							<button
+								onClick={handleQuerySubmit}
+								className="mt-4 w-40 rounded-md bg-[#ADF0D1] p-2 font-semibold text-[#00203F]"
+							>
+								Submit Query
+							</button>
+							{/* Show the query result in a new text field */}
+							{queryResult && (
+								<div className="mt-4 flex w-3/4 flex-col">
+									<textarea
+										className="resize-none overflow-hidden rounded-md bg-[#D3D3D3] p-2 text-[#00203F]"
+										value={queryResult}
+										onChange={(e) => {
+											handleResultChange;
+											autoResize(e.target);
+										}}
+										rows={3}
+									/>
+								</div>
+							)}
 
-      <button
-        onClick={toggleChat}
-        className={`bg-[#ADF0D1] text-[#00203F] p-3 rounded-full focus:outline-none transition-all duration-300 ${
-          isOpen ? "opacity-0 pointer-events-none" : "opacity-100 pointer-events-auto"
-        }`}
-      >
-        {isOpen ? <AiOutlineArrowDown /> : <AiOutlineArrowUp />}
-      </button>
-    </div>
-  );
+							{/* button compile */}
+							{queryResult && contextOption === "use my context" && (
+								<div className="mt-4 flex flex-col items-center justify-center">
+									<button
+										onClick={handleCompile}
+										className="mt-4 w-40 rounded-md bg-[#ADF0D1] p-2 font-semibold text-[#00203F]"
+									>
+										Compile
+									</button>
+								</div>
+							)}
+						</div>
+					)}
+
+					{/* {run query} */}
+					{compiledData.length > 0 && (
+						<div className="mt-4">
+							<table className="w-full table-auto">
+								<thead>
+									<tr>
+										{/* Extract columns from the first object in compiledData */}
+										{Object.keys(compiledData[0]).map((key) => (
+											<th key={key} className="border p-2 text-left">
+												{key.charAt(0).toUpperCase() + key.slice(1)}{" "}
+												{/* Display column name properly */}
+											</th>
+										))}
+									</tr>
+								</thead>
+								<tbody>
+									{compiledData.map((row, index) => (
+										<tr key={index}>
+											{/* Display values based on columns */}
+											{Object.values(row).map((value, i) => (
+												<td key={i} className="border p-2">
+													{String(value)}
+												</td>
+											))}
+										</tr>
+									))}
+								</tbody>
+							</table>
+						</div>
+					)}
+
+					{/* Reset chat button inside the ChatBot */}
+					{inChatMode && (
+						<button
+							onClick={resetChat}
+							className="absolute bottom-4 left-4 rounded-full bg-[#ADF0D1] p-2 text-[#00203F]"
+						>
+							<AiOutlineReload />
+						</button>
+					)}
+
+					<div ref={chatEndRef} />
+				</div>
+			</div>
+
+			<button
+				onClick={toggleChat}
+				className={`rounded-full bg-[#ADF0D1] p-3 text-[#00203F] transition-all duration-300 focus:outline-none ${
+					isOpen
+						? "pointer-events-none opacity-0"
+						: "pointer-events-auto opacity-100"
+				}`}
+			>
+				{isOpen ? <AiOutlineArrowDown /> : <AiOutlineArrowUp />}
+			</button>
+		</div>
+	);
 }

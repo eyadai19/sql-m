@@ -15,12 +15,31 @@ export async function ChatbotAction(
 	input: z.infer<typeof userChatBotInputSchema>,
 ): Promise<{ answer: string } | userExcerciseAnswerError | undefined> {
 	"use server";
+	var table;
 	try {
-		const question = await userChatBotInputSchema.parseAsync({ input });
+		const response = await fetch("http://localhost:3000/api/getContext");
+		const data = await response.json();
+		if (!response.ok) {
+			alert(data.error || "خطأ أثناء جلب الجداول.");
+			return;
+		}
+		table = data["context"];
+	} catch (error) {
+		console.error("خطأ أثناء جلب الجداول:", error);
+		alert("حدث خطأ أثناء جلب الجداول.");
+		return { field: "root", message: "Failed to fetch table" };
+	}
+	try {
+		if (!input || !input.question) {
+			console.log(
+				"The 'input' object must contain a valid 'question' property.",
+			);
+		}
+		const input_prompt = table + "\nquery for: " + input.question;
 		const response = await axios.post(ngrok_url_generate_sql, {
-			question,
+			input_prompt: input_prompt,
 		});
-		return { answer: response.data.answer };
+		return { answer: response.data["generated_sql"] };
 	} catch (error) {
 		console.error("Error sending question to API:", error);
 		return { field: "root", message: "Failed to retrieve answer" };
@@ -85,4 +104,4 @@ export async function ChatbotTrArToEn(
 	}
 }
 
-// when use ar in nlp => use ChatbotTrArToEn then ChatbotAction then ChatbotTrArToEn
+// when use ar in nlp => use ChatbotTrArToEn then ChatbotAction then ChatbotTrEnToAr
