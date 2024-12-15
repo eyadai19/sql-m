@@ -70,17 +70,47 @@ export async function getUnlockIndex(): Promise<
 		if (!user) return;
 		const userInfo = await db.query.TB_user.findFirst({
 			where: (info, { eq }) => eq(info.id, user.id),
+			with: {
+				stage: true,
+			},
 		});
 		if (!userInfo) return;
-		const stage = await db.query.TB_stage.findFirst({
-			where: (stageInfo, { eq }) => eq(stageInfo.id, userInfo.stageId),
-		});
-		if (!stage) return;
 
-		const stageIndex = stage.index;
+		const stageIndex = userInfo.stage.index;
 
 		return stageIndex;
 	} catch (error) {
 		return { field: "root", message: "error" };
+	}
+}
+
+export async function getAuthorizedPage(
+	levelName: string,
+): Promise<boolean | undefined> {
+	"use server";
+	try {
+		const user = await getUser();
+		if (!user) return;
+		const userInfo = await db.query.TB_user.findFirst({
+			where: (info, { eq }) => eq(info.id, user.id),
+			with: {
+				stage: true,
+			},
+		});
+		if (!userInfo) return;
+
+		const stageIndex = userInfo.stage.index;
+
+		const level = await db.query.TB_level.findFirst({
+			where: (level, { eq }) => eq(level.level, levelName),
+			with: {
+				stage: true,
+			},
+		});
+		if (!level) return;
+
+		return stageIndex >= level.stage.index;
+	} catch (error) {
+		return false;
 	}
 }

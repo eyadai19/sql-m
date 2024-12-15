@@ -1,10 +1,11 @@
 import Between from '@/components/pages/select/between'
 import React from 'react'
+import { getAuthorizedPage } from '../../layout'
 
 export default function page() {
   return (
     <div className='p-4 text-base md:text-lg lg:text-xl'>
-      <Between/>
+      <Between getAuthorizedPage={getAuthorizedPage}/>
     </div>
   )
 }
