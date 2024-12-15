@@ -114,3 +114,31 @@ export async function getAuthorizedPage(
 		return false;
 	}
 }
+
+export async function getAuthorizedQuiz(
+	stageId: string,
+): Promise<boolean | undefined> {
+	"use server";
+	try {
+		const user = await getUser();
+		if (!user) return;
+		const userInfo = await db.query.TB_user.findFirst({
+			where: (info, { eq }) => eq(info.id, user.id),
+			with: {
+				stage: true,
+			},
+		});
+		if (!userInfo) return;
+
+		const stageIndex = userInfo.stage.index;
+
+		const stage = await db.query.TB_stage.findFirst({
+			where: (stage, { eq }) => eq(stage.id, stageId),
+		});
+		if (!stage) return;
+
+		return stageIndex >= stage.index;
+	} catch (error) {
+		return false;
+	}
+}

@@ -1,3 +1,4 @@
+import { getAuthorizedQuiz } from "@/app/(main)/layout";
 import SqlQuiz from "@/components/Quiz";
 import { getUser } from "@/lib/auth";
 import { db } from "@/lib/db";
@@ -16,6 +17,7 @@ export default function quiz({ params }: { params: { id: string } }) {
 		<SqlQuiz
 			quizAction={quizAction}
 			quizQuestionAction={quizQuestionAction.bind(null, params.id)}
+			getAuthorizedQuiz={getAuthorizedQuiz.bind(null, params.id)}
 		/>
 	);
 }

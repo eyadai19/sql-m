@@ -15,6 +15,7 @@ import {
 	userQuizAnswerSchema,
 } from "@/lib/types/userSchema";
 import { zodResolver } from "@hookform/resolvers/zod";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
@@ -23,6 +24,7 @@ import { z } from "zod";
 export default function SqlQuiz({
 	quizAction,
 	quizQuestionAction,
+	getAuthorizedQuiz,
 }: {
 	quizAction: (
 		input: z.infer<typeof userQuizAnswerSchema>,
@@ -34,6 +36,7 @@ export default function SqlQuiz({
 	quizQuestionAction: () => Promise<
 		{ question: string }[] | { field: string; message: string } | undefined
 	>;
+	getAuthorizedQuiz: () => Promise<boolean | undefined>;
 }) {
 	const router = useRouter();
 	const [questions, setQuestions] = useState<{ question: string }[]>([]);
@@ -42,6 +45,19 @@ export default function SqlQuiz({
 	const [isSubmitted, setIsSubmitted] = useState(false);
 	const [showModal, setShowModal] = useState(false);
 	const [score, setScore] = useState<number | null>(null);
+	const [hasAccess, setHasAccess] = useState<boolean | undefined>(undefined);
+
+	useEffect(() => {
+		const checkAccess = async () => {
+			const access = await getAuthorizedQuiz();
+			if (access === false) {
+				setHasAccess(false);
+			} else {
+				setHasAccess(true);
+			}
+		};
+		checkAccess();
+	}, [getAuthorizedQuiz]);
 
 	useEffect(() => {
 		const fetchQuestions = async () => {
@@ -63,13 +79,11 @@ export default function SqlQuiz({
 	});
 
 	const handleSubmit = async (data: z.infer<typeof userQuizAnswerSchema>) => {
-		// تحقق من أن الأسئلة موجودة وجاهزة
 		if (questions.length === 0) {
 			console.error("No questions available.");
 			return;
 		}
 
-		// تأكد من تحديث بيانات الـ `data` من الأسئلة المحملة
 		const updatedData = {
 			...data,
 			question: questions.map((q) => q.question), // تحديث الأسئلة في data
@@ -94,7 +108,6 @@ export default function SqlQuiz({
 		}
 	};
 
-
 	const handleGoBack = () => {
 		router.back();
 	};
@@ -103,6 +116,20 @@ export default function SqlQuiz({
 		setShowModal(false);
 	};
 
+	if (hasAccess === false) {
+		return (
+			<div>
+				<p>You have not access to this page.</p>
+				<Button>
+					<Link href="/home">Return to Home</Link>
+				</Button>
+			</div>
+		);
+	}
+
+	if (hasAccess === undefined) {
+		return <p>Loading...</p>;
+	}
 	return (
 		<div className="relative bg-[#00203F] py-10">
 			{/* Quiz form layout */}
