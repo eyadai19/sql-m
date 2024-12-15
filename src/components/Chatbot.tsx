@@ -52,19 +52,25 @@ export default function ChatBot({
 	const [queryResult, setQueryResult] = useState("");
 	const [contextOption, setContextOption] = useState("use my context");
 	const [newContext, setNewContext] = useState("");
+	const [loading, setLoading] = useState(false);
 
 	const handleQuerySubmit = async () => {
-		if (language == "AR") {
-			const questionEN = await ChatbotTrArToEn({ question: userQuery });
-			if (questionEN && "answer" in questionEN) {
-				const result = await ChatbotAction({ question: questionEN.answer });
+		setLoading(true); // إظهار الـ loader
+		try {
+			if (language == "AR") {
+				const questionEN = await ChatbotTrArToEn({ question: userQuery });
+				if (questionEN && "answer" in questionEN) {
+					const result = await ChatbotAction({ question: questionEN.answer });
+					if (result && "answer" in result) setQueryResult(result.answer);
+					else return result?.message;
+				} else return questionEN?.message;
+			} else {
+				const result = await ChatbotAction({ question: userQuery });
 				if (result && "answer" in result) setQueryResult(result.answer);
 				else return result?.message;
-			} else return questionEN?.message;
-		} else {
-			const result = await ChatbotAction({ question: userQuery });
-			if (result && "answer" in result) setQueryResult(result.answer);
-			else return result?.message;
+			}
+		} finally {
+			setLoading(false); // إخفاء الـ loader بعد إتمام العملية
 		}
 	};
 	const handleResultChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -342,7 +348,6 @@ export default function ChatBot({
 									Use New Context
 								</label>
 							</div>
-
 							{contextOption === "use new context" && (
 								<div className="m-3 mt-4 flex w-3/4 flex-col">
 									<textarea
@@ -357,7 +362,6 @@ export default function ChatBot({
 									/>
 								</div>
 							)}
-
 							{/* Input Field */}
 							<div className="m-3 mt-4 flex w-3/4 flex-col">
 								<textarea
@@ -372,12 +376,34 @@ export default function ChatBot({
 								/>
 							</div>
 							{/* Submit Button */}
+							<style jsx>{`
+								.loader {
+									border: 10px solid #f3f3f3;
+									border-top: 10px solid #adf0d1;
+									border-radius: 50%;
+									width: 50px;
+									height: 50px;
+									animation: spin 1s linear infinite;
+									margin: auto;
+								}
+
+								@keyframes spin {
+									0% {
+										transform: rotate(0deg);
+									}
+									100% {
+										transform: rotate(360deg);
+									}
+								}
+							`}</style>
 							<button
 								onClick={handleQuerySubmit}
 								className="mt-4 w-40 rounded-md bg-[#ADF0D1] p-2 font-semibold text-[#00203F]"
 							>
 								Submit Query
 							</button>
+							{/* عرض الـ loader أثناء التحميل */}
+							{loading && <div className="loader"></div>}{" "}
 							{/* Show the query result in a new text field */}
 							{queryResult && (
 								<div className="mt-4 flex w-3/4 flex-col">
@@ -399,7 +425,6 @@ export default function ChatBot({
 									/>
 								</div>
 							)}
-
 							{/* button compile */}
 							{queryResult && contextOption === "use my context" && (
 								<div className="mt-4 flex flex-col items-center justify-center">

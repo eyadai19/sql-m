@@ -1,9 +1,11 @@
 "use client";
+import Link from "next/link";
 import { useState } from "react";
+import { FaDatabase, FaEdit, FaUserCircle } from "react-icons/fa";
+
 import {
 	FaArrowLeft,
 	FaBars,
-	FaFireAlt,
 	FaHome,
 	FaSignOutAlt,
 	FaTimes,
@@ -29,36 +31,60 @@ export function ProfileNavbar({
 			<div className="text-2xl font-bold">sqlmentor</div>
 
 			{/* Navigation Icons */}
-			<div className="flex items-center space-x-4">
-				<button
-					onClick={() => {
-						console.log("Home button clicked"); // زر للذهاب للصفحة الرئيسية
-					}}
-					className="transition-colors hover:text-white"
-					title="Home"
-				>
-					<FaFireAlt size={24} />
-				</button>
-
-				<button
-					onClick={() => {
-						handleLogout();
-					}}
-					className="transition-colors hover:text-white"
-					title="Logout"
-				>
-					<FaSignOutAlt size={24} />
-				</button>
-
-				{/* Hamburger icon for mobile */}
-				<div className="md:hidden">
-					<button onClick={toggleDrawer} className="text-[#ADF0D1]">
-						{isDrawerOpen ? <FaTimes size={24} /> : <FaBars size={24} />}
-					</button>
+			{!isDrawerOpen && (
+				<div>
+					<div className="hidden items-center space-x-4 sm:flex">
+						{/* Home Icon */}
+						<Link
+							href="/home"
+							className="transition-colors hover:text-white"
+							title="Home"
+						>
+							<FaHome size={27} />
+						</Link>
+						{/* Profile Icon */}
+						<Link
+							href="/Profile"
+							className="transition-colors hover:text-white"
+							title="Profile"
+						>
+							<FaUserCircle size={24} />
+						</Link>
+						{/* user compiler Icon */}
+						<Link
+							href="/UserDbEditor"
+							className="transition-colors hover:text-white"
+							title="Compiler"
+						>
+							<FaEdit size={24} />
+						</Link>
+						{/* Database Icon */}
+						<Link
+							href="/DataBaseExeplorer"
+							className="transition-colors hover:text-white"
+							title="Explore My Database"
+						>
+							<FaDatabase size={24} />
+						</Link>
+						<button
+							onClick={() => {
+								handleLogout();
+							}}
+							className="transition-colors hover:text-white"
+							title="Logout"
+						>
+							<FaSignOutAlt size={24} />
+						</button>
+					</div>
+					{/* Hamburger icon for mobile */}
+					<div className="md:hidden">
+						<button onClick={toggleDrawer} className="text-[#ADF0D1]">
+							{isDrawerOpen ? <FaTimes size={24} /> : <FaBars size={24} />}
+						</button>
+					</div>
 				</div>
-			</div>
+			)}
 
-			{/* Drawer Menu for Mobile */}
 			{isDrawerOpen && (
 				<div className="fixed inset-0 z-10 flex flex-col items-center justify-center space-y-6 bg-[#00203F] bg-opacity-90 text-lg">
 					{/* Back Button in Drawer */}
@@ -73,17 +99,38 @@ export function ProfileNavbar({
 						<FaArrowLeft size={40} />
 					</button>
 
-					{/* Home Button in Drawer */}
-					<button
-						onClick={() => {
-							console.log("Home button clicked"); // زر للذهاب للصفحة الرئيسية
-							toggleDrawer();
-						}}
+					{/* Home Icon */}
+					<Link
+						href="/home"
 						className="transition-colors hover:text-white"
 						title="Home"
 					>
 						<FaHome size={40} />
-					</button>
+					</Link>
+					{/* Profile Icon */}
+					<Link
+						href="/Profile"
+						className="transition-colors hover:text-white"
+						title="Profile"
+					>
+						<FaUserCircle size={40} />
+					</Link>
+					{/* user compiler Icon */}
+					<Link
+						href="/UserDbEditor"
+						className="transition-colors hover:text-white"
+						title="Compiler"
+					>
+						<FaEdit size={40} />
+					</Link>
+					{/* Database Icon */}
+					<Link
+						href="/DataBaseExeplorer"
+						className="transition-colors hover:text-white"
+						title="Explore My Database"
+					>
+						<FaDatabase size={40} />
+					</Link>
 
 					{/* Logout Button in Drawer */}
 					<button

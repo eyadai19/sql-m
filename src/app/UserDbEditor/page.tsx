@@ -1,5 +1,13 @@
 import DatabaseManager from "@/components/database/DatabaseManager";
+import { logoutAction } from "../Profile/page";
+import { ProfileNavbar } from "@/components/ProfileNavbar";
 
 export default function UserComp() {
-	return <DatabaseManager />;
+	return (
+		<div>
+			<ProfileNavbar	 logoutAction={logoutAction} />
+
+			<DatabaseManager />
+		</div>
+	);
 }

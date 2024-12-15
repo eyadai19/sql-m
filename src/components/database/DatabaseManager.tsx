@@ -6,7 +6,6 @@ import AlterData from "./alter";
 import CreateTable from "./create";
 import DeleteData from "./delete";
 import DropTable from "./Drop";
-import { EditorNavbar } from "./EditorNavbar";
 import InsertData from "./Insert";
 import SelectData from "./Select";
 import UpdateData from "./update";
@@ -41,9 +40,6 @@ export default function DatabaseManager() {
 
 	return (
 		<>
-			{/* شريط التنقل */}
-			<EditorNavbar />
-
 			<div className="flex min-h-screen items-center justify-center bg-gradient-to-r from-[#00203F] to-[#ADF0D1] py-8">
 				<div className="w-2/3 rounded-lg border border-gray-200 bg-gray-300 p-6 shadow-md">
 					{/* العنوان مع الأيقونة المنبثقة */}

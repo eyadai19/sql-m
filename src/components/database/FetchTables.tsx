@@ -1,57 +1,171 @@
 "use client";
-import React, { useState } from "react";
+import { useEffect, useState } from "react";
+import Mermaid from "react-mermaid2";
+import { Button } from "@/components/ui/button";
+import { Card, CardHeader, CardContent } from "@/components/ui/card";
+import {
+	Table,
+	TableHeader,
+	TableRow,
+	TableHead,
+	TableBody,
+	TableCell,
+} from "@/components/ui/table";
 
 interface Table {
-  tableName: string;
-  columns: { columnName: string; columnType: string }[];
+	tableName: string;
+	columns: { columnName: string; columnType: string }[];
+	data: Record<string, any>[]; // البيانات في الجدول
 }
 
-const FetchTables: React.FC = () => {
-  const [tables, setTables] = useState<Table[]>([]);
+export default function FetchTablesWithERD() {
+	const [tables, setTables] = useState<Table[]>([]);
+	const [erdDiagram, setErdDiagram] = useState<string>("");
 
-  const fetchTables = async () => {
-    try {
-      const response = await fetch("http://localhost:3000/api/db");
-      const data = await response.json();
-      if (!response.ok) {
-        alert(data.error || "خطأ أثناء جلب الجداول.");
-        return;
-      }
-      setTables(data);
-    } catch (error) {
-      console.error("خطأ أثناء جلب الجداول:", error);
-      alert("حدث خطأ أثناء جلب الجداول.");
-    }
-  };
+	const fetchTables = async () => {
+		try {
+			const response = await fetch("http://localhost:3000/api/db");
+			const data = await response.json();
 
-  return (
-    <div className="mb-8">
-      <button
-        onClick={fetchTables}
-        className="rounded-md bg-blue-600 px-4 py-2 text-white shadow hover:bg-blue-700"
-      >
-        عرض الجداول
-      </button>
-      {tables.length > 0 ? (
-        <ul className="mt-4">
-          {tables.map((table, index) => (
-            <li key={index} className="mb-2">
-              <strong>{table.tableName}</strong>
-              <ul className="ml-4">
-                {table.columns.map((col, colIndex) => (
-                  <li key={colIndex}>
-                    {col.columnName} ({col.columnType})
-                  </li>
-                ))}
-              </ul>
-            </li>
-          ))}
-        </ul>
-      ) : (
-        <p className="mt-4">لا توجد جداول لعرضها.</p>
-      )}
-    </div>
-  );
-};
+			if (!response.ok) {
+				alert(data.error || "خطأ أثناء جلب الجداول.");
+				return;
+			}
 
-export default FetchTables;
+			setTables(data);
+
+			const erd = generateERD(data);
+			setErdDiagram(erd);
+		} catch (error) {
+			console.error("خطأ أثناء جلب الجداول:", error);
+			alert("حدث خطأ أثناء جلب الجداول.");
+		}
+	};
+
+	const generateERD = (tables: Table[]) => {
+		let diagram = "erDiagram\n";
+
+		tables.forEach((table) => {
+			diagram += `${table.tableName} {\n`;
+			table.columns.forEach((col) => {
+				diagram += `  ${col.columnType} ${col.columnName}\n`;
+			});
+			diagram += "}\n";
+		});
+
+		// التعرف التلقائي على العلاقات
+		tables.forEach((table) => {
+			table.columns.forEach((col) => {
+				// التحقق إذا كان العمود يبدو كأنه مفتاح أجنبي
+				tables.forEach((relatedTable) => {
+					if (
+						col.columnName
+							.toLowerCase()
+							.includes(relatedTable.tableName.toLowerCase()) &&
+						col.columnName.toLowerCase().includes("id")
+					) {
+						diagram += `\n  ${table.tableName} ||--o{ ${relatedTable.tableName} : "Foreign Key"\n`;
+					}
+				});
+			});
+		});
+
+		return diagram;
+	};
+
+	useEffect(() => {
+		fetchTables();
+	}, []);
+
+	return (
+
+			<div className="flex min-h-screen items-center justify-center bg-gradient-to-r from-[#00203F] to-[#ADF0D1] py-8">
+				<Card className="w-4/5 rounded-lg border border-gray-200 bg-white shadow-md">
+					<CardHeader>
+						<h1 className="text-center text-3xl font-semibold text-[#00203F]">
+							My DB Viewer
+						</h1>
+					</CardHeader>
+					<CardContent>
+						<div className="mb-6 flex justify-center">
+							<Button
+								onClick={fetchTables}
+								className="rounded-md bg-[#00203F] px-4 py-2 text-white shadow hover:bg-[#ADF0D1] hover:text-[#00203F]"
+							>
+								عرض الجداول
+							</Button>
+						</div>
+						{erdDiagram && (
+							<div className="mb-8 rounded-lg border bg-white p-6 shadow-md">
+								<h2 className="mb-4 text-2xl font-bold text-[#00203F]">
+									مخطط ERD
+								</h2>
+								<Mermaid chart={erdDiagram} />
+							</div>
+						)}
+						{tables.length > 0 ? (
+							<div className="space-y-6">
+								{tables.map((table, index) => (
+									<div
+										key={index}
+										className="rounded-lg border border-gray-300 bg-gray-100 p-4"
+									>
+										<h2 className="mb-4 text-xl font-bold text-[#00203F]">
+											{table.tableName}
+										</h2>
+										<h3 className="mb-2 text-lg font-semibold text-[#00203F]">
+											الأعمدة:
+										</h3>
+										<ul className="list-disc pl-5">
+											{table.columns.map((col, colIndex) => (
+												<li key={colIndex} className="text-[#00203F]">
+													{col.columnName} ({col.columnType})
+												</li>
+											))}
+										</ul>
+										<h3 className="mb-2 mt-4 text-lg font-semibold text-[#00203F]">
+											البيانات:
+										</h3>
+										{table.data.length > 0 ? (
+											<Table>
+												<TableHeader>
+													<TableRow>
+														{table.columns.map((col, colIndex) => (
+															<TableHead key={colIndex}>
+																{col.columnName}
+															</TableHead>
+														))}
+													</TableRow>
+												</TableHeader>
+												<TableBody>
+													{table.data.map((row, rowIndex) => (
+														<TableRow key={rowIndex}>
+															{table.columns.map((col, colIndex) => (
+																<TableCell key={colIndex}>
+																	{row[col.columnName] !== undefined
+																		? row[col.columnName]
+																		: "NULL"}
+																</TableCell>
+															))}
+														</TableRow>
+													))}
+												</TableBody>
+											</Table>
+										) : (
+											<p className="text-[#00203F]">
+												لا توجد بيانات في هذا الجدول.
+											</p>
+										)}
+									</div>
+								))}
+							</div>
+						) : (
+							<p className="text-center text-[#00203F]">
+								لا توجد جداول لعرضها.
+							</p>
+						)}
+					</CardContent>
+				</Card>
+			</div>
+	);
+}

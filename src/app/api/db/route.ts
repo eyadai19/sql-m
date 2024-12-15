@@ -177,33 +177,40 @@ export async function POST(req: NextRequest) {
 export async function GET(req: NextRequest) {
 	try {
 		const db = await getDb();
+
+		// الحصول على أسماء الجداول
 		const tables = await db.all(
-			`SELECT name FROM sqlite_master WHERE type='table' AND name NOT LIKE 'sqlite_%';`,
+			`SELECT name FROM sqlite_master WHERE type='table' AND name NOT LIKE 'sqlite_%';`
 		);
 
-		// الحصول على الأعمدة مع النوع لكل جدول
-		const tablesWithColumns = await Promise.all(
+		// الحصول على الأعمدة مع النوع والبيانات لكل جدول
+		const tablesWithColumnsAndData = await Promise.all(
 			tables.map(async (table: { name: string }) => {
+				// جلب معلومات الأعمدة
 				const columns = await db.all(`PRAGMA table_info(${table.name});`);
+				// جلب البيانات من الجدول
+				const data = await db.all(`SELECT * FROM ${table.name}`);
 				return {
 					tableName: table.name,
 					columns: columns.map((col: any) => ({
 						columnName: col.name,
 						columnType: col.type,
 					})),
+					data, // بيانات الجدول
 				};
-			}),
+			})
 		);
 
-		return NextResponse.json(tablesWithColumns, { status: 200 });
+		return NextResponse.json(tablesWithColumnsAndData, { status: 200 });
 	} catch (error) {
 		console.error("Database error:", error);
 		return NextResponse.json(
 			{
-				error: "حدث خطأ أثناء جلب الجداول.",
+				error: "حدث خطأ أثناء جلب الجداول والبيانات.",
 				details: error instanceof Error ? error.message : String(error),
 			},
-			{ status: 500 },
+			{ status: 500 }
 		);
 	}
 }
+
