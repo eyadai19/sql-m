@@ -18,7 +18,7 @@ import {
 	Lightbulb,
 } from "lucide-react";
 import React, { useState } from "react";
-import CodeBlock from "..//CodeBlock";
+import CodeBlock from "./CodeBlock";
 
 interface ExplanationProps {
 	title?: string;

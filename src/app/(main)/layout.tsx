@@ -1,7 +1,7 @@
-import { AppSidebar } from "@/components/AppSidebar";
 import Chatbot from "@/components/Chatbot";
-import { ProfileNavbar } from "@/components/ProfileNavbar";
-import RenderHeadings from "@/components/RenderHeadings";
+import { AppSidebar } from "@/components/layout/AppSidebar";
+import { ProfileNavbar } from "@/components/layout/ProfileNavbar";
+import RenderHeadings from "@/components/layout/RenderHeadings";
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { getUser } from "@/lib/auth";
 import { db } from "@/lib/db";

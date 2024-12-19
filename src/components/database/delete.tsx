@@ -1,5 +1,6 @@
 "use client";
 
+import { userDbApi } from "@/utils/apis";
 import { faCopy, faInfoCircle } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import React, { useEffect, useRef, useState } from "react";
@@ -49,7 +50,7 @@ export default function DeleteData() {
 		}
 
 		try {
-			const response = await fetch("http://localhost:3000/api/db", {
+			const response = await fetch(userDbApi, {
 				method: "POST",
 				headers: { "Content-Type": "application/json" },
 				body: JSON.stringify({ action: "DELETE", tableName, whereConditions }),

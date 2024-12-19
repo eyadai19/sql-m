@@ -58,6 +58,8 @@ export default function Exercise({
 	const [error, setError] = useState<ErrorType>(null);
 	const [isCorrect, setIsCorrect] = useState(false);
 	const [attempts, setAttempts] = useState(0);
+	const [activeHint, setActiveHint] = useState(0); // إدارة التلميحات
+	const [showTips, setShowTips] = useState(false); // عرض النصائح
 	const exerciseStartTime = useRef<number | null>(null);
 
 	// Initialize start time on first attempt
@@ -226,11 +228,13 @@ export default function Exercise({
 					<TabsContent value="help" className="space-y-6">
 						<Hints
 							hints={hints}
-							activeHint={0}
-							onNextHint={() => {}}
+							activeHint={activeHint}
+							onNextHint={() =>
+								setActiveHint((prev) => Math.min(prev + 1, hints.length - 1))
+							}
 							tips={tips}
-							showTips={false}
-							onToggleTips={() => {}}
+							showTips={showTips}
+							onToggleTips={() => setShowTips((prev) => !prev)}
 						/>
 					</TabsContent>
 				</Tabs>

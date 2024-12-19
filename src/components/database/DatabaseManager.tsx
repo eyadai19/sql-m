@@ -40,7 +40,13 @@ export default function DatabaseManager() {
 
 	return (
 		<>
-			<div className="flex min-h-screen items-center justify-center bg-gradient-to-r from-[#00203F] to-[#ADF0D1] py-8">
+			<div
+				className="flex min-h-screen items-center justify-center px-8"
+				style={{
+					background: "linear-gradient(to bottom, #00203F, #ADF0D1)",
+				}}
+			>
+				{" "}
 				<div className="w-2/3 rounded-lg border border-gray-200 bg-gray-300 p-6 shadow-md">
 					{/* العنوان مع الأيقونة المنبثقة */}
 					<div className="mb-6 flex items-center justify-between">

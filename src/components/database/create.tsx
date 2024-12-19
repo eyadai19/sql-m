@@ -1,4 +1,5 @@
 "use client";
+import { userDbApi } from "@/utils/apis";
 import { faCopy, faInfoCircle } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import React, { useEffect, useRef, useState } from "react";
@@ -35,7 +36,6 @@ export default function CreateTable() {
 		});
 	};
 
-	// دالة لإنشاء جدول بعد التحقق من صحة تعليمة CREATE
 	const validateAndCreateTable = async () => {
 		const regex = /^CREATE\s+TABLE\s+(\S+)\s*\(([\s\S]+)\)$/i;
 		const match = createQuery.trim().match(regex);
@@ -58,7 +58,7 @@ export default function CreateTable() {
 		}
 
 		try {
-			const response = await fetch("http://localhost:3000/api/db", {
+			const response = await fetch(userDbApi, {
 				method: "POST",
 				headers: { "Content-Type": "application/json" },
 				body: JSON.stringify({ action: "CREATE", tableName, columns }),
@@ -72,7 +72,7 @@ export default function CreateTable() {
 
 			const data = await response.json();
 			alert(data.message);
-			setCreateQuery(""); // مسح الحقل بعد النجاح
+			setCreateQuery("");
 		} catch (error) {
 			console.error("خطأ أثناء إنشاء الجدول:", error);
 			alert("حدث خطأ أثناء إنشاء الجدول.");

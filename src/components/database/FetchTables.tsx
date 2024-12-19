@@ -1,16 +1,17 @@
 "use client";
-import { useEffect, useState } from "react";
-import Mermaid from "react-mermaid2";
 import { Button } from "@/components/ui/button";
-import { Card, CardHeader, CardContent } from "@/components/ui/card";
+import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import {
 	Table,
-	TableHeader,
-	TableRow,
-	TableHead,
 	TableBody,
 	TableCell,
+	TableHead,
+	TableHeader,
+	TableRow,
 } from "@/components/ui/table";
+import { userDbApi } from "@/utils/apis";
+import { useEffect, useState } from "react";
+import Mermaid from "react-mermaid2";
 
 interface Table {
 	tableName: string;
@@ -24,7 +25,7 @@ export default function FetchTablesWithERD() {
 
 	const fetchTables = async () => {
 		try {
-			const response = await fetch("http://localhost:3000/api/db");
+			const response = await fetch(userDbApi);
 			const data = await response.json();
 
 			if (!response.ok) {
@@ -78,94 +79,94 @@ export default function FetchTablesWithERD() {
 	}, []);
 
 	return (
-
-			<div className="flex min-h-screen items-center justify-center bg-gradient-to-r from-[#00203F] to-[#ADF0D1] py-8">
-				<Card className="w-4/5 rounded-lg border border-gray-200 bg-white shadow-md">
-					<CardHeader>
-						<h1 className="text-center text-3xl font-semibold text-[#00203F]">
-							My DB Viewer
-						</h1>
-					</CardHeader>
-					<CardContent>
-						<div className="mb-6 flex justify-center">
-							<Button
-								onClick={fetchTables}
-								className="rounded-md bg-[#00203F] px-4 py-2 text-white shadow hover:bg-[#ADF0D1] hover:text-[#00203F]"
-							>
-								عرض الجداول
-							</Button>
+		<div className="flex min-h-screen items-center justify-center px-8"
+			style={{
+				background: "linear-gradient(to bottom, #00203F, #ADF0D1)",
+			}}>
+			<Card className="w-4/5 rounded-lg border border-gray-200 bg-white shadow-md">
+				<CardHeader>
+					<h1 className="text-center text-3xl font-semibold text-[#00203F]">
+						My DB Viewer
+					</h1>
+				</CardHeader>
+				<CardContent>
+					<div className="mb-6 flex justify-center">
+						<Button
+							onClick={fetchTables}
+							className="rounded-md bg-[#00203F] px-4 py-2 text-white shadow hover:bg-[#ADF0D1] hover:text-[#00203F]"
+						>
+							عرض الجداول
+						</Button>
+					</div>
+					{erdDiagram && (
+						<div className="mb-8 rounded-lg border bg-white p-6 shadow-md">
+							<h2 className="mb-4 text-2xl font-bold text-[#00203F]">
+								مخطط ERD
+							</h2>
+							<Mermaid chart={erdDiagram} />
 						</div>
-						{erdDiagram && (
-							<div className="mb-8 rounded-lg border bg-white p-6 shadow-md">
-								<h2 className="mb-4 text-2xl font-bold text-[#00203F]">
-									مخطط ERD
-								</h2>
-								<Mermaid chart={erdDiagram} />
-							</div>
-						)}
-						{tables.length > 0 ? (
-							<div className="space-y-6">
-								{tables.map((table, index) => (
-									<div
-										key={index}
-										className="rounded-lg border border-gray-300 bg-gray-100 p-4"
-									>
-										<h2 className="mb-4 text-xl font-bold text-[#00203F]">
-											{table.tableName}
-										</h2>
-										<h3 className="mb-2 text-lg font-semibold text-[#00203F]">
-											الأعمدة:
-										</h3>
-										<ul className="list-disc pl-5">
-											{table.columns.map((col, colIndex) => (
-												<li key={colIndex} className="text-[#00203F]">
-													{col.columnName} ({col.columnType})
-												</li>
-											))}
-										</ul>
-										<h3 className="mb-2 mt-4 text-lg font-semibold text-[#00203F]">
-											البيانات:
-										</h3>
-										{table.data.length > 0 ? (
-											<Table>
-												<TableHeader>
-													<TableRow>
+					)}
+					{tables.length > 0 ? (
+						<div className="space-y-6">
+							{tables.map((table, index) => (
+								<div
+									key={index}
+									className="rounded-lg border border-gray-300 bg-gray-100 p-4"
+								>
+									<h2 className="mb-4 text-xl font-bold text-[#00203F]">
+										{table.tableName}
+									</h2>
+									<h3 className="mb-2 text-lg font-semibold text-[#00203F]">
+										الأعمدة:
+									</h3>
+									<ul className="list-disc pl-5">
+										{table.columns.map((col, colIndex) => (
+											<li key={colIndex} className="text-[#00203F]">
+												{col.columnName} ({col.columnType})
+											</li>
+										))}
+									</ul>
+									<h3 className="mb-2 mt-4 text-lg font-semibold text-[#00203F]">
+										البيانات:
+									</h3>
+									{table.data.length > 0 ? (
+										<Table>
+											<TableHeader>
+												<TableRow>
+													{table.columns.map((col, colIndex) => (
+														<TableHead key={colIndex}>
+															{col.columnName}
+														</TableHead>
+													))}
+												</TableRow>
+											</TableHeader>
+											<TableBody>
+												{table.data.map((row, rowIndex) => (
+													<TableRow key={rowIndex}>
 														{table.columns.map((col, colIndex) => (
-															<TableHead key={colIndex}>
-																{col.columnName}
-															</TableHead>
+															<TableCell key={colIndex}>
+																{row[col.columnName] !== undefined
+																	? row[col.columnName]
+																	: "NULL"}
+															</TableCell>
 														))}
 													</TableRow>
-												</TableHeader>
-												<TableBody>
-													{table.data.map((row, rowIndex) => (
-														<TableRow key={rowIndex}>
-															{table.columns.map((col, colIndex) => (
-																<TableCell key={colIndex}>
-																	{row[col.columnName] !== undefined
-																		? row[col.columnName]
-																		: "NULL"}
-																</TableCell>
-															))}
-														</TableRow>
-													))}
-												</TableBody>
-											</Table>
-										) : (
-											<p className="text-[#00203F]">
-												لا توجد بيانات في هذا الجدول.
-											</p>
-										)}
-									</div>
-								))}
-							</div>
-						) : (
-							<p className="text-center text-[#00203F]">
-								لا توجد جداول لعرضها.
-							</p>
-						)}
-					</CardContent>
-				</Card>
-			</div>
+												))}
+											</TableBody>
+										</Table>
+									) : (
+										<p className="text-[#00203F]">
+											لا توجد بيانات في هذا الجدول.
+										</p>
+									)}
+								</div>
+							))}
+						</div>
+					) : (
+						<p className="text-center text-[#00203F]">لا توجد جداول لعرضها.</p>
+					)}
+				</CardContent>
+			</Card>
+		</div>
 	);
 }

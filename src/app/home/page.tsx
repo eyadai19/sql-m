@@ -1,10 +1,10 @@
 // my-navbar-app/pages/_app.tsx
-import { AboutComponent } from "@/components/AboutComponent";
+import { AboutComponent } from "@/components/home/AboutComponent";
 import Chatbot from "@/components/Chatbot";
-import { Footer } from "@/components/Footer";
-import { HomeComponent } from "@/components/HomeComponent";
-import { Navbar } from "@/components/Navbar";
-import { TryitCard } from "@/components/TryitCard";
+import { Footer } from "@/components/home/Footer";
+import { HomeComponent } from "@/components/home/HomeComponent";
+import { Navbar } from "@/components/home/Navbar";
+import { TryitCard } from "@/components/home/TryitCard";
 import {
 	ChatbotAction,
 	ChatbotExpAction,

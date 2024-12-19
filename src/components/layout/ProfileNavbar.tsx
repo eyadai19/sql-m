@@ -2,6 +2,7 @@
 import Link from "next/link";
 import { useState } from "react";
 import { FaDatabase, FaEdit, FaUserCircle } from "react-icons/fa";
+import { RiCommunityFill } from "react-icons/ri";
 
 import {
 	FaArrowLeft,
@@ -65,6 +66,14 @@ export function ProfileNavbar({
 							title="Explore My Database"
 						>
 							<FaDatabase size={24} />
+						</Link>
+						{/* Community Icon */}
+						<Link
+							href="/Community"
+							className="transition-colors hover:text-white"
+							title="Community"
+						>
+							<RiCommunityFill size={24} />
 						</Link>
 						<button
 							onClick={() => {
@@ -131,7 +140,14 @@ export function ProfileNavbar({
 					>
 						<FaDatabase size={40} />
 					</Link>
-
+					{/* Community Icon */}
+					<Link
+						href="/Community"
+						className="transition-colors hover:text-white"
+						title="Community"
+					>
+						<RiCommunityFill size={40} />
+					</Link>
 					{/* Logout Button in Drawer */}
 					<button
 						onClick={() => {

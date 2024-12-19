@@ -1,21 +1,24 @@
+import { ProfileNavbar } from "@/components/layout/ProfileNavbar";
 import ProfilePage from "@/components/profile";
-import { ProfileNavbar } from "@/components/ProfileNavbar";
-import { getUser } from "@/lib/auth";
+import { getUser, lucia } from "@/lib/auth";
 import { db } from "@/lib/db";
+import { TB_user } from "@/lib/schema";
 import { ProfileData } from "@/lib/types/authSchemas";
+import { eq } from "drizzle-orm";
+import { cookies } from "next/headers";
+import { redirect } from "next/navigation";
 
 export default function Profile() {
 	return (
 		<div>
 			<ProfileNavbar logoutAction={logoutAction} />
-			<ProfilePage ProfileAction={ProfileAction} />
+			<ProfilePage
+				ProfileAction={ProfileAction}
+				UpdateProfileAction={UpdateProfileAction}
+			/>
 		</div>
 	);
 }
-
-import { lucia } from "@/lib/auth";
-import { cookies } from "next/headers";
-import { redirect } from "next/navigation";
 
 export async function logoutAction() {
 	"use server";
@@ -83,5 +86,55 @@ async function ProfileAction(): Promise<
 		}
 	} catch (error) {
 		return { field: "root", message: "Error fetching user data" };
+	}
+}
+
+async function UpdateProfileAction(
+	form: FormData,
+): Promise<string | { field: string; message: string } | undefined> {
+	"use server";
+
+	try {
+		const firstName = form.get("firstName")?.toString();
+		const lastName = form.get("lastName")?.toString();
+		const photo = form.get("photo") as File | null;
+
+		if (!firstName || !lastName) {
+			return {
+				field: "form",
+				message: "First name and last name are required",
+			};
+		}
+
+		const user = await getUser();
+		if (!user) {
+			return { field: "root", message: "User not found" };
+		}
+
+		let photoBase64: string | undefined = undefined;
+
+		if (photo) {
+			const arrayBuffer = await photo.arrayBuffer();
+			const photoBuffer = Buffer.from(arrayBuffer);
+
+			photoBase64 = photoBuffer.toString("base64");
+		}
+
+		const updatedUser = await db
+			.update(TB_user)
+			.set({
+				firstName,
+				lastName,
+				photo: photoBase64,
+			})
+			.where(eq(TB_user.id, user.id));
+
+		if (updatedUser) {
+			return "Profile updated successfully";
+		} else {
+			return { field: "root", message: "Failed to update profile" };
+		}
+	} catch (error) {
+		return { field: "root", message: "Error updating profile" };
 	}
 }
