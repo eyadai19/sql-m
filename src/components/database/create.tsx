@@ -145,7 +145,7 @@ export default function CreateTable() {
 							<p className="mt-2 text-[#00203F]">
 								To execute a CREATE TABLE query, use the following syntax:
 							</p>
-							<pre className="mt-2 rounded-md bg-[#f5f5f5] p-3">
+							<pre className="mt-2 flex items-center justify-between rounded-md bg-[#f5f5f5] p-3">
 								CREATE TABLE tableName (column1 datatype, column2 datatype,
 								...);
 								<button

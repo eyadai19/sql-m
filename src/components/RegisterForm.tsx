@@ -3,7 +3,8 @@
 import { registerFormSchema } from "@/lib/types/authSchemas";
 import { zodResolver } from "@hookform/resolvers/zod";
 import Link from "next/link";
-import { useState } from "react";
+import { useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { Button } from "./ui/button";
@@ -31,7 +32,35 @@ export default function RegisterForm({
 
 	const [preview, setPreview] = useState<string | null>(null);
 	const [photoFile, setPhotoFile] = useState<File | null>(null);
+	const router = useRouter();
+	const [isLoading, setIsLoading] = useState(true);
 
+	useEffect(() => {
+		async function checkLoginStatus() {
+			try {
+				const response = await fetch("/api/is_logged_in");
+
+				if (!response.ok) {
+					console.error("Failed to fetch login status:", response.statusText);
+					setIsLoading(false);
+					return;
+				}
+
+				const data = await response.json();
+
+				if (data.isLoggedIn) {
+					router.push("/Profile");
+				} else {
+					setIsLoading(false);
+				}
+			} catch (error) {
+				console.error("An error occurred while checking login status:", error);
+				setIsLoading(false);
+			}
+		}
+
+		checkLoginStatus();
+	}, [router]);
 	const handleImageChange = (event: React.ChangeEvent<HTMLInputElement>) => {
 		const file = event.target.files?.[0];
 		if (file) {
@@ -72,7 +101,13 @@ export default function RegisterForm({
 			return;
 		}
 	}
-
+	if (isLoading) {
+		return (
+			<div className="flex min-h-screen items-center justify-center bg-gray-900 text-white">
+				<div className="text-lg">Loading...</div>
+			</div>
+		);
+	}
 	return (
 		<div
 			className="flex min-h-screen items-center justify-center bg-gradient-to-b from-[#00203F] to-[#00001a]"

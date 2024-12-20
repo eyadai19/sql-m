@@ -2,20 +2,21 @@ import { getAuthorizedQuiz } from "@/app/(main)/layout";
 import SqlQuiz from "@/components/Quiz";
 import { getUser } from "@/lib/auth";
 import { db } from "@/lib/db";
-import { TB_quiz, TB_quiz_questions } from "@/lib/schema";
+import { TB_quiz, TB_quiz_questions, TB_user } from "@/lib/schema";
 import {
 	userExcerciseAnswerError,
 	userQuizAnswerSchema,
 } from "@/lib/types/userSchema";
 import { ngrok_url_compare } from "@/utils/apis";
 import axios from "axios";
+import { eq } from "drizzle-orm";
 import { nanoid } from "nanoid";
 import { z } from "zod";
 
 export default function quiz({ params }: { params: { id: string } }) {
 	return (
 		<SqlQuiz
-			quizAction={quizAction}
+			quizAction={quizAction.bind(null, params.id)}
 			quizQuestionAction={quizQuestionAction.bind(null, params.id)}
 			getAuthorizedQuiz={getAuthorizedQuiz.bind(null, params.id)}
 		/>
@@ -44,6 +45,7 @@ async function quizQuestionAction(stageId: string) {
 }
 
 async function quizAction(
+	stageId: string,
 	input: z.infer<typeof userQuizAnswerSchema>,
 ): Promise<
 	| { score: number; correctAnswers: string[] }
@@ -103,7 +105,6 @@ async function quizAction(
 			mark: score,
 			stageId: levelId.stageId,
 		};
-		console.log("New Quiz Data:", newQuiz);
 
 		try {
 			await db.insert(TB_quiz).values(newQuiz);
@@ -120,6 +121,24 @@ async function quizAction(
 			return { field: "root", message: "Error inserting quiz questions data" };
 		}
 
+		const stage = await db.query.TB_stage.findFirst({
+			where: (stage, { eq }) => eq(stage.id, stageId),
+		});
+		if (!stage) return;
+		if (stage.index != 4) {
+			const x = stage.index + 1;
+			const newStage = await db.query.TB_stage.findFirst({
+				where: (s, { eq }) => eq(s.index, x),
+			});
+			if (!newStage) return;
+
+			await db
+				.update(TB_user)
+				.set({
+					stageId: newStage.id,
+				})
+				.where(eq(TB_user.id, user.id));
+		}
 		return { score, correctAnswers };
 	} catch (e) {
 		console.error(e);

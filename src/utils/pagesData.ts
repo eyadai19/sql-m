@@ -485,7 +485,6 @@ WHERE d.id = 1;`,
 			],
 		},
 	},
-
 	ERD: {
 		exerciseParams: {
 			title: "Entity Relationship Diagram Analysis",

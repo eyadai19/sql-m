@@ -144,7 +144,7 @@ export default function DeleteData() {
 							<p className="mt-2 text-[#00203F]">
 								To delete data from a table, use the following syntax:
 							</p>
-							<div className="mt-2 flex items-center rounded-md bg-[#f5f5f5] p-3">
+							<div className="mt-2 flex items-center justify-between rounded-md bg-[#f5f5f5] p-3">
 								<pre className="flex-1">
 									DELETE FROM tableName WHERE condition;
 								</pre>

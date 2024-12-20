@@ -146,7 +146,7 @@ export default function InsertData() {
 							<p className="mt-2 text-[#00203F]">
 								To insert data into a table, use the following syntax:
 							</p>
-							<pre className="mt-2 rounded-md bg-[#f5f5f5] p-3">
+							<pre className="mt-2 flex items-center justify-between rounded-md bg-[#f5f5f5] p-3">
 								INSERT INTO tableName (column1, column2, ...) VALUES (value1,
 								value2, ...);
 								<button

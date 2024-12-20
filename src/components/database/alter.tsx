@@ -7,12 +7,7 @@ import React, { useEffect, useRef, useState } from "react";
 export default function AlterData() {
 	const [alterQuery, setAlterQuery] = useState<string>("");
 	const [popupVisible, setPopupVisible] = useState<boolean>(false);
-	const [popupPosition, setPopupPosition] = useState<{
-		top: number;
-		left: number;
-	}>({ top: 0, left: 0 });
 
-	// إنشاء ref للإشارة إلى الـ popup
 	const popupRef = useRef<HTMLDivElement | null>(null);
 
 	// دالة للتحقق مما إذا كان النقر حدث خارج الـ popup
@@ -102,11 +97,6 @@ export default function AlterData() {
 	const handleIconClick = (event: React.MouseEvent) => {
 		const { clientX, clientY } = event;
 
-		// Set position for the popup where the user clicked
-		setPopupPosition({
-			top: clientY + 10, // Add some offset to avoid covering the click point
-			left: clientX - 260, // Adjust the left position to be to the left of the button (assuming the width of the dialog is ~250px)
-		});
 
 		setPopupVisible(true); // Show the popup when the icon is clicked
 	};
@@ -171,7 +161,7 @@ export default function AlterData() {
 							<p className="mt-2 text-[#00203F]">
 								To alter the structure of a table, use the following syntax:
 							</p>
-							<pre className="mt-2 rounded-md bg-[#f5f5f5] p-3">
+							<pre className="mt-2 flex items-center justify-between rounded-md bg-[#f5f5f5] p-3">
 								ALTER TABLE tableName ADD/DROP COLUMN columnName columnType;
 								<button
 									onClick={() =>
