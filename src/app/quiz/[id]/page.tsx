@@ -53,6 +53,7 @@ async function quizQuestionAction(stageId: string) {
 
 		const bestUserParams = userParams.reduce(
 			(acc, curr) => {
+				const existing = acc[curr.levelId];
 				const currentScore = parseFloat(curr.score!);
 				if (
 					!existing ||
@@ -65,32 +66,28 @@ async function quizQuestionAction(stageId: string) {
 			{} as Record<string, (typeof userParams)[0]>,
 		);
 
-		// حساب القيمة القصوى للوقت والمحاولات
 		const maxTime = Math.max(...userParams.map((param) => param.time!));
 		const maxTrials = Math.max(...userParams.map((param) => param.trials!));
 
-		// تحديد الأوزان
-		const w1 = -0.3; // الوزن للـ score (سلبي)
-		const w2 = 0.2; // الوزن للـ time
-		const w3 = 0.2; // الوزن للـ trials
-		const w4 = 1000; // الوزن للـ is_show_ans (عالي جدًا)
+		const w1 = -0.3;
+		const w2 = 0.2;
+		const w3 = 0.2;
+		const w4 = 1000;
 
 		const levelQuestionsCount = levels.map((level) => {
 			const userLevelData = bestUserParams[level.id];
 			if (!userLevelData) {
-				// إذا لم توجد بيانات للمستخدم لهذه اللفلة، قم بتحديد 5 أسئلة افتراضيًا
 				return { levelId: level.id, questionCount: 5 };
 			}
 
 			const { score, time, trials, is_show_ans } = userLevelData;
 
-			// تطبيع البيانات بناءً على القيم القصوى
 			const normalizedScore = Math.min(1, parseFloat(score!) / 100);
-			const normalizedTime = time! / maxTime; // تطبيع الوقت بناءً على القيمة القصوى
-			const normalizedTrials = trials! / maxTrials; // تطبيع المحاولات بناءً على القيمة القصوى
+			const normalizedTime = time! / maxTime;
+			const normalizedTrials = trials! / maxTrials;
 			const normalizedIsShowAns = is_show_ans ? 1 : 0;
 
-			// حساب عدد الأسئلة بناءً على المعادلة
+			// count
 			let questionCount =
 				w1 * normalizedScore +
 				w2 * normalizedTime +
