@@ -1,62 +1,57 @@
-import type {
-	DatabaseRow,
-	OperationType,
-	QueryResult,
-	TablesSnapshot,
-} from "@/lib/types/mockDatabase";
+import type { OperationType, QueryResult } from "@/lib/types/mockDatabase";
 import {
 	DUMMY_DEPARTMENTS_TABLE,
 	DUMMY_EMPLOYEES_TABLE,
+	EmployeeRow,
 } from "@/utils/dummyData";
 import getDummyDataSubset from "@/utils/getDummyDataSubset";
-import { Pool, PoolClient } from "pg";
+import { parse } from "sql-parser";
+import { open } from "sqlite";
+import sqlite3 from "sqlite3";
+
+const getDb = async () => {
+	return open({
+		filename: "../ExerciseDb",
+		driver: sqlite3.Database,
+	});
+};
 
 export class TempDatabase {
-	private pool: Pool;
+	private db: any;
 	private seed: string;
 	private employeesCount: number;
 	private departmentsCount: number;
-	private currentId: number = 1;
 
 	constructor(seed: string, employeesCount: number, departmentsCount: number) {
-		console.log("eyad hassnn : " + process.env.POSTGRES_DB);
-
-		this.pool = new Pool({
-			user: process.env.POSTGRES_USER,
-			password: process.env.POSTGRES_PASSWORD,
-			host: process.env.POSTGRES_HOST,
-			port: parseInt(process.env.POSTGRES_PORT || "5432"),
-			database: process.env.POSTGRES_DB,
-		});
 		this.seed = seed;
 		this.employeesCount = employeesCount;
 		this.departmentsCount = departmentsCount;
 	}
 
 	async initialize() {
-		const client = await this.pool.connect();
+		this.db = await getDb();
 		try {
-			// Create temporary tables with serial id
-			await client.query(`
-        CREATE TEMP TABLE employees (
-          id SERIAL PRIMARY KEY,
-          name VARCHAR(100),
-          position VARCHAR(100),
-          department_id INTEGER,
-          salary INTEGER,
-          date_hired DATE,
-          status VARCHAR(50) DEFAULT 'active',
-          last_working_day DATE
-        );
+			// Create temporary tables
+			await this.db.exec(`
+				CREATE TABLE IF NOT EXISTS employees (
+					id INTEGER PRIMARY KEY AUTOINCREMENT,
+					name TEXT,
+					position TEXT,
+					department_id INTEGER,
+					salary INTEGER,
+					date_hired TEXT,
+					status TEXT DEFAULT 'active',
+					last_working_day TEXT
+				);
 
-        CREATE TEMP TABLE departments (
-          id INTEGER PRIMARY KEY,
-          name VARCHAR(100),
-          manager VARCHAR(100),
-          budget INTEGER,
-          location VARCHAR(100)
-        );
-      `);
+				CREATE TABLE IF NOT EXISTS departments (
+					id INTEGER PRIMARY KEY,
+					name TEXT,
+					manager TEXT,
+					budget INTEGER,
+					location TEXT
+				);
+			`);
 
 			// Get subsets of dummy data
 			const employees = getDummyDataSubset(
@@ -70,87 +65,88 @@ export class TempDatabase {
 				this.departmentsCount,
 			);
 
-			// Insert data into temporary tables
+			// Insert data into tables
 			for (const emp of employees) {
-				await client.query(
-					"INSERT INTO employees (name, position, department_id, salary, date_hired, status, last_working_day) VALUES ($1, $2, $3, $4, $5, $6, $7)",
-					[
-						emp.name,
-						emp.position,
-						emp.department_id,
-						emp.salary,
-						emp.date_hired,
-						emp.status,
-						emp.last_working_day,
-					],
+				await this.db.run(
+					"INSERT INTO employees (name, position, department_id, salary, date_hired, status, last_working_day) VALUES (?, ?, ?, ?, ?, ?, ?)",
+					emp.name,
+					emp.position,
+					emp.department_id,
+					emp.salary,
+					emp.date_hired,
+					emp.status,
+					emp.last_working_day,
 				);
 			}
 
 			for (const dept of departments) {
-				await client.query(
-					"INSERT INTO departments (id, name, manager, budget, location) VALUES ($1, $2, $3, $4, $5)",
-					[dept.id, dept.name, dept.manager, dept.budget, dept.location],
+				await this.db.run(
+					"INSERT INTO departments (id, name, manager, budget, location) VALUES (?, ?, ?, ?, ?)",
+					dept.id,
+					dept.name,
+					dept.manager,
+					dept.budget,
+					dept.location,
 				);
 			}
-
-			// Get the current max id
-			const result = await client.query("SELECT MAX(id) FROM employees");
-			this.currentId = (result.rows[0].max || 0) + 1;
-		} finally {
-			client.release();
+		} catch (err) {
+			console.error("Error initializing database:", err);
 		}
 	}
 
-	async executeQuery(query: string): Promise<QueryResult> {
-		const client = await this.pool.connect();
+	async executeQuery(query: string, realQuery: string): Promise<QueryResult> {
 		try {
-			// First, get a snapshot of the affected tables before the operation
-			const tablesBefore = await this.getTablesSnapshot(client);
+			// const userQueryParsed = parse(query);
+			// const realQueryParsed = parse(realQuery);
 
-			// Execute the query
-			const result = await client.query(query);
+			// const userTables: string[] = userQueryParsed.tables || [];
+			// const realTables: string[] = realQueryParsed.tables || [];
 
-			// Get operation type from the query
+			// const userColumns: string[] = userQueryParsed.columns || [];
+			// const realColumns: string[] = realQueryParsed.columns || [];
+
+			// const tablesMatch = realTables.every((table: string) =>
+			// 	userTables.includes(table),
+			// );
+
+			// const columnsMatch = realColumns.every((column: string) =>
+			// 	userColumns.includes(column),
+			// );
+
+			// if (!tablesMatch || !columnsMatch) {
+			// 	throw new Error(
+			// 		"User query does not match the required query structure.",
+			// 	);
+			// }
+
+			const result = await this.db.all(query);
+
 			const operationType = this.getOperationType(query);
 
 			if (operationType === "SELECT") {
 				return {
-					columns: result.fields.map((field) => field.name),
-					rows: result.rows.map((row) => Object.values(row)),
+					columns: result.length > 0 ? Object.keys(result[0]) : [],
+					rows: result.map((row: EmployeeRow) => Object.values(row)),
 					operation: {
 						type: operationType,
-						rowCount: result.rowCount || 0,
+						rowCount: result.length,
 					},
 				};
 			} else {
-				// For INSERT, UPDATE, DELETE, get affected rows
-				const tablesAfter = await this.getTablesSnapshot(client);
-				const affectedRows = this.getAffectedRows(
-					tablesBefore,
-					tablesAfter,
-					operationType,
-				);
-
+				const rowCount = await this.db.get("SELECT changes() AS count");
 				return {
-					columns: affectedRows.columns,
-					rows: affectedRows.rows,
+					columns: [],
+					rows: [],
 					operation: {
 						type: operationType,
-						rowCount: result.rowCount || 0,
+						rowCount: rowCount.count,
 					},
 				};
 			}
-		} finally {
-			client.release();
+		} catch (err) {
+			console.error("Error executing query:", err);
+			throw err;
 		}
-	}
-
-	private async getTablesSnapshot(client: PoolClient): Promise<TablesSnapshot> {
-		const employees = await client.query("SELECT * FROM employees ORDER BY id");
-		const departments = await client.query(
-			"SELECT * FROM departments ORDER BY id",
-		);
-		return { employees, departments };
 	}
 
 	private getOperationType(query: string): OperationType {
@@ -162,77 +158,15 @@ export class TempDatabase {
 		return "SELECT"; // Default fallback
 	}
 
-	private getAffectedRows(
-		before: TablesSnapshot,
-		after: TablesSnapshot,
-		operationType: OperationType,
-	) {
-		const columns = [
-			"id",
-			"name",
-			"position",
-			"department_id",
-			"salary",
-			"date_hired",
-			"status",
-			"last_working_day",
-		];
-
-		switch (operationType) {
-			case "INSERT":
-				return {
-					columns,
-					rows: after.employees.rows
-						.filter(
-							(row: DatabaseRow) =>
-								!before.employees.rows.find(
-									(r: DatabaseRow) => r.id === row.id,
-								),
-						)
-						.map((row: DatabaseRow) => Object.values(row)),
-				};
-
-			case "UPDATE":
-				return {
-					columns,
-					rows: after.employees.rows
-						.filter((row: DatabaseRow) => {
-							const beforeRow = before.employees.rows.find(
-								(r: DatabaseRow) => r.id === row.id,
-							);
-							return (
-								beforeRow && JSON.stringify(beforeRow) !== JSON.stringify(row)
-							);
-						})
-						.map((row: DatabaseRow) => Object.values(row)),
-				};
-
-			case "DELETE":
-				return {
-					columns,
-					rows: before.employees.rows
-						.filter(
-							(row: DatabaseRow) =>
-								!after.employees.rows.find((r: DatabaseRow) => r.id === row.id),
-						)
-						.map((row: DatabaseRow) => Object.values(row)),
-				};
-
-			default:
-				return { columns: [], rows: [] };
-		}
-	}
-
 	async cleanup() {
-		const client = await this.pool.connect();
 		try {
-			await client.query(`
-        DROP TABLE IF EXISTS employees;
-        DROP TABLE IF EXISTS departments;
-      `);
-		} finally {
-			client.release();
-			await this.pool.end();
+			await this.db.exec(`
+				DROP TABLE IF EXISTS employees;
+				DROP TABLE IF EXISTS departments;
+			`);
+			await this.db.close();
+		} catch (err) {
+			console.error("Error cleaning up database:", err);
 		}
 	}
 }

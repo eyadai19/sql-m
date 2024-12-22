@@ -1,10 +1,18 @@
 import { TempDatabase } from "@/lib/mockDb/db";
 import type { QueryResult } from "@/lib/types/mockDatabase";
 import { NextRequest, NextResponse } from "next/server";
+import { open } from "sqlite";
+import sqlite3 from "sqlite3";
 
+const getDb = async () => {
+	return open({
+		filename: "../ExerciseDb",
+		driver: sqlite3.Database,
+	});
+};
 export async function POST(req: NextRequest) {
 	try {
-		const { query, seed, employeesCount, departmentsCount } = await req.json();
+		const { query, seed, employeesCount, departmentsCount , answer } = await req.json();
 
 		// Only prevent system-level commands
 		if (
@@ -24,7 +32,7 @@ export async function POST(req: NextRequest) {
 		await db.initialize();
 
 		try {
-			const result = await db.executeQuery(query);
+			const result = await db.executeQuery(query , answer);
 
 			// Add operation-specific success messages
 			let successMessage;

@@ -10,6 +10,8 @@ import {
 	userExcerciseAnswerError,
 	userExcerciseAnswerSchema,
 } from "@/lib/types/userSchema";
+import { ngrok_url_compare } from "@/utils/apis";
+import axios from "axios";
 import { AlertCircle, BookOpen, Code, Trophy } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { v4 as uuidv4 } from "uuid";
@@ -37,6 +39,7 @@ export interface ExerciseProps {
 	expectedRowCount?: number;
 	UserExcerciseAnswerAction: (
 		input: z.infer<typeof userExcerciseAnswerSchema>,
+		score: number,
 	) => Promise<userExcerciseAnswerError | undefined>;
 }
 
@@ -57,9 +60,9 @@ export default function Exercise({
 	const [result, setResult] = useState<ResultType>(null);
 	const [error, setError] = useState<ErrorType>(null);
 	const [isCorrect, setIsCorrect] = useState(false);
-	const [attempts, setAttempts] = useState(0);
-	const [activeHint, setActiveHint] = useState(0); // إدارة التلميحات
-	const [showTips, setShowTips] = useState(false); // عرض النصائح
+	const [attempts, setAttempts] = useState(1);
+	const [activeHint, setActiveHint] = useState(0);
+	const [showTips, setShowTips] = useState(false);
 	const exerciseStartTime = useRef<number | null>(null);
 
 	// Initialize start time on first attempt
@@ -96,6 +99,7 @@ export default function Exercise({
 					seed,
 					employeesCount: 8,
 					departmentsCount: 4,
+					answer: answer,
 				}),
 			});
 
@@ -113,32 +117,50 @@ export default function Exercise({
 			};
 
 			// Validate if result matches expected criteria
-			const isResultCorrect = expectedRowCount
-				? data.rows.length === expectedRowCount
-				: true;
+			const isResultCorrect =
+				Array.isArray(data.rows) &&
+				(expectedRowCount !== undefined
+					? data.rows.length === expectedRowCount
+					: true);
 
 			setIsCorrect(isResultCorrect);
 
-			if (isResultCorrect) {
-				// Calculate total elapsed time
-				const endTime = performance.now();
-				const elapsedTime =
-					exerciseStartTime.current !== null
-						? Math.round((endTime - exerciseStartTime.current) / 1000)
-						: 0;
+			if (data.successMessage) {
+				try {
+					const response = await axios.post(ngrok_url_compare, {
+						sentence1: sqlQuery,
+						sentence2: answer,
+					});
+					const score = Math.abs(response.data.cosine_similarity) * 100;
 
-				// Call UserExcerciseAnswerAction with the required data
-				const inputData = {
-					time: elapsedTime,
-					is_show_ans: showAnswer,
-					trials: attempts, // Total incorrect attempts
-				};
-				await UserExcerciseAnswerAction(inputData);
+					const endTime = performance.now();
+					const elapsedTime =
+						exerciseStartTime.current !== null
+							? Math.round((endTime - exerciseStartTime.current) / 1000)
+							: 0;
 
-				queryResult.successMessage =
-					attempts === 1
-						? "Excellent! You solved it on your first try!"
-						: `Great job! You solved it in ${attempts} attempts.`;
+					const inputData = {
+						time: elapsedTime,
+						is_show_ans: showAnswer,
+						trials: attempts,
+					};
+
+					try {
+						await UserExcerciseAnswerAction(inputData, score);
+					} catch (error) {
+						console.error("UserExcerciseAnswerAction error:", error);
+					}
+
+					queryResult.successMessage =
+						attempts === 1
+							? `🎉 Excellent! You nailed it on your first try! 🎯\nYour score: ${score.toFixed(2)}%`
+							: `👏 Great job! You solved it in ${attempts} attempts. 🏆\nYour score: ${score.toFixed(2)}%`;
+					// if (score != 100) {
+					// 	queryResult.successMessage += `\nthe answer: ${answer}`;
+					// }
+				} catch (error) {
+					console.log("error in response" + error);
+				}
 			}
 
 			setResult(queryResult);
@@ -154,8 +176,8 @@ export default function Exercise({
 		setResult(null);
 		setIsCorrect(false);
 		setShowAnswer(false);
-		setAttempts(0); // Reset attempts
-		exerciseStartTime.current = null; // Reset start time
+		setAttempts(0);
+		exerciseStartTime.current = null;
 	};
 
 	return (

@@ -9,7 +9,7 @@ export default function HomePage() {
 
 	return (
 		<div>
-			<p>Redirecting...</p>
+			<p>Loading...</p>
 		</div>
 	);
 }

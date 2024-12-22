@@ -12,6 +12,7 @@ import {
 export async function UserExcerciseAnswerAction(
 	pageName: string,
 	input: z.infer<typeof userExcerciseAnswerSchema>,
+	score: number,
 ): Promise<userExcerciseAnswerError | undefined> {
 	if (!pageName) {
 		return { field: "root", message: "Level is missing" };
@@ -38,6 +39,7 @@ export async function UserExcerciseAnswerAction(
 		userId: user.id,
 		levelId: levelId,
 		...query,
+		score: score
 	};
 
 	try {
