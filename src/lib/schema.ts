@@ -92,7 +92,7 @@ export const TB_user_excercise_summary = pgTable("user_excercise_summary", {
 	time: integer("time"),
 	trials: integer("trials"),
 	is_show_ans: boolean("is_show_ans").notNull(),
-	score: integer("score"),
+	score: numeric("score"),
 });
 
 export const TB_question_bank = pgTable("question_bank", {

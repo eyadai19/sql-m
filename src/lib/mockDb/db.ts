@@ -2,10 +2,8 @@ import type { OperationType, QueryResult } from "@/lib/types/mockDatabase";
 import {
 	DUMMY_DEPARTMENTS_TABLE,
 	DUMMY_EMPLOYEES_TABLE,
-	EmployeeRow,
 } from "@/utils/dummyData";
 import getDummyDataSubset from "@/utils/getDummyDataSubset";
-import { parse } from "sql-parser";
 import { open } from "sqlite";
 import sqlite3 from "sqlite3";
 
@@ -96,40 +94,36 @@ export class TempDatabase {
 
 	async executeQuery(query: string, realQuery: string): Promise<QueryResult> {
 		try {
-			// const userQueryParsed = parse(query);
-			// const realQueryParsed = parse(realQuery);
+			const userResult: Record<string, any>[] = await this.db.all(query);
+			if (userResult.length === 0) {
+				throw new Error("User query returned no results.");
+			}
 
-			// const userTables: string[] = userQueryParsed.tables || [];
-			// const realTables: string[] = realQueryParsed.tables || [];
+			const realResult: Record<string, any>[] = await this.db.all(realQuery);
 
-			// const userColumns: string[] = userQueryParsed.columns || [];
-			// const realColumns: string[] = realQueryParsed.columns || [];
+			const allMatch = realResult.every((realRow: Record<string, any>) =>
+				userResult.some((userRow: Record<string, any>) =>
+					Object.keys(realRow).every((key) => realRow[key] === userRow[key]),
+				),
+			);
 
-			// const tablesMatch = realTables.every((table: string) =>
-			// 	userTables.includes(table),
-			// );
-
-			// const columnsMatch = realColumns.every((column: string) =>
-			// 	userColumns.includes(column),
-			// );
-
-			// if (!tablesMatch || !columnsMatch) {
-			// 	throw new Error(
-			// 		"User query does not match the required query structure.",
-			// 	);
-			// }
-
-			const result = await this.db.all(query);
+			if (!allMatch) {
+				throw new Error(
+					"User query results do not match the required query results.",
+				);
+			}
 
 			const operationType = this.getOperationType(query);
 
 			if (operationType === "SELECT") {
 				return {
-					columns: result.length > 0 ? Object.keys(result[0]) : [],
-					rows: result.map((row: EmployeeRow) => Object.values(row)),
+					columns: userResult.length > 0 ? Object.keys(userResult[0]) : [],
+					rows: userResult.map((row: Record<string, any>) =>
+						Object.values(row),
+					),
 					operation: {
 						type: operationType,
-						rowCount: result.length,
+						rowCount: userResult.length,
 					},
 				};
 			} else {
@@ -155,7 +149,7 @@ export class TempDatabase {
 		if (normalizedQuery.startsWith("insert")) return "INSERT";
 		if (normalizedQuery.startsWith("update")) return "UPDATE";
 		if (normalizedQuery.startsWith("delete")) return "DELETE";
-		return "SELECT"; // Default fallback
+		return "SELECT";
 	}
 
 	async cleanup() {

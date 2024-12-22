@@ -16,7 +16,7 @@ export const userViewSchema = userSchema.pick({
 export const userExcerciseAnswerSchema = z.object({
 	time: z.number(),
 	is_show_ans: z.boolean(),
-	trials: z.number().int().min(1),
+	trials: z.number().int(),
 });
 export const userExcerciseAnswerSchemaForInput = z.object({
 	query: z.string().min(1),

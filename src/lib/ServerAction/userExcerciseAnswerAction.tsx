@@ -33,18 +33,20 @@ export async function UserExcerciseAnswerAction(
 	if (!user) {
 		return { field: "root", message: "account error" };
 	}
+	if (query.trials == 0) query.trials = 1;
 
 	const data = {
 		id: nanoid(),
 		userId: user.id,
 		levelId: levelId,
 		...query,
-		score: score
+		score: score.toFixed(2),
 	};
 
 	try {
 		await db.insert(TB_user_excercise_summary).values(data);
-	} catch {
+	} catch (error) {
+		// console.log(error);
 		return { field: "root", message: "input error" };
 	}
 }

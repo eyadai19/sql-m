@@ -1,5 +1,7 @@
 // "use server";
 import {
+	chatBotApi,
+	getContextApi,
 	ngrok_url_ar_to_en,
 	ngrok_url_en_to_ar,
 	ngrok_url_generate_sql,
@@ -17,7 +19,7 @@ export async function ChatbotAction(
 	"use server";
 	var table;
 	try {
-		const response = await fetch("http://localhost:3000/api/getContext");
+		const response = await fetch(getContextApi);
 		const data = await response.json();
 		if (!response.ok) {
 			alert(data.error || "خطأ أثناء جلب الجداول.");
@@ -57,7 +59,7 @@ export async function ChatbotExpAction(
 	"use server";
 	try {
 		const choose = await userChatBotInputSchema.parseAsync({ input });
-		const response = await axios.post("http://localhost:3000/chatbot", {
+		const response = await axios.post(chatBotApi, {
 			choose,
 		});
 		if (response.data) return { answer: response.data.answer };

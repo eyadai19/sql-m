@@ -22,6 +22,7 @@ const formatDate = (value: string | number) => {
 };
 
 export default function ResultsView({ result }: ResultsViewProps) {
+	
 	return (
 		<section className="mt-6 space-y-4">
 			{result.successMessage && (
