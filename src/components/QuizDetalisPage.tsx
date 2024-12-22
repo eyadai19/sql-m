@@ -22,7 +22,6 @@ export default function QuizDetalisPage({
 		const fetchQuizData = async () => {
 			try {
 				const data = await QuizDetailsAction();
-				console.log("data" + data);
 				
 				if (Array.isArray(data)) {
 					setQuizData(

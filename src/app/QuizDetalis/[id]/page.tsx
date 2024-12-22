@@ -2,7 +2,6 @@ import QuizDetalisPage from "@/components/QuizDetalisPage";
 import { db } from "@/lib/db";
 
 export default function QuizDetalis({ params }: { params: { id: string } }) {
-	console.log("param" + params.id);
 
 	return (
 		<QuizDetalisPage
@@ -19,7 +18,6 @@ async function QuizDetailsAction(
 	| undefined
 > {
 	"use server";
-	console.log("rec id :" + quizId);
 
 	try {
 		const quizDetails = await db.query.TB_quiz_questions.findMany({

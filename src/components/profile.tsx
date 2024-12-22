@@ -31,9 +31,6 @@ export default function ProfilePage({
 	});
 	const router = useRouter();
 	const swiperRef = useRef<any>(null);
-	useEffect(() => {
-		console.log(info?.photo);
-	}, [info?.photo]);
 
 	useEffect(() => {
 		const fetchProfileData = async () => {

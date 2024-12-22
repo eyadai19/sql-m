@@ -33,7 +33,7 @@ async function quizQuestionAction(stageId: string) {
 	"use server";
 	try {
 		const levels = await db.query.TB_level.findMany({
-			where: (level, { eq }) => eq(level.stageId, stageId), //stageId
+			where: (level, { eq }) => eq(level.stageId, stageId),
 		});
 		if (!levels || levels.length === 0) {
 			return [];
@@ -43,7 +43,77 @@ async function quizQuestionAction(stageId: string) {
 		const questions = await db.query.TB_question_bank.findMany({
 			where: (question, { inArray }) => inArray(question.levelId, levelIds),
 		});
-		return questions.map((q) => ({ question: q.question }));
+
+		const user = await getUser();
+		if (!user) return;
+
+		const userParams = await db.query.TB_user_excercise_summary.findMany({
+			where: (u, { eq }) => eq(u.userId, user.id),
+		});
+
+		const bestUserParams = userParams.reduce(
+			(acc, curr) => {
+				const currentScore = parseFloat(curr.score!);
+				if (
+					!existing ||
+					(currentScore && parseFloat(existing.score!) < currentScore)
+				) {
+					acc[curr.levelId] = { ...curr, score: currentScore.toString() };
+				}
+				return acc;
+			},
+			{} as Record<string, (typeof userParams)[0]>,
+		);
+
+		// حساب القيمة القصوى للوقت والمحاولات
+		const maxTime = Math.max(...userParams.map((param) => param.time!));
+		const maxTrials = Math.max(...userParams.map((param) => param.trials!));
+
+		// تحديد الأوزان
+		const w1 = -0.3; // الوزن للـ score (سلبي)
+		const w2 = 0.2; // الوزن للـ time
+		const w3 = 0.2; // الوزن للـ trials
+		const w4 = 1000; // الوزن للـ is_show_ans (عالي جدًا)
+
+		const levelQuestionsCount = levels.map((level) => {
+			const userLevelData = bestUserParams[level.id];
+			if (!userLevelData) {
+				// إذا لم توجد بيانات للمستخدم لهذه اللفلة، قم بتحديد 5 أسئلة افتراضيًا
+				return { levelId: level.id, questionCount: 5 };
+			}
+
+			const { score, time, trials, is_show_ans } = userLevelData;
+
+			// تطبيع البيانات بناءً على القيم القصوى
+			const normalizedScore = Math.min(1, parseFloat(score!) / 100);
+			const normalizedTime = time! / maxTime; // تطبيع الوقت بناءً على القيمة القصوى
+			const normalizedTrials = trials! / maxTrials; // تطبيع المحاولات بناءً على القيمة القصوى
+			const normalizedIsShowAns = is_show_ans ? 1 : 0;
+
+			// حساب عدد الأسئلة بناءً على المعادلة
+			let questionCount =
+				w1 * normalizedScore +
+				w2 * normalizedTime +
+				w3 * normalizedTrials +
+				w4 * normalizedIsShowAns;
+
+			questionCount = Math.min(Math.max(questionCount, 0), 5);
+
+			return { levelId: level.id, questionCount: Math.round(questionCount) };
+		});
+
+		const resultQuestions = levelQuestionsCount.flatMap(
+			({ levelId, questionCount }) => {
+				const questionsForLevel = questions.filter(
+					(q) => q.levelId === levelId,
+				);
+				return questionsForLevel
+					.slice(0, questionCount)
+					.map((q) => ({ question: q.question }));
+			},
+		);
+
+		return resultQuestions;
 	} catch (error) {
 		console.error("Error fetching questions:", error);
 		return { field: "root", message: "error" };

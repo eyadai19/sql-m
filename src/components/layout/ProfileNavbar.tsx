@@ -99,7 +99,6 @@ export function ProfileNavbar({
 					{/* Back Button in Drawer */}
 					<button
 						onClick={() => {
-							console.log("Go back button clicked"); // زر للعودة
 							toggleDrawer();
 						}}
 						className="transition-colors hover:text-white"

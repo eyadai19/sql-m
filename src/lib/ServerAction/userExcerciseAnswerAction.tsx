@@ -46,7 +46,6 @@ export async function UserExcerciseAnswerAction(
 	try {
 		await db.insert(TB_user_excercise_summary).values(data);
 	} catch (error) {
-		// console.log(error);
 		return { field: "root", message: "input error" };
 	}
 }
