@@ -320,7 +320,7 @@ export default function ProfilePage({
 													{info.stage.stage}
 												</td>
 												<td className="border px-6 py-4 text-gray-700">
-													{quiz.mark}%
+													{quiz.mark!.toFixed(2)}%
 												</td>
 												<td className="border px-6 py-4 text-center">
 													<button

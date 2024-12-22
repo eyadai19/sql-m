@@ -109,7 +109,7 @@ export default function QuizDetalisPage({
 								color: "#00203F",
 							}}
 						>
-							{item.accuracy}%
+							{item.accuracy.toFixed(2)}%
 						</div>
 					</div>
 				))}

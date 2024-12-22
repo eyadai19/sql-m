@@ -131,7 +131,12 @@ export default function SqlQuiz({
 		return <p>Loading...</p>;
 	}
 	return (
-		<div className="relative bg-[#00203F] py-10">
+		<div
+			className="flex min-h-screen items-center justify-center px-8"
+			style={{
+				background: "linear-gradient(to bottom, #00203F, #ADF0D1)",
+			}}
+		>
 			{/* Quiz form layout */}
 			<div className="container mx-auto max-w-3xl rounded-lg bg-white px-4 py-8">
 				<h1 className="mb-8 text-center text-3xl font-bold text-[#00203F]">
@@ -180,7 +185,7 @@ export default function SqlQuiz({
 				<div className="fixed inset-0 z-50 flex items-center justify-center bg-gray-600 bg-opacity-50">
 					<div className="w-full max-w-lg rounded-lg bg-white p-8 shadow-lg">
 						<h2 className="mb-4 text-2xl font-bold text-[#00203F]">
-							Your Score: {score} / {questions.length}
+							Your Score: {score?.toFixed(2)} / 100
 						</h2>
 						<Button
 							onClick={handleReviewAnswers}

@@ -1,4 +1,6 @@
 import { getAuthorizedQuiz } from "@/app/(main)/layout";
+import { logoutAction } from "@/app/Profile/page";
+import { ProfileNavbar } from "@/components/layout/ProfileNavbar";
 import SqlQuiz from "@/components/Quiz";
 import { getUser } from "@/lib/auth";
 import { db } from "@/lib/db";
@@ -15,11 +17,15 @@ import { z } from "zod";
 
 export default function quiz({ params }: { params: { id: string } }) {
 	return (
-		<SqlQuiz
-			quizAction={quizAction.bind(null, params.id)}
-			quizQuestionAction={quizQuestionAction.bind(null, params.id)}
-			getAuthorizedQuiz={getAuthorizedQuiz.bind(null, params.id)}
-		/>
+		<div>
+			<ProfileNavbar logoutAction={logoutAction} />
+
+			<SqlQuiz
+				quizAction={quizAction.bind(null, params.id)}
+				quizQuestionAction={quizQuestionAction.bind(null, params.id)}
+				getAuthorizedQuiz={getAuthorizedQuiz.bind(null, params.id)}
+			/>
+		</div>
 	);
 }
 
@@ -127,17 +133,27 @@ async function quizAction(
 		if (!stage) return;
 		if (stage.index != 4) {
 			const x = stage.index + 1;
-			const newStage = await db.query.TB_stage.findFirst({
-				where: (s, { eq }) => eq(s.index, x),
+			const userInfo = await db.query.TB_user.findFirst({
+				where: (u, { eq }) => eq(u.id, user.id),
+				with: {
+					stage: true,
+				},
 			});
-			if (!newStage) return;
+			if (!userInfo) return;
 
-			await db
-				.update(TB_user)
-				.set({
-					stageId: newStage.id,
-				})
-				.where(eq(TB_user.id, user.id));
+			if (userInfo.stage.index < x) {
+				const newStage = await db.query.TB_stage.findFirst({
+					where: (s, { eq }) => eq(s.index, x),
+				});
+				if (!newStage) return;
+
+				await db
+					.update(TB_user)
+					.set({
+						stageId: newStage.id,
+					})
+					.where(eq(TB_user.id, user.id));
+			}
 		}
 		return { score, correctAnswers };
 	} catch (e) {
