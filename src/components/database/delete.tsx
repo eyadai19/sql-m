@@ -8,12 +8,8 @@ import React, { useEffect, useRef, useState } from "react";
 export default function DeleteData() {
 	const [deleteQuery, setDeleteQuery] = useState<string>("");
 	const [popupVisible, setPopupVisible] = useState<boolean>(false);
-	const [popupPosition, setPopupPosition] = useState<{
-		top: number;
-		left: number;
-	}>({ top: 0, left: 0 });
-
 	const popupRef = useRef<HTMLDivElement | null>(null);
+	const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
 	const handleClickOutside = (event: MouseEvent) => {
 		if (popupRef.current && !popupRef.current.contains(event.target as Node)) {
@@ -31,40 +27,25 @@ export default function DeleteData() {
 	}, [popupVisible]);
 
 	const validateAndDeleteData = async () => {
-		const regex = /^DELETE\s+FROM\s+(\S+)\s+WHERE\s+([\s\S]+)$/i;
-		const match = deleteQuery.trim().match(regex);
-
-		if (!match) {
-			alert("Invalid DELETE query.");
-			return;
-		}
-
-		const tableName = match[1];
-		const whereConditions = match[2]
-			.split("AND")
-			.map((condition) => condition.trim());
-
-		if (!tableName || whereConditions.length === 0) {
-			alert("Query must include a table name and conditions.");
-			return;
-		}
-
 		try {
 			const response = await fetch(userDbApi, {
 				method: "POST",
 				headers: { "Content-Type": "application/json" },
-				body: JSON.stringify({ action: "DELETE", tableName, whereConditions }),
+				body: JSON.stringify({ query: deleteQuery }),
 			});
 
 			if (!response.ok) {
 				const errorData = await response.json();
-				alert(errorData.error || "Error while deleting data.");
+				setErrorMessage(
+					`${errorData.error} \n ${errorData.originalError}` ||
+						"Error executing query.",
+				);
 				return;
 			}
 
 			const data = await response.json();
 			alert(data.message);
-			setDeleteQuery(""); // Clear input after success
+			setDeleteQuery("");
 		} catch (error) {
 			console.error("Error while deleting data:", error);
 			alert("An error occurred while deleting data.");
@@ -72,11 +53,6 @@ export default function DeleteData() {
 	};
 
 	const handleIconClick = (event: React.MouseEvent) => {
-		const { clientX, clientY } = event;
-		setPopupPosition({
-			top: clientY + 10,
-			left: clientX - 260,
-		});
 		setPopupVisible(true);
 	};
 
@@ -111,6 +87,11 @@ export default function DeleteData() {
 					<FontAwesomeIcon icon={faInfoCircle}></FontAwesomeIcon>
 				</span>
 			</div>
+			{errorMessage && (
+				<div className="mb-4 rounded-md bg-red-100 p-3 text-red-700">
+					<pre className="whitespace-pre-wrap text-red-500">{errorMessage}</pre>
+				</div>
+			)}
 			<button
 				onClick={validateAndDeleteData}
 				className="rounded-md bg-[#ADF0D1] px-4 py-2 text-[#00203F] shadow hover:bg-[#00203F] hover:text-[#ADF0D1]"

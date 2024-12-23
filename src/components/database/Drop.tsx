@@ -7,18 +7,12 @@ import React, { useEffect, useRef, useState } from "react";
 export default function DropTable() {
 	const [dropQuery, setDropQuery] = useState<string>("");
 	const [popupVisible, setPopupVisible] = useState<boolean>(false);
-	const [popupPosition, setPopupPosition] = useState<{
-		top: number;
-		left: number;
-	}>({ top: 0, left: 0 });
-
-	// إنشاء ref للإشارة إلى الـ popup
 	const popupRef = useRef<HTMLDivElement | null>(null);
+	const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
-	// دالة للتحقق مما إذا كان النقر حدث خارج الـ popup
 	const handleClickOutside = (event: MouseEvent) => {
 		if (popupRef.current && !popupRef.current.contains(event.target as Node)) {
-			setPopupVisible(false); // إغلاق الـ popup إذا تم النقر خارجها
+			setPopupVisible(false);
 		}
 	};
 
@@ -29,44 +23,35 @@ export default function DropTable() {
 	};
 
 	useEffect(() => {
-		// إضافة مستمع الحدث عند عرض الـ popup
 		if (popupVisible) {
 			document.addEventListener("click", handleClickOutside);
 		}
 
-		// إزالة مستمع الحدث عند إخفاء الـ popup
 		return () => {
 			document.removeEventListener("click", handleClickOutside);
 		};
 	}, [popupVisible]);
 
 	const validateAndDropTable = async () => {
-		const regex = /^DROP\s+TABLE\s+(\S+)$/i;
-		const match = dropQuery.trim().match(regex);
-
-		if (!match) {
-			alert("Invalid DROP query.");
-			return;
-		}
-
-		const tableName = match[1];
-
 		try {
 			const response = await fetch(userDbApi, {
 				method: "POST",
 				headers: { "Content-Type": "application/json" },
-				body: JSON.stringify({ action: "DROP", tableName }),
+				body: JSON.stringify({ query: dropQuery }),
 			});
 
 			if (!response.ok) {
 				const errorData = await response.json();
-				alert(errorData.error || "Error while dropping the table.");
+				setErrorMessage(
+					`${errorData.error} \n ${errorData.originalError}` ||
+						"Error executing query.",
+				);
 				return;
 			}
 
 			const data = await response.json();
 			alert(data.message);
-			setDropQuery(""); // Clear input after success
+			setDropQuery("");
 		} catch (error) {
 			console.error("Error while dropping the table:", error);
 			alert("An error occurred while dropping the table.");
@@ -74,19 +59,11 @@ export default function DropTable() {
 	};
 
 	const handleIconClick = (event: React.MouseEvent) => {
-		const { clientX, clientY } = event;
-
-		// Set position for the popup where the user clicked
-		setPopupPosition({
-			top: clientY + 10, // Add some offset to avoid covering the click point
-			left: clientX - 260, // Adjust the left position to be to the left of the button (assuming the width of the dialog is ~250px)
-		});
-
-		setPopupVisible(true); // Show the popup when the icon is clicked
+		setPopupVisible(true);
 	};
 
 	const closePopup = () => {
-		setPopupVisible(false); // Close the popup
+		setPopupVisible(false);
 	};
 
 	return (
@@ -110,6 +87,11 @@ export default function DropTable() {
 					<FontAwesomeIcon icon={faInfoCircle}></FontAwesomeIcon>
 				</span>
 			</div>
+			{errorMessage && (
+				<div className="mb-4 rounded-md bg-red-100 p-3 text-red-700">
+					<pre className="whitespace-pre-wrap text-red-500">{errorMessage}</pre>
+				</div>
+			)}
 			<button
 				onClick={validateAndDropTable}
 				className="rounded-md bg-[#ADF0D1] px-4 py-2 text-[#00203F] shadow hover:bg-[#00203F] hover:text-[#ADF0D1]"

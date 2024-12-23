@@ -7,10 +7,7 @@ import React, { useEffect, useRef, useState } from "react";
 export default function CreateTable() {
 	const [createQuery, setCreateQuery] = useState<string>("");
 	const [popupVisible, setPopupVisible] = useState<boolean>(false);
-	const [popupPosition, setPopupPosition] = useState<{
-		top: number;
-		left: number;
-	}>({ top: 0, left: 0 });
+	const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
 	const popupRef = useRef<HTMLDivElement | null>(null);
 
@@ -37,36 +34,19 @@ export default function CreateTable() {
 	};
 
 	const validateAndCreateTable = async () => {
-		const regex = /^CREATE\s+TABLE\s+(\S+)\s*\(([\s\S]+)\)$/i;
-		const match = createQuery.trim().match(regex);
-
-		if (!match) {
-			alert("تعليمة CREATE غير صحيحة.");
-			return;
-		}
-
-		const tableName = match[1];
-		const columnsPart = match[2].trim();
-		const columns = columnsPart
-			.split(",")
-			.map((col) => col.trim())
-			.filter(Boolean);
-
-		if (!tableName || columns.length === 0) {
-			alert("اسم الجدول أو الأعمدة مفقودة.");
-			return;
-		}
-
 		try {
 			const response = await fetch(userDbApi, {
 				method: "POST",
 				headers: { "Content-Type": "application/json" },
-				body: JSON.stringify({ action: "CREATE", tableName, columns }),
+				body: JSON.stringify({ query: createQuery }),
 			});
 
 			if (!response.ok) {
 				const errorData = await response.json();
-				alert(errorData.error || "خطأ أثناء إنشاء الجدول.");
+				setErrorMessage(
+					`${errorData.error} \n ${errorData.originalError}` ||
+						"Error executing query.",
+				);
 				return;
 			}
 
@@ -80,11 +60,6 @@ export default function CreateTable() {
 	};
 
 	const handleIconClick = (event: React.MouseEvent) => {
-		const { clientX, clientY } = event;
-		setPopupPosition({
-			top: clientY + 10,
-			left: clientX - 260,
-		});
 		setPopupVisible(true);
 	};
 
@@ -113,6 +88,11 @@ export default function CreateTable() {
 					<FontAwesomeIcon icon={faInfoCircle}></FontAwesomeIcon>
 				</span>
 			</div>
+			{errorMessage && (
+				<div className="mb-4 rounded-md bg-red-100 p-3 text-red-700">
+					<pre className="whitespace-pre-wrap text-red-500">{errorMessage}</pre>
+				</div>
+			)}
 			<button
 				onClick={validateAndCreateTable}
 				className="rounded-md bg-[#ADF0D1] px-4 py-2 text-[#00203F] shadow hover:bg-[#00203F] hover:text-[#ADF0D1]"

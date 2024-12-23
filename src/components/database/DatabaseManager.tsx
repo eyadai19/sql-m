@@ -1,5 +1,7 @@
 "use client";
 
+import { faInfoCircle } from "@fortawesome/free-solid-svg-icons";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { useEffect, useRef, useState } from "react";
 import AlterData from "./alter";
 import CreateTable from "./create";
@@ -8,8 +10,6 @@ import DropTable from "./Drop";
 import InsertData from "./Insert";
 import SelectData from "./Select";
 import UpdateData from "./update";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faInfoCircle } from "@fortawesome/free-solid-svg-icons";
 
 export default function DatabaseManager() {
 	const [popupVisible, setPopupVisible] = useState<boolean>(false);

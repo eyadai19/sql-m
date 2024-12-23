@@ -7,14 +7,13 @@ import { useEffect, useRef, useState } from "react";
 export default function InsertData() {
 	const [insertQuery, setInsertQuery] = useState<string>("");
 	const [popupVisible, setPopupVisible] = useState<boolean>(false);
+	const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
-	// إنشاء ref للإشارة إلى الـ popup
 	const popupRef = useRef<HTMLDivElement | null>(null);
 
-	// دالة للتحقق مما إذا كان النقر حدث خارج الـ popup
 	const handleClickOutside = (event: MouseEvent) => {
 		if (popupRef.current && !popupRef.current.contains(event.target as Node)) {
-			setPopupVisible(false); // إغلاق الـ popup إذا تم النقر خارجها
+			setPopupVisible(false);
 		}
 	};
 
@@ -25,59 +24,35 @@ export default function InsertData() {
 	};
 
 	useEffect(() => {
-		// إضافة مستمع الحدث عند عرض الـ popup
 		if (popupVisible) {
 			document.addEventListener("click", handleClickOutside);
 		}
 
-		// إزالة مستمع الحدث عند إخفاء الـ popup
 		return () => {
 			document.removeEventListener("click", handleClickOutside);
 		};
 	}, [popupVisible]);
 
 	const validateAndInsertData = async () => {
-		const regex =
-			/^INSERT\s+INTO\s+(\S+)(?:\s*\(([\s\S]+)\))?\s+VALUES\s*\(([\s\S]+)\)$/i;
-		const match = insertQuery.trim().match(regex);
-
-		if (!match) {
-			alert("Invalid INSERT query.");
-			return;
-		}
-
-		const tableName = match[1];
-		const columnsPart = match[2]?.trim();
-		const valuesPart = match[3]?.trim();
-
-		const columns = columnsPart
-			? columnsPart.split(",").map((col) => col.trim())
-			: [];
-		const values = valuesPart
-			? valuesPart.split(",").map((val) => val.trim())
-			: [];
-
-		if (!tableName || columns.length === 0 || values.length === 0) {
-			alert("Incomplete input data.");
-			return;
-		}
-
 		try {
 			const response = await fetch(userDbApi, {
 				method: "POST",
 				headers: { "Content-Type": "application/json" },
-				body: JSON.stringify({ action: "INSERT", tableName, columns, values }),
+				body: JSON.stringify({ query: insertQuery }),
 			});
 
 			if (!response.ok) {
 				const errorData = await response.json();
-				alert(errorData.error || "Error while inserting data.");
+				setErrorMessage(
+					`${errorData.error} \n ${errorData.originalError}` ||
+						"Error executing query.",
+				);
 				return;
 			}
 
 			const data = await response.json();
 			alert(data.message);
-			setInsertQuery(""); // Clear input after success
+			setInsertQuery("");
 		} catch (error) {
 			console.error("Error while inserting data:", error);
 			alert("An error occurred while inserting data.");
@@ -85,11 +60,11 @@ export default function InsertData() {
 	};
 
 	const handleIconClick = () => {
-		setPopupVisible(true); // Show popup when icon is clicked
+		setPopupVisible(true);
 	};
 
 	const closePopup = () => {
-		setPopupVisible(false); // Close popup
+		setPopupVisible(false);
 	};
 
 	return (
@@ -113,6 +88,11 @@ export default function InsertData() {
 					<FontAwesomeIcon icon={faInfoCircle}></FontAwesomeIcon>
 				</span>
 			</div>
+			{errorMessage && (
+				<div className="mb-4 rounded-md bg-red-100 p-3 text-red-700">
+					<pre className="whitespace-pre-wrap text-red-500">{errorMessage}</pre>
+				</div>
+			)}
 			<button
 				onClick={validateAndInsertData}
 				className="rounded-md bg-[#ADF0D1] px-4 py-2 text-[#00203F] shadow hover:bg-[#00203F] hover:text-[#ADF0D1]"
@@ -127,13 +107,13 @@ export default function InsertData() {
 						style={{ zIndex: 9 }}
 					></div>
 					<div
-						ref={popupRef} // ربط الـ popup مع الـ ref
+						ref={popupRef}
 						className="absolute rounded-md bg-white shadow-lg"
 						style={{
 							position: "fixed",
 							top: "50%",
 							left: "50%",
-							transform: "translate(-50%, -50%)", // This ensures the popup is centered
+							transform: "translate(-50%, -50%)",
 							zIndex: 10,
 							minWidth: "250px",
 							padding: "20px",

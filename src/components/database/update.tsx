@@ -7,13 +7,8 @@ import React, { useEffect, useRef, useState } from "react";
 export default function UpdateData() {
 	const [updateQuery, setUpdateQuery] = useState<string>("");
 	const [popupVisible, setPopupVisible] = useState<boolean>(false);
-	const [popupPosition, setPopupPosition] = useState<{
-		top: number;
-		left: number;
-	}>({ top: 0, left: 0 });
-
+	const [errorMessage, setErrorMessage] = useState<string | null>(null);
 	const popupRef = useRef<HTMLDivElement | null>(null);
-
 	const handleClickOutside = (event: MouseEvent) => {
 		if (popupRef.current && !popupRef.current.contains(event.target as Node)) {
 			setPopupVisible(false);
@@ -30,60 +25,31 @@ export default function UpdateData() {
 		if (popupVisible) {
 			document.addEventListener("click", handleClickOutside);
 		}
-
 		return () => {
 			document.removeEventListener("click", handleClickOutside);
 		};
 	}, [popupVisible]);
 
 	const validateAndUpdateData = async () => {
-		const regex = /^UPDATE\s+(\S+)\s+SET\s+([\s\S]+)\s+WHERE\s+([\s\S]+)$/i;
-		const match = updateQuery.trim().match(regex);
-
-		if (!match) {
-			alert("تعليمة UPDATE غير صحيحة.");
-			return;
-		}
-
-		const tableName = match[1];
-		const setPart = match[2].trim();
-		const wherePart = match[3].trim();
-
-		const setColumns = setPart.split(",").map((col) => {
-			const [column, value] = col.split("=").map((part) => part.trim());
-			return { column, value };
-		});
-
-		const whereConditions = wherePart
-			.split("AND")
-			.map((condition) => condition.trim());
-
-		if (!tableName || setColumns.length === 0 || whereConditions.length === 0) {
-			alert("معلومات التحديث غير مكتملة.");
-			return;
-		}
-
 		try {
 			const response = await fetch(userDbApi, {
 				method: "POST",
 				headers: { "Content-Type": "application/json" },
 				body: JSON.stringify({
-					action: "UPDATE",
-					tableName,
-					setColumns,
-					whereConditions,
+					query: updateQuery,
 				}),
 			});
-
 			if (!response.ok) {
 				const errorData = await response.json();
-				alert(errorData.error || "خطأ أثناء تحديث البيانات.");
+				setErrorMessage(
+					`${errorData.error} \n ${errorData.originalError}` ||
+						"Error executing query.",
+				);
 				return;
 			}
-
 			const data = await response.json();
 			alert(data.message);
-			setUpdateQuery(""); // مسح الحقل بعد النجاح
+			setUpdateQuery("");
 		} catch (error) {
 			console.error("خطأ أثناء تحديث البيانات:", error);
 			alert("حدث خطأ أثناء تحديث البيانات.");
@@ -91,11 +57,6 @@ export default function UpdateData() {
 	};
 
 	const handleIconClick = (event: React.MouseEvent) => {
-		const { clientX, clientY } = event;
-		setPopupPosition({
-			top: clientY + 10,
-			left: clientX - 260,
-		});
 		setPopupVisible(true);
 	};
 
@@ -124,13 +85,17 @@ export default function UpdateData() {
 					<FontAwesomeIcon icon={faInfoCircle}></FontAwesomeIcon>
 				</span>
 			</div>
+			{errorMessage && (
+				<div className="mb-4 rounded-md bg-red-100 p-3 text-red-700">
+					<pre className="whitespace-pre-wrap text-red-500">{errorMessage}</pre>
+				</div>
+			)}
 			<button
 				onClick={validateAndUpdateData}
 				className="rounded-md bg-[#ADF0D1] px-4 py-2 text-[#00203F] shadow hover:bg-[#00203F] hover:text-[#ADF0D1]"
 			>
 				Update Data
 			</button>
-
 			{popupVisible && (
 				<>
 					<div

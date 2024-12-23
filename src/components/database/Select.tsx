@@ -10,10 +10,7 @@ export default function SelectData() {
 		[],
 	);
 	const [popupVisible, setPopupVisible] = useState<boolean>(false);
-	const [popupPosition, setPopupPosition] = useState<{
-		top: number;
-		left: number;
-	}>({ top: 0, left: 0 });
+	const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
 	const popupRef = useRef<HTMLDivElement | null>(null);
 
@@ -40,37 +37,22 @@ export default function SelectData() {
 	}, [popupVisible]);
 
 	const validateAndSelectData = async () => {
-		const regex = /^SELECT\s+([\s\S]+)\s+FROM\s+(\S+)$/i;
-		const match = selectQuery.trim().match(regex);
-
-		if (!match) {
-			alert("Invalid SELECT query.");
-			return;
-		}
-
-		const columnsPart = match[1].trim();
-		const tableName = match[2].trim();
-		const columns = columnsPart.split(",").map((col) => col.trim());
-
-		if (!tableName || columns.length === 0) {
-			alert("Incomplete SELECT query.");
-			return;
-		}
-
+		setErrorMessage(null);
 		try {
 			const response = await fetch(userDbApi, {
 				method: "POST",
 				headers: { "Content-Type": "application/json" },
 				body: JSON.stringify({
-					action: "SELECT",
-					tableName,
-					selectColumns: columns,
+					query: selectQuery,
 				}),
 			});
 
 			if (!response.ok) {
 				const errorData = await response.json();
-				alert(errorData.error || "Error executing query.");
+				setErrorMessage(
+					`${errorData.error} \n ${errorData.originalError}` ||
+						"Error executing query.",
+				);
 				return;
 			}
 
@@ -79,16 +61,11 @@ export default function SelectData() {
 			setSelectResults(data.data);
 		} catch (error) {
 			console.error("Error executing query:", error);
-			alert("An error occurred while executing the query.");
+			setErrorMessage("An error occurred while executing the query.");
 		}
 	};
 
 	const handleIconClick = (event: React.MouseEvent) => {
-		const { clientX, clientY } = event;
-		setPopupPosition({
-			top: clientY + 10,
-			left: clientX - 260,
-		});
 		setPopupVisible(true);
 	};
 
@@ -117,6 +94,11 @@ export default function SelectData() {
 					<FontAwesomeIcon icon={faInfoCircle}></FontAwesomeIcon>
 				</span>
 			</div>
+			{errorMessage && (
+				<div className="mb-4 rounded-md bg-red-100 p-3 text-red-700">
+					<pre className="whitespace-pre-wrap text-red-500">{errorMessage}</pre>
+				</div>
+			)}
 			<button
 				onClick={validateAndSelectData}
 				className="rounded-md bg-[#ADF0D1] px-4 py-2 text-[#00203F] shadow hover:bg-[#00203F] hover:text-[#ADF0D1]"
@@ -177,7 +159,6 @@ export default function SelectData() {
 				</>
 			)}
 
-			{/* تحسين عرض الجدول */}
 			{selectResults.length > 0 && (
 				<div className="mt-6 rounded-lg bg-white p-6 shadow-md">
 					<h3 className="mb-4 text-lg font-medium text-[#00203F]">

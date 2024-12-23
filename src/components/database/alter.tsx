@@ -7,13 +7,13 @@ import React, { useEffect, useRef, useState } from "react";
 export default function AlterData() {
 	const [alterQuery, setAlterQuery] = useState<string>("");
 	const [popupVisible, setPopupVisible] = useState<boolean>(false);
+	const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
 	const popupRef = useRef<HTMLDivElement | null>(null);
 
-	// دالة للتحقق مما إذا كان النقر حدث خارج الـ popup
 	const handleClickOutside = (event: MouseEvent) => {
 		if (popupRef.current && !popupRef.current.contains(event.target as Node)) {
-			setPopupVisible(false); // إغلاق الـ popup إذا تم النقر خارجها
+			setPopupVisible(false);
 		}
 	};
 
@@ -24,70 +24,35 @@ export default function AlterData() {
 	};
 
 	useEffect(() => {
-		// إضافة مستمع الحدث عند عرض الـ popup
 		if (popupVisible) {
 			document.addEventListener("click", handleClickOutside);
 		}
 
-		// إزالة مستمع الحدث عند إخفاء الـ popup
 		return () => {
 			document.removeEventListener("click", handleClickOutside);
 		};
 	}, [popupVisible]);
 
 	const validateAndAlterData = async () => {
-		// تعبير regex لتحليل تعليمة ALTER
-		const regex =
-			/^ALTER\s+TABLE\s+(\S+)\s+(ADD|DROP)\s+COLUMN\s+(\S+)\s+(\S+)$/i;
-		const match = alterQuery.trim().match(regex);
-
-		if (!match) {
-			alert("Invalid ALTER query.");
-			return;
-		}
-
-		const tableName = match[1]; // اسم الجدول
-		const action1 = match[2].toUpperCase(); // ADD أو DROP
-		const columnName = match[3]; // اسم العمود
-		const columnType = match[4]; // نوع العمود (فقط في حالة ADD)
-
-		// تحقق من صحة الإدخال
-		if (!tableName || !columnName || !action1) {
-			alert("Incomplete ALTER query.");
-			return;
-		}
-
-		// بناء JSON لإرسال البيانات إلى الخادم
-		const requestData: { [key: string]: any } = {
-			action: "ALTER",
-			tableName,
-			actionType: action1,
-			columnName,
-		};
-
-		// إذا كان الإجراء هو ADD، نضيف نوع العمود
-		if (action1 === "ADD" && columnType) {
-			requestData.columnType = columnType;
-		}
-
-		// إرسال البيانات إلى الخادم
 		try {
 			const response = await fetch(userDbApi, {
 				method: "POST",
 				headers: { "Content-Type": "application/json" },
-				body: JSON.stringify(requestData),
+				body: JSON.stringify({ query: alterQuery }),
 			});
 
-			// معالجة الرد من الخادم
 			if (!response.ok) {
 				const errorData = await response.json();
-				alert(errorData.error || "Error while altering table structure.");
+				setErrorMessage(
+					`${errorData.error} \n ${errorData.originalError}` ||
+						"Error executing query.",
+				);
 				return;
 			}
 
 			const data = await response.json();
-			alert(data.message); // عرض رسالة النجاح
-			setAlterQuery(""); // مسح الإدخال بعد النجاح
+			alert(data.message);
+			setAlterQuery("");
 		} catch (error) {
 			console.error("Error while altering table structure:", error);
 			alert("An error occurred while altering the table structure.");
@@ -95,14 +60,11 @@ export default function AlterData() {
 	};
 
 	const handleIconClick = (event: React.MouseEvent) => {
-		const { clientX, clientY } = event;
-
-
-		setPopupVisible(true); // Show the popup when the icon is clicked
+		setPopupVisible(true);
 	};
 
 	const closePopup = () => {
-		setPopupVisible(false); // Close the popup
+		setPopupVisible(false);
 	};
 
 	return (
@@ -126,6 +88,11 @@ export default function AlterData() {
 					<FontAwesomeIcon icon={faInfoCircle}></FontAwesomeIcon>
 				</span>
 			</div>
+			{errorMessage && (
+				<div className="mb-4 rounded-md bg-red-100 p-3 text-red-700">
+					<pre className="whitespace-pre-wrap text-red-500">{errorMessage}</pre>
+				</div>
+			)}
 			<button
 				onClick={validateAndAlterData}
 				className="rounded-md bg-[#ADF0D1] px-4 py-2 text-[#00203F] shadow hover:bg-[#00203F] hover:text-[#ADF0D1]"
