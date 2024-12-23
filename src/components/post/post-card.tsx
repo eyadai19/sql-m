@@ -1,129 +1,157 @@
 "use client";
 
-import { useState } from "react";
-import { PostProps } from "@/lib/types/post";
-import { Avatar, AvatarFallback, AvatarImage} from "@/components/ui/avatar";
+import { Post } from "@/app/Community/page";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { CommentList } from "./comment-list";
-import { CommentForm } from "./comment-form";
-import { formatDistanceToNow } from "date-fns";
-import { Heart, MessageCircle, Share } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { formatDistanceToNow } from "date-fns";
+import { Heart, MessageCircle } from "lucide-react";
+import { useState } from "react";
+import { CommentForm } from "./comment-form";
+import { CommentList } from "./comment-list";
 
-export function PostCard({
-  post,
-  comments,
-  likes,
-  onLike,
-  onComment,
-  onShare,
-}: PostProps) {
-  const [isLiking, setIsLiking] = useState(false);
-  const [showComments, setShowComments] = useState(false);
+export default function PostCard({
+	post,
+	postLikeAction,
+	postCommentAction,
+	postCommentLikeAction,
+}: {
+	post: Post;
+	postLikeAction: (
+		postId: string,
+	) => Promise<{ field: string; message: string } | undefined>;
+	postCommentAction: (
+		postId: string,
+		content: string,
+		photo: string | null,
+	) => Promise<{ field: string; message: string } | undefined>;
+	postCommentLikeAction: (
+		commentId: string,
+	) => Promise<{ field: string; message: string } | undefined>;
+}) {
+	const [isLiking, setIsLiking] = useState(false);
+	const [showComments, setShowComments] = useState(false);
 
-  const handleLike = async () => {
-    if (isLiking) return;
-    setIsLiking(true);
-    try {
-      await onLike(post.id);
-    } finally {
-      setIsLiking(false);
-    }
-  };
+	const handleLike = async () => {
+		if (isLiking) return;
+		{
+			setIsLiking(true);
+			try {
+				const result = await postLikeAction(post.id);
+				if (result) {
+					console.error("Error liking post:", result.message);
+					// Optionally handle UI feedback based on the specific field/message.
+				}
+			} catch (error) {
+				console.error("Unexpected error while liking post:", error);
+			} finally {
+				setIsLiking(false);
+			}
+		}
+	};
 
-  const handleComment = async (content: string) => {
-    await onComment(post.id, content);
-  };
+	// const handleCommentLike = async () => {
+	// 	await postCommentLikeAction(post.id);
+	// };
 
-  return (
-    <Card className="max-w-2xl mx-auto">
-      <div className="p-6">
-        {/* Header */}
-        <div className="flex items-center gap-4 mb-4">
-          <Avatar className="w-12 h-12">
-            <AvatarImage src={post.author.avatar} alt={post.author.name} />
-            <AvatarFallback>{post.author.name.slice(0, 2).toUpperCase()}</AvatarFallback>
-          </Avatar>
-          <div>
-            <h2 className="font-semibold">{post.author.name}</h2>
-            <p className="text-sm text-muted-foreground">
-              {formatDistanceToNow(new Date(post.timestamp), { addSuffix: true })}
-            </p>
-          </div>
-        </div>
+	return (
+		<Card className="mx-auto max-w-2xl">
+			<div className="p-6">
+				{/* Header */}
+				<div className="mb-4 flex items-center gap-4">
+					<Avatar className="h-12 w-12">
+						{post.user.photo && (
+							<div>
+								<AvatarImage src={post.user.photo} alt={post.user.name} />,
+							</div>
+						)}
+						<AvatarFallback>
+							{post.user.name.slice(0, 2).toUpperCase()}
+						</AvatarFallback>
+					</Avatar>
+					<div>
+						<h2 className="font-semibold">{post.user.name}</h2>
+						<p className="text-sm text-muted-foreground">
+							{formatDistanceToNow(new Date(post.createdTime), {
+								addSuffix: true,
+							})}
+						</p>
+					</div>
+				</div>
 
-        {/* Content */}
-        <div className="space-y-4">
-          <h3 className="text-xl font-semibold">{post.title}</h3>
-          <p className="text-base">{post.content}</p>
-          {post.image && (
-            <div className="relative aspect-video rounded-lg overflow-hidden">
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img
-                src={post.image}
-                alt="Post image"
-                className="object-cover w-full h-full"
-              />
-            </div>
-          )}
-        </div>
+				{/* Content */}
+				<div className="space-y-4">
+					<h3 className="text-xl font-semibold">{post.title}</h3>
+					<p className="text-base">{post.content}</p>
+					{post.photo && (
+						<div className="relative aspect-video overflow-hidden rounded-lg">
+							{/* eslint-disable-next-line @next/next/no-img-element */}
+							<img
+								src={post.photo}
+								alt="Post image"
+								className="h-full w-full object-cover"
+							/>
+						</div>
+					)}
+				</div>
 
-        {/* Actions */}
-        <div className="flex items-center gap-6 mt-6">
-          <Button
-            variant="ghost"
-            size="sm"
-            className={cn(
-              "flex items-center gap-2",
-              likes.isLiked && "text-red-500"
-            )}
-            onClick={handleLike}
-            disabled={isLiking}
-          >
-            <Heart
-              className={cn(
-                "w-5 h-5",
-                likes.isLiked && "fill-current"
-              )}
-            />
-            <span>{likes.count}</span>
-          </Button>
+				{/* Actions */}
+				<div className="mt-6 flex items-center gap-6">
+					<Button
+						variant="ghost"
+						size="sm"
+						className={cn(
+							"flex items-center gap-2",
+							post.likesCount != 0 && "text-red-500",
+						)}
+						onClick={handleLike}
+						disabled={isLiking}
+					>
+						<Heart
+							className={cn("h-5 w-5", post.likesCount != 0 && "fill-current")}
+						/>
+						<span>{post.likesCount}</span>
+					</Button>
 
-          <Button
-            variant="ghost"
-            size="sm"
-            className="flex items-center gap-2"
-            onClick={() => setShowComments(!showComments)}
-          >
-            <MessageCircle className="w-5 h-5" />
-            <span>{comments.length}</span>
-          </Button>
+					<Button
+						variant="ghost"
+						size="sm"
+						className="flex items-center gap-2"
+						onClick={() => setShowComments(!showComments)}
+					>
+						<MessageCircle className="h-5 w-5" />
+						<span>{post.comments.length}</span>
+					</Button>
 
-          {onShare && (
-            <Button
-              variant="ghost"
-              size="sm"
-              className="flex items-center gap-2"
-              onClick={() => onShare(post.id)}
-            >
-              <Share className="w-5 h-5" />
-              <span>Share</span>
-            </Button>
-          )}
-        </div>
-      </div>
+					{/* {onShare && (
+						<Button
+							variant="ghost"
+							size="sm"
+							className="flex items-center gap-2"
+							onClick={() => onShare(post.id)}
+						>
+							<Share className="h-5 w-5" />
+							<span>Share</span>
+						</Button>
+					)} */}
+				</div>
+			</div>
 
-      {/* Comments Section */}
-      {showComments && (
-        <div className="border-t p-6 space-y-6">
-          <CommentForm
-            onSubmit={handleComment}
-            userAvatar={post.author.avatar} // In a real app, this would be the current user's avatar
-          />
-          <CommentList comments={comments} />
-        </div>
-      )}
-    </Card>
-  );
+			{/* Comments Section */}
+			{showComments && (
+				<div className="space-y-6 border-t p-6">
+					<CommentForm
+						postCommentAction={postCommentAction}
+						postId={post.id}
+						userPhoto={post.user.photo}
+					/>
+					<CommentList
+						comments={post.comments}
+						postCommentLikeAction={postCommentLikeAction}
+					/>
+				</div>
+			)}
+		</Card>
+	);
 }

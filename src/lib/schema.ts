@@ -1,14 +1,13 @@
 import { relations } from "drizzle-orm";
 import {
-	numeric,
 	boolean,
-	customType,
 	integer,
+	numeric,
 	pgTable,
+	real,
 	serial,
 	text,
 	timestamp,
-	real,
 } from "drizzle-orm/pg-core";
 
 export const TB_user = pgTable("user", {
@@ -109,6 +108,7 @@ export const TB_posts = pgTable("posts", {
 	userId: text("user_id")
 		.notNull()
 		.references(() => TB_user.id, { onDelete: "cascade" }),
+	title: text("title").notNull(),
 	content: text("content").notNull(),
 	photo: text("photo_url"),
 	createdTime: timestamp("created_time", {
