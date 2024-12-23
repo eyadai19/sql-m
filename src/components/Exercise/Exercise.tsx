@@ -1,14 +1,12 @@
 "use client";
 
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { Badge } from "@/components/ui/badge";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Progress } from "@/components/ui/progress";
+import { Card, CardContent } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import type { QueryResult } from "@/lib/types/mockDatabase";
 import {
-	userExcerciseAnswerError,
-	userExcerciseAnswerSchema,
+  userExcerciseAnswerError,
+  userExcerciseAnswerSchema,
 } from "@/lib/types/userSchema";
 import { ngrok_url_compare } from "@/utils/apis";
 import axios from "axios";
@@ -16,12 +14,13 @@ import { AlertCircle, BookOpen, Code, Trophy } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { v4 as uuidv4 } from "uuid";
 import { z } from "zod";
-import ControlButtons from "./ControlButtons";
-import Hints from "./Hints";
-import ResultsView from "./ResultsView";
-import SQLEditor from "./SQLEditor";
-import TablesView from "./TablesView";
-import TaskPrompt from "./TaskPrompt";
+import ControlButtons from "./common/ControlButtons";
+import Hints from "./common/Hints";
+import ResultsView from "./common/ResultsView";
+import SQLEditor from "./common/SQLEditor";
+import TablesView from "./common/TablesView";
+import TaskPrompt from "./common/TaskPrompt";
+import ExerciseHeader from "./common/ExerciseHeader";
 
 export type ResultType = QueryResult | null;
 export type ErrorType = string | null;
@@ -44,16 +43,16 @@ export interface ExerciseProps {
 }
 
 export default function Exercise({
-	title = "SQL Exercise",
-	prompt,
-	tables,
-	answer,
-	difficulty,
-	tips = [],
-	hints = [],
-	seed = uuidv4(),
-	expectedRowCount,
-	UserExcerciseAnswerAction,
+  title = "SQL Exercise",
+  prompt,
+  tables,
+  answer,
+  difficulty,
+  tips = [],
+  hints = [],
+  seed = uuidv4(),
+  expectedRowCount,
+  UserExcerciseAnswerAction,
 }: ExerciseProps) {
 	const [sqlQuery, setSqlQuery] = useState<string>("");
 	const [showAnswer, setShowAnswer] = useState(false);
@@ -65,29 +64,22 @@ export default function Exercise({
 	const [showTips, setShowTips] = useState(false);
 	const exerciseStartTime = useRef<number | null>(null);
 
-	// Initialize start time on first attempt
-	useEffect(() => {
-		if (attempts === 1 && exerciseStartTime.current === null) {
-			exerciseStartTime.current = performance.now();
-		}
-	}, [attempts]);
+  useEffect(() => {
+    if (attempts === 1 && exerciseStartTime.current === null) {
+      exerciseStartTime.current = performance.now();
+    }
+  }, [attempts]);
 
-	const difficultyColor = {
-		Easy: "bg-green-100 text-green-800",
-		Medium: "bg-yellow-100 text-yellow-800",
-		Hard: "bg-red-100 text-red-800",
-	}[difficulty];
+  const handleRunQuery = async () => {
+    if (!sqlQuery.trim()) {
+      setError("Please enter a SQL query");
+      return;
+    }
 
-	const handleRunQuery = async () => {
-		if (!sqlQuery.trim()) {
-			setError("Please enter a SQL query");
-			return;
-		}
-
-		try {
-			setError(null);
-			setResult(null);
-			setAttempts((prev) => prev + 1);
+    try {
+      setError(null);
+      setResult(null);
+      setAttempts((prev) => prev + 1);
 
 			const response = await fetch("/api/validate-query", {
 				method: "POST",
@@ -103,18 +95,18 @@ export default function Exercise({
 				}),
 			});
 
-			if (!response.ok) {
-				const data = await response.json();
-				setError(data.error);
-				return;
-			}
+      if (!response.ok) {
+        const data = await response.json();
+        setError(data.error);
+        return;
+      }
 
-			const data = await response.json();
+      const data = await response.json();
 
-			const queryResult: QueryResult = {
-				...data,
-				successMessage: undefined,
-			};
+      const queryResult: QueryResult = {
+        ...data,
+        successMessage: undefined,
+      };
 
 			// Validate if result matches expected criteria
 			const isResultCorrect =
@@ -123,7 +115,7 @@ export default function Exercise({
 					? data.rows.length === expectedRowCount
 					: true);
 
-			setIsCorrect(isResultCorrect);
+      setIsCorrect(isResultCorrect);
 
 			if (data.successMessage) {
 				try {
@@ -163,12 +155,12 @@ export default function Exercise({
 				}
 			}
 
-			setResult(queryResult);
-		} catch (err) {
-			console.error("Query execution error:", err);
-			setError("An error occurred while executing the query");
-		}
-	};
+      setResult(queryResult);
+    } catch (err) {
+      console.error("Query execution error:", err);
+      setError("An error occurred while executing the query");
+    }
+  };
 
 	const handleReset = () => {
 		setSqlQuery("");
@@ -180,72 +172,56 @@ export default function Exercise({
 		exerciseStartTime.current = null;
 	};
 
-	return (
-		<Card className="mx-auto mb-3 w-full max-w-4xl bg-white/40 backdrop-blur-xl">
-			<CardHeader className="space-y-4">
-				<div className="flex items-center justify-between">
-					<CardTitle className="text-2xl font-bold text-sailorBlue">
-						{title}
-					</CardTitle>
-					<Badge className={difficultyColor}>{difficulty}</Badge>
-				</div>
-				{attempts > 0 && (
-					<div className="space-y-2">
-						<div className="flex justify-between text-sm text-gray-600">
-							<span>Attempts: {attempts}</span>
-							{isCorrect && (
-								<span className="flex items-center gap-1 text-green-600">
-									<Trophy className="h-4 w-4" />
-									Completed
-								</span>
-							)}
-						</div>
-						<Progress value={isCorrect ? 100 : Math.min(attempts * 10, 90)} />
-					</div>
-				)}
-			</CardHeader>
+  return (
+    <Card className="mx-auto mb-3 w-full max-w-4xl bg-white/40 backdrop-blur-xl">
+      <ExerciseHeader
+        title={title}
+        difficulty={difficulty}
+        attempts={attempts}
+        isCompleted={isCorrect}
+      />
 
-			<CardContent className="space-y-6">
-				<Tabs defaultValue="exercise" className="w-full">
-					<TabsList className="grid w-full grid-cols-2">
-						<TabsTrigger value="exercise" className="flex items-center gap-2">
-							<Code className="h-4 w-4" />
-							Exercise
-						</TabsTrigger>
-						<TabsTrigger value="help" className="flex items-center gap-2">
-							<BookOpen className="h-4 w-4" />
-							Help & Tips
-						</TabsTrigger>
-					</TabsList>
+      <CardContent className="space-y-6">
+        <Tabs defaultValue="exercise" className="w-full">
+          <TabsList className="grid w-full grid-cols-2">
+            <TabsTrigger value="exercise" className="flex items-center gap-2">
+              <Code className="h-4 w-4" />
+              Exercise
+            </TabsTrigger>
+            <TabsTrigger value="help" className="flex items-center gap-2">
+              <BookOpen className="h-4 w-4" />
+              Help & Tips
+            </TabsTrigger>
+          </TabsList>
 
-					<TabsContent value="exercise" className="space-y-6">
-						<TaskPrompt prompt={prompt} />
-						<TablesView tables={tables} seed={seed} />
-						<SQLEditor
-							value={sqlQuery}
-							onChange={setSqlQuery}
-							onExecute={handleRunQuery}
-						/>
-						<ControlButtons
-							onRun={handleRunQuery}
-							onReset={handleReset}
-							onShowAnswer={() => {
-								setSqlQuery(answer || "");
-								setShowAnswer(true);
-							}}
-							showAnswer={showAnswer}
-						/>
-						{error && (
-							<Alert variant="destructive">
-								<div className="flex items-center">
-									<AlertCircle className="mr-3 h-4 w-4" />
-									<AlertDescription>{error}</AlertDescription>
-								</div>
-							</Alert>
-						)}
+          <TabsContent value="exercise" className="space-y-6">
+            <TaskPrompt prompt={prompt} />
+            <TablesView tables={tables} seed={seed} />
+            <SQLEditor
+              value={sqlQuery}
+              onChange={setSqlQuery}
+              onExecute={handleRunQuery}
+            />
+            <ControlButtons
+              onRun={handleRunQuery}
+              onReset={handleReset}
+              onShowAnswer={() => {
+                setSqlQuery(answer || "");
+                setShowAnswer(true);
+              }}
+              showAnswer={showAnswer}
+            />
+            {error && (
+              <Alert variant="destructive">
+                <div className="flex items-center">
+                  <AlertCircle className="mr-3 h-4 w-4" />
+                  <AlertDescription>{error}</AlertDescription>
+                </div>
+              </Alert>
+            )}
 
-						{result && <ResultsView result={result} />}
-					</TabsContent>
+            {result && <ResultsView result={result} />}
+          </TabsContent>
 
 					<TabsContent value="help" className="space-y-6">
 						<Hints

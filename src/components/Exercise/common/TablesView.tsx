@@ -1,5 +1,5 @@
-import EmployeesTable from "./EmployeesTable";
-import DepartmentsTable from "./DepartmentsTable";
+import EmployeesTable from "../EmployeesTable";
+import DepartmentsTable from "..//DepartmentsTable";
 
 interface TablesViewProps {
   tables: string[];
