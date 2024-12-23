@@ -1,15 +1,15 @@
-import { TempDatabase } from "@/lib/mockDb/db";
+import { TempDatabase } from "@/lib/ExerciseDb/db";
 import type { QueryResult } from "@/lib/types/mockDatabase";
 import { NextRequest, NextResponse } from "next/server";
 import { open } from "sqlite";
 import sqlite3 from "sqlite3";
 
-const getDb = async () => {
-	return open({
-		filename: "../ExerciseDb",
-		driver: sqlite3.Database,
-	});
-};
+// const getDb = async () => {
+// 	return open({
+// 		filename: "../ExerciseDb",
+// 		driver: sqlite3.Database,
+// 	});
+// };
 export async function POST(req: NextRequest) {
 	try {
 		const { query, seed, employeesCount, departmentsCount , answer } = await req.json();
