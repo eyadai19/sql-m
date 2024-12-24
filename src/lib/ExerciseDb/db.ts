@@ -1,4 +1,4 @@
-import type { OperationType, QueryResult } from "@/lib/types/mockDatabase";
+import type { OperationType, QueryResult } from "@/lib/types/exerciseDatabase";
 import {
 	DUMMY_DEPARTMENTS_TABLE,
 	DUMMY_EMPLOYEES_TABLE,

@@ -1,6 +1,5 @@
 // "use server";
 import {
-	chatBotApi,
 	getContextApi,
 	ngrok_url_ar_to_en,
 	ngrok_url_en_to_ar,
@@ -48,31 +47,26 @@ export async function ChatbotAction(
 	}
 }
 
-export async function ChatbotExpAction(
-	input: z.infer<typeof userChatBotInputSchema>,
-): Promise<
-	| { answer: String }
-	| { question: String; answers: String[] }
-	| userExcerciseAnswerError
-	| undefined
-> {
-	"use server";
-	try {
-		const choose = await userChatBotInputSchema.parseAsync({ input });
-		const response = await axios.post(chatBotApi, {
-			choose,
-		});
-		if (response.data) return { answer: response.data.answer };
-		else {
-			const a = ["d", "d"]; // get the answers array from response json
-			// const asnwers = a.map((x) => ({ asnwer: x }));
-			return { question: response.data.asnw, answers: a };
-		}
-	} catch (error) {
-		console.error("Error sending question to API:", error);
-		return { field: "root", message: "Failed to retrieve answer" };
-	}
-}
+// export async function ChatbotExpAction(
+// 	input: z.infer<typeof userChatBotInputSchema>,
+// ): Promise<
+// 	| { answer: String }
+// 	| { question: String; answers: String[] }
+// 	| userExcerciseAnswerError
+// 	| undefined
+// > {
+// 	"use server";
+// 	try {
+// 		const choose = await userChatBotInputSchema.parseAsync({ input });
+// 		const response = await axios.post(chatBotApi, {
+// 			choose,
+// 		});
+
+// 	} catch (error) {
+// 		console.error("Error sending question to API:", error);
+// 		return { field: "root", message: "Failed to retrieve answer" };
+// 	}
+// }
 
 export async function ChatbotTrEnToAr(
 	input: z.infer<typeof userChatBotInputSchema>,

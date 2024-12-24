@@ -28,7 +28,12 @@ export const userCreateTabelSchema = z.object({
 });
 
 export const userChatBotInputSchema = z.object({
-	question: z.string().min(1, "enter question"),
+	question: z.string().min(1),
+});
+
+export const userChatBotExpInputSchema = z.object({
+	question: z.string().min(1),
+	answer: z.string().min(1),
 });
 
 export const userQuizAnswerSchema = z.object({

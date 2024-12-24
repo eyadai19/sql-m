@@ -7,7 +7,7 @@ import {
 	TableHeader,
 	TableRow,
 } from "@/components/ui/table";
-import type { QueryResult } from "@/lib/types/mockDatabase";
+import type { QueryResult } from "@/lib/types/exerciseDatabase";
 import { Trophy } from "lucide-react";
 
 interface ResultsViewProps {
@@ -22,7 +22,6 @@ const formatDate = (value: string | number) => {
 };
 
 export default function ResultsView({ result }: ResultsViewProps) {
-	
 	return (
 		<section className="mt-6 space-y-4">
 			{result.successMessage && (

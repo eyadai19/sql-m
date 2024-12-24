@@ -3,7 +3,7 @@
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Card, CardContent } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import type { QueryResult } from "@/lib/types/mockDatabase";
+import type { QueryResult } from "@/lib/types/exerciseDatabase";
 import {
 	userExcerciseAnswerError,
 	userExcerciseAnswerSchema,
