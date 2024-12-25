@@ -12,8 +12,8 @@ export function useExerciseState(
   const [attempts, setAttempts] = useState(0);
   const [isCompleted, setIsCompleted] = useState(false);
   const [startTime] = useState(Date.now());
-  const [activeHint, setActiveHint] = useState(-1);
-  const [showHints, setShowHints] = useState(false);
+  const [activeHint, setActiveHint] = useState(0);
+  const [showHints, setShowHints] = useState(true);
   const [showTips, setShowTips] = useState(false);
   const [showAnswer, setShowAnswer] = useState(false);
 

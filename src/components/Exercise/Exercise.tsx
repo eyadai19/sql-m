@@ -185,7 +185,7 @@ export default function Exercise({
 
 			<CardContent className="space-y-6">
 				<Tabs defaultValue="exercise" className="w-full">
-					<TabsList className="grid w-full grid-cols-2">
+					<TabsList className="grid w-full grid-cols-2 ">
 						<TabsTrigger value="exercise" className="flex items-center gap-2">
 							<Code className="h-4 w-4" />
 							Exercise

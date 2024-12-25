@@ -15,7 +15,7 @@ export default function ChoiceButton({ choice, isSelected, onClick }: ChoiceButt
     <Button
       onClick={onClick}
       variant={isSelected ? "default" : "outline"}
-      className="h-auto p-4 flex flex-col items-center justify-center w-full"
+      className="h-auto p-4 flex flex-col items-center justify-center w-full "
     >
       {choice.imageUrl && (
         <div className="relative w-full h-32 mb-2">

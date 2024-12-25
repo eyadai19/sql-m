@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { Progress } from '@/components/ui/progress';
-import { Card } from '@/components/ui/card';
+import { Card, CardContent } from '@/components/ui/card';
 import { DragDropContainer } from './DragDropContainer';
 import  ExerciseHeader  from '../common/ExerciseHeader';
 import  TaskPrompt  from '../common/TaskPrompt';
@@ -10,6 +10,8 @@ import  Hints  from '../common/Hints';
 import  ControlButtons  from '../common/ControlButtons';
 import { formatTime } from '@/lib/utils';
 import type { DragDropExerciseProps, ExerciseState, DragDropItem } from './types';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Code, BookOpen } from 'lucide-react';
 
 const INITIAL_STATE: ExerciseState = {
   attempts: 0,
@@ -18,7 +20,7 @@ const INITIAL_STATE: ExerciseState = {
   isComplete: false,
   score: 0,
   showAnswer: false,
-  showHints: false,
+  showHints: true,
   showTips: false,
   activeHint: 0,
 };
@@ -111,15 +113,28 @@ function calculateScore(current: string[], correct: string[]): number {
 }
 
   return (
-    <Card className="mx-auto p-6 w-full max-w-4xl bg-white/40 ">
+    <Card className="mx-auto w-full max-w-4xl bg-white/40 my-3">
       <ExerciseHeader
         title={title}
         difficulty={difficulty}
         attempts={state.attempts}
         isCompleted={state.isComplete}
       />
-      
+      <CardContent className='space-y-6'>
       <TaskPrompt prompt={prompt} />
+
+      <Tabs defaultValue="exercise" className="w-full">
+					<TabsList className="grid w-full grid-cols-2 ">
+						<TabsTrigger value="exercise" className="flex items-center gap-2">
+							<Code className="h-4 w-4" />
+							Exercise
+						</TabsTrigger>
+						<TabsTrigger value="help" className="flex items-center gap-2">
+							<BookOpen className="h-4 w-4" />
+							Help & Tips
+						</TabsTrigger>
+					</TabsList>
+					<TabsContent value="exercise" className="space-y-6">
 
       <div className="mb-6">
         <DragDropContainer
@@ -128,7 +143,6 @@ function calculateScore(current: string[], correct: string[]): number {
         />
       </div>
 
-      <div className="space-y-4">
         <Progress value={state.score} className="h-2" />
 
         <ControlButtons
@@ -137,6 +151,8 @@ function calculateScore(current: string[], correct: string[]): number {
           onShowAnswer={handleShowAnswer}
           showAnswer={state.showAnswer}
         />
+        </TabsContent>
+					<TabsContent value="help" className="space-y-6">
 
         <Hints
           hints={hints}
@@ -155,7 +171,10 @@ function calculateScore(current: string[], correct: string[]): number {
             attempts and {formatTime(state.elapsedTime)}.
           </div>
         )}
-      </div>
+        </TabsContent>
+      
+      </Tabs>
+      </CardContent>
     </Card>
   );
 }

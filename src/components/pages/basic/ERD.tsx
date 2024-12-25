@@ -1,6 +1,9 @@
 "use client";
 
 import Exercise from "@/components/Exercise/Exercise";
+import DragDropExercise from "@/components/Exercise/DragDropExercise/DragDropExercise";
+import MultipleChoiceExercise from "@/components/Exercise/MultipleChoiceExercise/MultipleChoiceExercise";
+import TrueFalseExercise from "@/components/Exercise/TrueFalseExercise/TrueFalseExercise";
 import Explanation from "@/components/Explanation/Explanation";
 import { Button } from "@/components/ui/button";
 import { UserExcerciseAnswerAction } from "@/lib/ServerAction/userExcerciseAnswerAction";
@@ -13,7 +16,7 @@ export default function ERDPage({
 }: {
 	getAuthorizedPage: (levelName: string) => Promise<boolean | undefined>;
 }) {
-	const { explanationParams, exerciseParams } = PAGE_DATA.ERD;
+	const { explanationParams, exerciseParams, trueFalseParams, multipleChoiceParams, dragDropParams } = PAGE_DATA.ERD;
 	const [hasAccess, setHasAccess] = useState<boolean | undefined>(undefined);
 	const [showMessage, setShowMessage] = useState(false);
 
@@ -48,6 +51,10 @@ export default function ERDPage({
 	return (
 		<div>
 			<Explanation {...explanationParams} />
+			
+			<DragDropExercise {...dragDropParams} />
+			<MultipleChoiceExercise {...multipleChoiceParams} />
+			<TrueFalseExercise {...trueFalseParams} />
 			<Exercise
 				{...exerciseParams}
 				UserExcerciseAnswerAction={UserExcerciseAnswerAction.bind(

@@ -40,7 +40,7 @@ export function DragDropContainer({ items, onReorder }: DragDropContainerProps) 
       modifiers={[restrictToVerticalAxis]}
     >
       <SortableContext items={items.map(item => item.id)} strategy={verticalListSortingStrategy}>
-        <div className="space-y-2">
+        <div className="space-y-2 my-2">
           {items.map((item) => (
             <DraggableItem key={item.id} {...item} />
           ))}

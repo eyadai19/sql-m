@@ -24,7 +24,7 @@ export function DraggableItem({ id, content }: DragDropItem) {
     <div
       ref={setNodeRef}
       style={style}
-      className={`flex items-center gap-2 rounded-lg  bg-white/20 border-sailorBlue/100 p-4 shadow-sm transition-colors `}
+      className={`flex items-center gap-2 rounded-lg  bg-white/20 border-sailorBlue/100 p-4 shadow-sm transition-colors text-sm `}
     >
       <button
         {...attributes}

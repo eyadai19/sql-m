@@ -1,7 +1,7 @@
 "use client";
 
-import { Checkbox } from "@/components/ui/checkbox";
-import { Label } from "@/components/ui/label";
+import { Button } from "@/components/ui/button";
+import { Check, X } from "lucide-react";
 import type { TrueFalseQuestion } from './types';
 
 interface QuestionProps {
@@ -20,27 +20,27 @@ export function Question({
   onAnswer
 }: QuestionProps) {
   return (
-    <div className="border rounded-lg p-4 bg-white">
-      <div className="flex items-start space-x-4">
-        <div className="space-y-3">
-          <div className="flex items-center space-x-2">
-            <Checkbox
-              id={`true-${question.id}`}
-              checked={answer === true}
-              disabled={isCompleted}
-              onCheckedChange={() => onAnswer(question.id, true)}
-            />
-            <Label htmlFor={`true-${question.id}`}>True</Label>
-          </div>
-          <div className="flex items-center space-x-2">
-            <Checkbox
-              id={`false-${question.id}`}
-              checked={answer === false}
-              disabled={isCompleted}
-              onCheckedChange={() => onAnswer(question.id, false)}
-            />
-            <Label htmlFor={`false-${question.id}`}>False</Label>
-          </div>
+    <div className="border rounded-lg p-4 bg-white/30">
+      <div className="flex  gap-4 justify-center items-center">
+        <div className="flex  gap-2">
+          <Button
+            onClick={() => onAnswer(question.id, true)}
+            variant={answer === true ? "default" : "outline"}
+            disabled={isCompleted}
+            className="w-8 flex items-center justify-center text-center"
+            size="sm"
+          >
+            <Check className="h-4 w-4" />
+          </Button>
+          <Button
+            onClick={() => onAnswer(question.id, false)}
+            variant={answer === false ? "default" : "outline"}
+            disabled={isCompleted}
+            className="w-8 flex items-center justify-center"
+            size="sm"
+          >
+            <X className=" h-4 w-4" />
+          </Button>
         </div>
         <p className="text-lg flex-1">{question.statement}</p>
       </div>
@@ -48,8 +48,8 @@ export function Question({
       {showExplanation && (
         <div className={`mt-4 p-3 rounded-lg ${
           answer === question.isCorrect
-            ? "bg-green-50 text-green-800"
-            : "bg-red-50 text-red-800"
+            ? "bg-green-50/40 text-green-800"
+            : "bg-red-50/40 text-red-800"
         }`}>
           {question.explanation}
         </div>
