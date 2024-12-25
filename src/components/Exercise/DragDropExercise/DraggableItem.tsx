@@ -1,30 +1,40 @@
-"use client";
+'use client';
 
-import { Draggable } from "@hello-pangea/dnd";
+import { useSortable } from '@dnd-kit/sortable';
+import { CSS } from '@dnd-kit/utilities';
+import type { DragDropItem } from './types';
+import { GripVertical } from 'lucide-react';
 
-interface DraggableItemProps {
-  id: string;
-  content: string;
-  index: number;
-}
+export function DraggableItem({ id, content }: DragDropItem) {
+  const {
+    attributes,
+    listeners,
+    setNodeRef,
+    transform,
+    transition,
+    isDragging,
+  } = useSortable({ id });
 
-export default function DraggableItem({ id, content, index }: DraggableItemProps) {
+  const style = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+  };
+
   return (
-    <Draggable draggableId={id} index={index}>
-      {(provided) => (
-        <div
-          ref={provided.innerRef}
-          {...provided.draggableProps}
-          {...provided.dragHandleProps}
-          className="p-4 bg-white rounded-lg shadow-sm border border-gray-200 cursor-move touch-none"
-          style={{
-            ...provided.draggableProps.style,
-            transform: provided.draggableProps.style?.transform,
-          }}
-        >
-          {content}
-        </div>
-      )}
-    </Draggable>
+    <div
+      ref={setNodeRef}
+      style={style}
+      className={`flex items-center gap-2 rounded-lg  bg-white/20 border-sailorBlue/100 p-4 shadow-sm transition-colors `}
+    >
+      <button
+        {...attributes}
+        {...listeners}
+        className="touch-none text-muted-foreground hover:text-foreground"
+        aria-label="Drag handle"
+      >
+        <GripVertical className="h-5 w-5" />
+      </button>
+      <div className="flex-1">{content}</div>
+    </div>
   );
 }

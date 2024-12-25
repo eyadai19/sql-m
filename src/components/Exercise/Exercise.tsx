@@ -173,7 +173,7 @@ export default function Exercise({
 	};
 
 	return (
-		<Card className="mx-auto mb-3 w-full max-w-4xl bg-white/40 backdrop-blur-xl">
+		<Card className=" mb-3 w-full max-w-4xl bg-white/40 backdrop-blur-xl">
 			<ExerciseHeader
 				title={title}
 				difficulty={difficulty}

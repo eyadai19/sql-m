@@ -17,14 +17,14 @@ export default function ControlButtons({
   showAnswer,
 }: ControlButtonsProps) {
   return (
-    <section className="flex justify-between">
-      <div className="space-x-2">
+    <section className="flex justify-between items-center">
+      <div className="space-x-2 flex items-center">
         {onRun && (
           <Button
             onClick={onRun}
             className="bg-sailorBlue hover:bg-lightSailorBlue text-gray-200"
           >
-            Run Query
+            Submit
           </Button>
         )}
         <Button

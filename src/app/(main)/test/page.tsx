@@ -5,22 +5,54 @@ import TrueFalseExercise from '@/components/Exercise/TrueFalseExercise'
 import React from 'react'
 
 export default function page() {
+  const exerciseParams = {
+    title: "Creating an ERD Diagram",
+    prompt: "Arrange the following steps in the correct order to create an Entity-Relationship Diagram (ERD).",
+    items: [
+      { 
+        id: '1', 
+        content: 'Identify entities (e.g., Customer, Order, Product) that represent main objects in the system' 
+      },
+      { 
+        id: '2', 
+        content: 'Define relationships between entities (e.g., Customer places Order, Order contains Product)' 
+      },
+      { 
+        id: '3', 
+        content: 'Determine attributes for each entity (e.g., Customer: name, email, address)' 
+      },
+      { 
+        id: '4', 
+        content: 'Specify cardinality for relationships (e.g., one-to-many, many-to-many)' 
+      },
+      { 
+        id: '5', 
+        content: 'Add primary and foreign keys to establish entity connections' 
+      }
+    ],
+    mode: 'simple' as const,
+    correctOrder: ['1', '3', '2', '4', '5'],
+    difficulty: 'Medium' as const,
+    hints: [
+      "Think about what information you need before establishing connections",
+      "Consider which steps depend on having other information first",
+      "Remember that keys are used to implement relationships"
+    ],
+    tips: [
+      "Start with the basic building blocks before adding details",
+      "Attributes help define what data each entity will store",
+      "Relationships and cardinality work together to show how entities interact"
+    ],
+    onComplete: (data: { time: number; trials: number }) => {
+      console.log('Exercise completed:', data);
+    }
+  };
+
   return (
     <div>
       
-      <DragDropExercise
-  title="Order the Steps of Database Normalization"
-  prompt="Arrange the following steps in the correct order of database normalization."
-  items={[
-    { id: "3nf", content: "Third Normal Form: Remove transitive dependencies" },
-    { id: "1nf", content: "First Normal Form: Atomic values" },
-    { id: "2nf", content: "Second Normal Form: Remove partial dependencies" }
-  ]}
-  correctOrder={["1nf", "2nf", "3nf"]}
-  difficulty="Medium"
-  hints={["Think about dependencies", "Consider the order of complexity"]}
-  onComplete={(data) => console.log(data)}
-/>
+      <DragDropExercise {...exerciseParams} />
+
 
 
 <TrueFalseExercise

@@ -111,11 +111,11 @@ export default function Explanation({
 							</h2>
 							<Card className="border-sailorBlue/40 bg-gray-100/40">
 								<CardContent className="p-4">
-									<ul className="list-disc space-y-2 pl-5">
+									<ul className="list-disc space-y-2 ">
 										{notes.map((note, index) => (
 											<li
 												key={index}
-												className="flex items-start text-base text-sailorBlue"
+												className="flex items-start text-sm text-sailorBlue"
 											>
 												
 												{note.length > 0 && (
@@ -166,7 +166,7 @@ export default function Explanation({
 						<CollapsibleTrigger asChild>
 							<Button
 								variant="outline"
-								className="flex w-full items-center justify-between p-4"
+								className="flex w-full items-center justify-between p-4 bg-white/30"
 							>
 								<span className="flex items-center gap-2">
 									<BookOpen className="h-4 w-4" />
