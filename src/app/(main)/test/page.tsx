@@ -1,7 +1,7 @@
 'use client'
 import DragDropExercise from '@/components/Exercise/DragDropExercise/DragDropExercise'
 import MultipleChoiceExercise from '@/components/Exercise/MultipleChoiceExercise/MultipleChoiceExercise'
-import TrueFalseExercise from '@/components/Exercise/TrueFalseExercise'
+import TrueFalseExercise from '@/components/Exercise/TrueFalseExercise/TrueFalseExercise'
 import React from 'react'
 
 export default function page() {
@@ -48,6 +48,57 @@ export default function page() {
     }
   };
 
+   const erdTrueFalseParams = {
+    title: "Understanding Entity-Relationship Diagrams",
+    prompt: "Evaluate these statements about Entity-Relationship Diagrams (ERDs). Mark each statement as True or False.",
+    difficulty: "Medium" as const,
+    questions: [
+      {
+        id: "erd-1",
+        statement: "In an ERD, a many-to-many relationship can be directly implemented in a relational database without a junction table.",
+        isCorrect: false,
+        explanation: "False. Many-to-many relationships require a junction (bridge) table to be properly implemented in a relational database. This table contains foreign keys from both entities."
+      },
+      {
+        id: "erd-2",
+        statement: "Weak entities in an ERD must have a identifying relationship with a strong entity to be meaningful.",
+        isCorrect: true,
+        explanation: "True. Weak entities depend on strong entities for their identification and cannot exist independently. They must have an identifying relationship with at least one strong entity."
+      },
+      {
+        id: "erd-3",
+        statement: "Composite attributes in an ERD can be broken down into multiple simple attributes.",
+        isCorrect: true,
+        explanation: "True. Composite attributes are made up of multiple simple attributes. For example, 'address' can be broken down into street, city, state, and zip code."
+      },
+      {
+        id: "erd-4",
+        statement: "Derived attributes must be physically stored in the database table.",
+        isCorrect: false,
+        explanation: "False. Derived attributes are calculated from other attributes and don't need to be stored physically. For example, age can be derived from date of birth."
+      },
+      {
+        id: "erd-5",
+        statement: "A single entity in an ERD can participate in multiple relationships simultaneously.",
+        isCorrect: true,
+        explanation: "True. An entity can have relationships with multiple other entities. For example, a Student entity might relate to Course, Department, and Dormitory entities."
+      }
+    ],
+    hints: [
+      "Think about how relationships are implemented in actual database tables",
+      "Consider the dependencies between different types of entities",
+      "Remember the different types of attributes and their characteristics"
+    ],
+    tips: [
+      "Visualize how the concepts would be implemented in a real database",
+      "Focus on the practical implications of each statement",
+      "Consider both logical design and physical implementation"
+    ],
+    onComplete: (data: { time: number; trials: number }) => {
+      console.log('Exercise completed:', data);
+    }
+  };
+
   return (
     <div>
       
@@ -56,18 +107,7 @@ export default function page() {
 
 
 <TrueFalseExercise
-  title="Database Relationships"
-  prompt="Evaluate these statements about database relationships."
-  questions={[
-    {
-      id: "q1",
-      statement: "A foreign key can reference multiple primary keys simultaneously.",
-      isCorrect: false,
-      explanation: "A foreign key can only reference one primary key at a time."
-    }
-  ]}
-  difficulty="Easy"
-  onComplete={(data) => console.log(data)}
+  {...erdTrueFalseParams}
 />
 
 <MultipleChoiceExercise

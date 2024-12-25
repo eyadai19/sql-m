@@ -43,7 +43,7 @@ export default function Hints({
             <Card className="bg-gray-100/40">
               <CardContent className="p-4">
                 {hints.slice(0, activeHint + 1).map((hint, index) => (
-                  <p key={index} className="mb-2 text-gray-700">
+                  <p key={index} className="mb-2 text-gray-700 text-base">
                     {index + 1}. {hint}
                   </p>
                 ))}
@@ -71,7 +71,7 @@ export default function Hints({
               <CardContent className="p-4">
                 <ul className="list-disc pl-5 space-y-2">
                   {tips.map((tip, index) => (
-                    <li key={index} className="text-gray-700 text-sm">
+                    <li key={index} className="text-gray-700 text-base">
                       {tip}
                     </li>
                   ))}
