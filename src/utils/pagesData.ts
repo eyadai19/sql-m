@@ -4,7 +4,7 @@ import type {
 	MultipleChoiceExerciseProps as MultipleChoiceParams,
 } from "@/lib/types/exerciseTypes";
 
-import type { ExplanationProps as ExplanationParams } from "@/components/Explanation/Explanation";
+import type { ExplanationProps as ExplanationParams } from "@/components/Explanation/types";
 
 interface ExerciseParams {
 	title?: string;
