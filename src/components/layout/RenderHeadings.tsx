@@ -7,7 +7,7 @@ import Heading from "./Heading";
 export default function RenderHeadings() {
 	const currentPath = usePathname();
 	return (
-		<div>
+		<div className="px-4">
 			{allPath.map((group) => (
 				<div key={group.name}>
 					{group.data.map((page) => {
