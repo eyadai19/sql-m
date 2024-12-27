@@ -10,6 +10,24 @@ import {
 	timestamp,
 } from "drizzle-orm/pg-core";
 
+export const TB_exp_session = pgTable("exp_session", {
+	id: text("id").primaryKey(),
+	userId: text("user_id")
+		.notNull()
+		.references(() => TB_user.id, { onDelete: "cascade" }),
+	isMoreThanTable: boolean("isMoreThanTable"),
+	selectCondition: boolean("selectCondition"),
+	useAgFun: boolean("useAgFun"),
+	useGroupBy: boolean("useGroupBy"),
+});
+
+export const RE_exp_session = relations(TB_exp_session, ({ one }) => ({
+	user: one(TB_user, {
+		fields: [TB_exp_session.userId],
+		references: [TB_user.id],
+	}),
+}));
+
 export const TB_user = pgTable("user", {
 	id: text("id").primaryKey(),
 	username: text("username").notNull().unique(),

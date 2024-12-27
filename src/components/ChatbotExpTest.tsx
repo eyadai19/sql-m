@@ -61,7 +61,6 @@ export default function ChatbotExpTest({
 				setExtraOptions(tableNames);
 				setExtraOptionsColumns(resolvedFun);
 				setSyntax(result.answer);
-
 				setEndMessage("");
 			} else if (Array.isArray(resolvedFun)) {
 				setExtraOptions(resolvedFun);
@@ -205,9 +204,9 @@ export default function ChatbotExpTest({
 						</ul>
 					</div>
 				)}
-
+				
 				{/* عرض الأعمدة كـ Checkboxes أو RadioButtons */}
-				{selectedTable && tableColumns.length > 0 && (
+				{!endMessage && selectedTable && tableColumns.length > 0 && (
 					<div className="mt-4">
 						<p className="mb-2 font-medium text-gray-700">
 							Select columns from {selectedTable.split(":")[0]}:

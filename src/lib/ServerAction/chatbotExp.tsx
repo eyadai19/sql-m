@@ -1,3 +1,14 @@
+// let isMoreThanTable: Boolean = false;
+// let selectCondition: Boolean = false;
+// let useAgFun: Boolean = false;
+// let useGroupBy: Boolean = false;
+
+import { eq } from "drizzle-orm";
+import { nanoid } from "nanoid";
+import { getUser } from "../auth";
+import { db } from "../db";
+import { TB_exp_session } from "../schema";
+
 export async function ChatbotExpAction(
 	question: string,
 	answer: string,
@@ -18,9 +29,35 @@ export async function ChatbotExpAction(
 	  }
 	| { question: string; answers: string[] }
 	| { field: string; message: string }
-	> {
+> {
 	"use server";
-	let isMoreThanColumn: Boolean;
+	var isMoreThanTable: boolean = false;
+	var selectCondition: boolean = false;
+	var useAgFun: boolean = false;
+	var useGroupBy: boolean = false;
+	const user = await getUser();
+	if (!user) return { field: "root", message: "user error" };
+
+	const existingSession = await db.query.TB_exp_session.findFirst({
+		where: (s, { eq }) => eq(s.userId, user.id),
+	});
+	if (!existingSession) {
+		const newSesstion = {
+			id: nanoid(),
+			userId: user.id,
+			isMoreThanTable: isMoreThanTable,
+			selectCondition: selectCondition,
+			useAgFun: useAgFun,
+			useGroupBy: useGroupBy,
+		};
+		await db.insert(TB_exp_session).values(newSesstion);
+	} else {
+		isMoreThanTable = existingSession.isMoreThanTable!;
+		selectCondition = existingSession.selectCondition!;
+		useAgFun = existingSession.useAgFun!;
+		useGroupBy = existingSession.useGroupBy!;
+	}
+
 	async function chose_table() {
 		function extractTableNames(context: string) {
 			const regex = /CREATE TABLE (\w+)/g;
@@ -92,7 +129,20 @@ export async function ChatbotExpAction(
 			return { field: "root", message: "Failed to fetch table" };
 		}
 	}
+	async function updateSession() {
+		const user = await getUser();
+		if (!user) return { field: "root", message: "user error" };
 
+		await db
+			.update(TB_exp_session)
+			.set({
+				isMoreThanTable: isMoreThanTable,
+				selectCondition: selectCondition,
+				useAgFun: useAgFun,
+				useGroupBy: useGroupBy,
+			})
+			.where(eq(TB_exp_session.userId, user.id));
+	}
 	try {
 		if (question === "What kind of instructions do you want?") {
 			if (answer === "dml") {
@@ -128,7 +178,7 @@ export async function ChatbotExpAction(
 				return {
 					fun: chose_table(),
 					message: "chose the table",
-					answer: "drop table {table_name}",
+					answer: "DROP table {table_name}",
 				};
 			}
 			if (answer === "no") {
@@ -193,7 +243,8 @@ export async function ChatbotExpAction(
 					// view all table to chose one then view all columns for this table to chose - if click on + then user can chose new column - foreach column should have input filed for value
 					message: "chose the table then chose the columns and enter the value",
 					fun: getTablesWithColumns(),
-					answer: "INSERT INTO {table_name} ({[column_name]}) VALUES {[value]};",
+					answer:
+						"INSERT INTO {table_name} ({[column_name]}) VALUES {[value]};",
 				};
 			}
 			if (answer === "delete") {
@@ -201,7 +252,7 @@ export async function ChatbotExpAction(
 					// view all table to chose one - ui for condition , show all column and when chose one show operator then enter value
 					message: "chose the table to delete ",
 					fun: getTablesWithColumns(),
-					answer: "DELETE FROM {table_name} WHERE condition;",
+					answer: "DELETE FROM {table_name} where (|condition|);",
 				};
 			}
 			if (answer === "modify") {
@@ -227,80 +278,124 @@ export async function ChatbotExpAction(
 					message: "chose the table to delete ",
 					fun: getTablesWithColumns(),
 					answer:
-						"UPDATE {table_name} SET {[column_name = value]} WHERE condition;",
+						"UPDATE {table_name} SET {[column_name = value]} where |condition|;",
 				};
 			}
 		}
-		// /////////////////
-		// if (question === "is the data present in more than one table?") {
-		// 	if (answer === "yes") {
-		// 		// x = chose tables;
-		// 		isMoreThanColumn = true;
-		// 		answer = "no";
-		// 	}
-		// 	if (answer === "no") {
-		// 		// chose_columns_query;
-		// 		return {
-		// 			question: "does the data you want have to be in one line?",
-		// 			answers: ["yes", "no"],
-		// 		};
-		// 	}
-		// }
-		// if (question === "does the data you want have to be in one line?") {
-		// 	if (answer === "yes") {
-		// 		// حالة خاصة
-		// 		return {
-		// 			question: "select the name of the process?",
-		// 			answers: ["min", "max", "sum", "avg", "count"],
-		// 		};
-		// 		// answer = "no";
-		// 	}
-		// 	if (answer === "no") {
-		// 		return {
-		// 			question: "do you want to add a condition?",
-		// 			answers: ["yes", "no"],
-		// 		};
-		// 	}
-		// }
-		// if (question === "select the name of the process?") {
-		// 	if (
-		// 		answer === "min" ||
-		// 		answer === "max" ||
-		// 		answer === "sum" ||
-		// 		answer === "avg" ||
-		// 		answer === "count"
-		// 	) {
-		// 		return {
-		// 			question: "do you want to add a condition?",
-		// 			answers: ["yes", "no"],
-		// 		};
-		// 	}
-		// }
-		// if (question === "do you want to add a condition?") {
-		// 	if (answer === "yes") {
-		// 		// x = add_condition();
-		// 		answer = "no";
-		// 	}
-		// 	if (answer === "no") {
-		// 		return {
-		// 			question: "do you want to arrange the data?",
-		// 			answers: ["yes", "no"],
-		// 		};
-		// 	}
-		// }
+		// // // // // // // // // // // // // // // // // // // // // // //
+		// // // // // // // // // // // // // // // // // // // // // // //
+		// // // // // // // // // // // // // // // // // // // // // // //
+		if (question === "is the data present in more than one table?") {
+			if (answer === "yes") {
+				// x = chose tables;
+				isMoreThanTable = true;
+				updateSession();
+				answer = "no";
+			}
+			if (answer === "no") {
+				// chose_columns_query;
+				return {
+					question:
+						"does the data you want have to be in one line? (use agregation function)",
+					answers: ["yes", "no"],
+				};
+			}
+		}
+		if (
+			question ===
+			"does the data you want have to be in one line? (use agregation function)"
+		) {
+			if (answer === "yes") {
+				// حالة خاصة
+				return {
+					question: "select the name of the process?",
+					answers: ["min", "max", "sum", "avg", "count"],
+				};
+				// answer = "no";
+			}
+			if (answer === "no") {
+				return {
+					question: "do you want to add a condition?",
+					answers: ["yes", "no"],
+				};
+			}
+		}
+		if (question === "select the name of the process?") {
+			if (
+				answer === "min" ||
+				answer === "max" ||
+				answer === "sum" ||
+				answer === "avg" ||
+				answer === "count"
+			) {
+				useAgFun = true;
+				updateSession();
 
-		// if (question === "do you want to arrange the data?") {
-		// 	if (answer === "yes") {
-		// 		return {
-		// 			answer: "",
-		// 		};
-		// 	}
-		// 	if (answer === "no") {
-		// 		return {
-		// 			answer: "",
-		// 		};
-		// 	}
-		// }
+				return {
+					question: "do you want to add a condition?",
+					answers: ["yes", "no"],
+				};
+			}
+		}
+		if (question === "do you want to add a condition?") {
+			if (answer === "yes") {
+				// x = add_condition();
+				selectCondition = true;
+				updateSession();
+				answer = "no";
+			}
+			if (answer === "no") {
+				if (useAgFun) {
+					return {
+						question: "do you want to group the data?",
+						answers: ["yes", "no"],
+					};
+				} else
+					return {
+						question: "do you want to arrange the data?",
+						answers: ["yes", "no"],
+					};
+			}
+		}
+		if (question === "do you want to group the data?") {
+			if (answer === "yes") {
+				useGroupBy = true;
+				updateSession();
+				answer = "no";
+			}
+			if (answer === "no") {
+				return {
+					question: "do you want to arrange the data?",
+					answers: ["yes", "no"],
+				};
+			}
+		}
+
+		if (question === "do you want to arrange the data?") {
+			if (answer === "yes") {
+				isMoreThanTable = false;
+				selectCondition = false;
+				useAgFun = false;
+				useGroupBy = false;
+				updateSession();
+				return {
+					message: `chose the ${isMoreThanTable ? "tables" : "table"} then chose the columns`,
+					fun: getTablesWithColumns(),
+					answer: `SELECT ${useAgFun ? "|agg| " : " "}{[column_name]} FROM ${isMoreThanTable ? "|table_name|" : "{table_name}"}${selectCondition ? " where (|condition|)" : ""}${useGroupBy ? " GROUP BY {column_name_GROUP_BY}" : ""} ORDER BY {column_name_ORDER_BY} {ASC|DESC};`,
+				};
+			}
+			if (answer === "no") {
+				isMoreThanTable = false;
+				selectCondition = false;
+				useAgFun = false;
+				useGroupBy = false;
+				return {
+					message: `chose the ${isMoreThanTable ? "tables" : "table"} then chose the columns`,
+					fun: getTablesWithColumns(),
+					answer: `SELECT {[column_name]} FROM ${isMoreThanTable ? "|table_name|" : "{table_name}"}${selectCondition ? " where (|condition|)" : ""}${useGroupBy ? " GROUP BY {column_name_GROUP_BY}" : ""};`,
+				};
+			}
+		}
 
 		return { field: "root", message: "Unable to process your request." };
 	} catch (error) {
