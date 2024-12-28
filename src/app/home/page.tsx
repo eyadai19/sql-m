@@ -1,38 +1,37 @@
-// my-navbar-app/pages/_app.tsx
+// my-navbar-app/pages/navbar-test.tsx
+import { Navbar } from "@/components/home/Navbar";
+import { HomeComponent } from "@/components/home/HomeComponent";
 import { AboutComponent } from "@/components/home/AboutComponent";
+import { TryitCard } from "@/components/home/TryitCard";
 import Chatbot from "@/components/Chatbot";
 import { Footer } from "@/components/home/Footer";
-import { HomeComponent } from "@/components/home/HomeComponent";
-import { Navbar } from "@/components/home/Navbar";
-import { TryitCard } from "@/components/home/TryitCard";
 import {
-	ChatbotAction,
-	ChatbotExpAction,
-	ChatbotTrArToEn,
-	ChatbotTrEnToAr,
+  ChatbotAction,
+  ChatbotExpAction,
+  ChatbotTrArToEn,
+  ChatbotTrEnToAr,
 } from "@/lib/ServerAction/chatBotNLP";
-
-// my-navbar-app/pages/navbar-test.tsx
+import Popup from "@/components/home/Popup";
 
 export default function HomePage() {
-	return (
-		<div className="">
-			<Navbar />
+  return (
+    <div className="">
+      <Navbar />
 
-			<HomeComponent />
+      <HomeComponent />
+      <AboutComponent />
+      <TryitCard />
 
-			<AboutComponent />
+      <Chatbot
+        ChatbotAction={ChatbotAction}
+        ChatbotExpAction={ChatbotExpAction}
+        ChatbotTrArToEn={ChatbotTrArToEn}
+        ChatbotTrEnToAr={ChatbotTrEnToAr}
+      />
 
-			<TryitCard />
+      <Footer />
 
-			<Chatbot
-				ChatbotAction={ChatbotAction}
-				ChatbotExpAction={ChatbotExpAction}
-				ChatbotTrArToEn={ChatbotTrArToEn}
-				ChatbotTrEnToAr={ChatbotTrEnToAr}
-			/>
-
-			<Footer />
-		</div>
-	);
+      <Popup />
+    </div>
+  );
 }

@@ -101,61 +101,72 @@ export default function InsertData() {
 			</button>
 
 			{popupVisible && (
-				<>
-					<div
-						className="fixed left-0 top-0 h-full w-full bg-black opacity-25"
-						style={{ zIndex: 9 }}
-					></div>
-					<div
-						ref={popupRef}
-						className="absolute rounded-md bg-white shadow-lg"
-						style={{
-							position: "fixed",
-							top: "50%",
-							left: "50%",
-							transform: "translate(-50%, -50%)",
-							zIndex: 10,
-							minWidth: "250px",
-							padding: "20px",
-						}}
-					>
-						<div className="mb-4">
-							<h3 className="text-xl font-semibold text-[#00203F]">
-								How to use INSERT INTO
-							</h3>
-							<p className="mt-2 text-[#00203F]">
-								To insert data into a table, use the following syntax:
-							</p>
-							<pre className="mt-2 flex items-center justify-between rounded-md bg-[#f5f5f5] p-3">
-								INSERT INTO tableName (column1, column2, ...) VALUES (value1,
-								value2, ...);
-								<button
-									onClick={() =>
-										copyToClipboard(
-											"INSERT INTO tableName (column1, column2, ...) VALUES (value1, value2, ...);",
-										)
-									}
-									className="ml-4 rounded-full bg-[#ADF0D1] px-2 py-1 text-[#00203F] shadow hover:bg-[#00203F] hover:text-[#ADF0D1]"
-									title="Copy to clipboard"
-								>
-									<FontAwesomeIcon icon={faCopy} className="text-[#00203F]" />
-								</button>
-							</pre>
-							<p className="mt-2 text-[#00203F]">
-								Replace <code>tableName</code> with the name of the table, and
-								list the <code>columns</code> and <code>values</code>{" "}
-								accordingly.
-							</p>
-						</div>
-						<button
-							onClick={closePopup}
-							className="w-full rounded-md bg-[#ADF0D1] py-2 text-[#00203F] hover:bg-[#00203F] hover:text-[#ADF0D1]"
-						>
-							Close
-						</button>
-					</div>
-				</>
-			)}
+  <>
+    {/* الخلفية المعتمة */}
+    <div
+      className="fixed left-0 top-0 h-full w-full bg-black opacity-25"
+      style={{ zIndex: 9 }}
+    ></div>
+
+    {/* النافذة المنبثقة */}
+    <div
+      ref={popupRef} // ربط الـ popup مع الـ ref
+      className="absolute rounded-md bg-white shadow-lg"
+      style={{
+        position: "fixed", // تحديد المكان بالنسبة للنافذة بالكامل
+        top: "50%", // وضعها في منتصف الصفحة عموديًا
+        left: "50%", // وضعها في منتصف الصفحة أفقيًا
+        transform: "translate(-50%, -50%)", // الترجمة لضبط المركز بالضبط
+        zIndex: 10,
+        minWidth: "250px", // الحد الأدنى للعرض
+        maxWidth: "90%", // الحد الأقصى للعرض على الأجهزة الصغيرة
+        padding: "20px", // الحواف الداخلية
+      }}
+    >
+      <div className="mb-4">
+        <h3 className="text-xl font-semibold text-[#00203F]">
+          How to use INSERT INTO
+        </h3>
+        <p className="mt-2 text-[#00203F]">
+          To insert data into a table, use the following syntax:
+        </p>
+        <div
+          className="mt-2 flex items-center justify-between rounded-md bg-[#f5f5f5] p-3"
+          style={{
+            overflowX: "auto", // تمكين التمرير الأفقي
+            wordWrap: "break-word", // لف الكلمات الطويلة
+            whiteSpace: "nowrap", // منع التفاف النص داخل الـ <pre>
+          }}
+        >
+          <pre className="flex-1">
+            INSERT INTO tableName (column1, column2, ...) VALUES (value1, value2, ...);
+          </pre>
+          <button
+            onClick={() =>
+              copyToClipboard(
+                "INSERT INTO tableName (column1, column2, ...) VALUES (value1, value2, ...);"
+              )
+            }
+            className="ml-4 rounded-full bg-[#ADF0D1] px-2 py-1 text-[#00203F] shadow hover:bg-[#00203F] hover:text-[#ADF0D1]"
+            title="Copy to clipboard"
+          >
+            <FontAwesomeIcon icon={faCopy} className="text-[#00203F]" />
+          </button>
+        </div>
+        <p className="mt-2 text-[#00203F]">
+          Replace <code>tableName</code> with the name of the table, and list the <code>columns</code> and <code>values</code> accordingly.
+        </p>
+      </div>
+      <button
+        onClick={closePopup}
+        className="w-full rounded-md bg-[#ADF0D1] py-2 text-[#00203F] hover:bg-[#00203F] hover:text-[#ADF0D1]"
+      >
+        Close
+      </button>
+    </div>
+  </>
+)}
+
 		</div>
 	);
 }

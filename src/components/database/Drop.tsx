@@ -100,57 +100,67 @@ export default function DropTable() {
 			</button>
 
 			{popupVisible && (
-				<>
-					{/* الخلفية المعتمة */}
-					<div
-						className="fixed left-0 top-0 h-full w-full bg-black opacity-25"
-						style={{ zIndex: 9 }}
-					></div>
+  <>
+    {/* الخلفية المعتمة */}
+    <div
+      className="fixed left-0 top-0 h-full w-full bg-black opacity-25"
+      style={{ zIndex: 9 }}
+    ></div>
 
-					{/* النافذة المنبثقة */}
-					<div
-						ref={popupRef} // ربط الـ popup مع الـ ref
-						className="absolute rounded-md bg-white p-6 shadow-lg"
-						style={{
-							position: "fixed", // تحديد المكان بالنسبة للنافذة بالكامل
-							top: "50%", // وضعها في منتصف الصفحة عموديًا
-							left: "50%", // وضعها في منتصف الصفحة أفقيًا
-							transform: "translate(-50%, -50%)", // الترجمة لضبط المركز بالضبط
-							zIndex: 10,
-							minWidth: "250px",
-						}}
-					>
-						<div className="mb-4">
-							<h3 className="text-xl font-semibold text-[#00203F]">
-								How to use DROP TABLE
-							</h3>
-							<p className="mt-2 text-[#00203F]">
-								To drop a table from the database, use the following syntax:
-							</p>
-							<pre className="mt-2 flex items-center justify-between rounded-md bg-[#f5f5f5] p-3">
-								DROP TABLE tableName;
-								<button
-									onClick={() => copyToClipboard("DROP TABLE tableName;")}
-									className="ml-4 rounded-full bg-[#ADF0D1] px-2 py-1 text-[#00203F] shadow hover:bg-[#00203F] hover:text-[#ADF0D1]"
-									title="Copy to clipboard"
-								>
-									<FontAwesomeIcon icon={faCopy} className="text-[#00203F]" />
-								</button>
-							</pre>
-							<p className="mt-2 text-[#00203F]">
-								Replace <code>tableName</code> with the name of the table you
-								wish to delete. Be cautious, as this action is irreversible.
-							</p>
-						</div>
-						<button
-							onClick={closePopup}
-							className="w-full rounded-md bg-[#ADF0D1] py-2 text-[#00203F] hover:bg-[#00203F] hover:text-[#ADF0D1]"
-						>
-							Close
-						</button>
-					</div>
-				</>
-			)}
+    {/* النافذة المنبثقة */}
+    <div
+      ref={popupRef} // ربط الـ popup مع الـ ref
+      className="absolute rounded-md bg-white p-6 shadow-lg"
+      style={{
+        position: "fixed", // تحديد المكان بالنسبة للنافذة بالكامل
+        top: "50%", // وضعها في منتصف الصفحة عموديًا
+        left: "50%", // وضعها في منتصف الصفحة أفقيًا
+        transform: "translate(-50%, -50%)", // الترجمة لضبط المركز بالضبط
+        zIndex: 10,
+        minWidth: "250px",
+        maxWidth: "90%", // لضمان أن النافذة المنبثقة لا تتجاوز عرض الشاشة
+      }}
+    >
+      <div className="mb-4">
+        <h3 className="text-xl font-semibold text-[#00203F]">
+          How to use DROP TABLE
+        </h3>
+        <p className="mt-2 text-[#00203F]">
+          To drop a table from the database, use the following syntax:
+        </p>
+        <div
+          className="mt-2 flex items-center justify-between rounded-md bg-[#f5f5f5] p-3"
+          style={{
+            overflowX: "auto", // تمكين التمرير الأفقي
+            wordWrap: "break-word", // لف الكلمات الطويلة
+            whiteSpace: "nowrap", // منع التفاف النص داخل الـ <pre>
+          }}
+        >
+          <pre className="flex-1">
+            DROP TABLE tableName;
+          </pre>
+          <button
+            onClick={() => copyToClipboard("DROP TABLE tableName;")}
+            className="ml-4 rounded-full bg-[#ADF0D1] px-2 py-1 text-[#00203F] shadow hover:bg-[#00203F] hover:text-[#ADF0D1]"
+            title="Copy to clipboard"
+          >
+            <FontAwesomeIcon icon={faCopy} className="text-[#00203F]" />
+          </button>
+        </div>
+        <p className="mt-2 text-[#00203F]">
+          Replace <code>tableName</code> with the name of the table you wish to delete. Be cautious, as this action is irreversible.
+        </p>
+      </div>
+      <button
+        onClick={closePopup}
+        className="w-full rounded-md bg-[#ADF0D1] py-2 text-[#00203F] hover:bg-[#00203F] hover:text-[#ADF0D1]"
+      >
+        Close
+      </button>
+    </div>
+  </>
+)}
+
 		</div>
 	);
 }

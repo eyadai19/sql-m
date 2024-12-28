@@ -42,7 +42,7 @@ export default function CreateTable({
 	}
 
 	if (hasAccess === undefined) {
-		return <p>Loading...</p>;
+		return <p></p>;
 	}
 
 	return (

@@ -42,8 +42,11 @@ export default function Update({
 	}
 
 	if (hasAccess === undefined) {
-		return <p>Loading...</p>;
-	}
+		return (
+				<div className="flex h-screen items-center justify-center">
+					<div className="animate-spin rounded-full h-16 w-16 border-t-4 border-b-4 border-[#ADF0D1]"></div>
+				</div>
+			);}
 
 	return (
 		<div>
