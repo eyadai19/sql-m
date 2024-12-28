@@ -173,7 +173,7 @@ export default function ProfilePage({
 											alt="New Profile"
 											className="h-full w-full object-cover"
 										/>
-									) : info.photo && info.photo.startsWith("data:image/") ? (
+									) : info.photo ? (
 										<img
 											src={info.photo}
 											alt="User Profile"

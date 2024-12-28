@@ -89,7 +89,6 @@ export default function RegisterForm({
 			photoBase64 = photoBuffer.toString("base64");
 		}
 
-
 		const error = await registerAction({
 			...values,
 			photo: photoBase64,

@@ -57,11 +57,11 @@ async function ProfileAction(): Promise<
 			},
 		});
 
-		if (info?.photo) {
-			// Convert photo from Uint8Array to Base64
-			const base64Photo = `data:image/jpeg;base64,${Buffer.from(info.photo).toString("base64")}`;
-			info.photo = base64Photo;
-		}
+		// if (info?.photo) {
+		// 	// Convert photo from Uint8Array to Base64
+		// 	const base64Photo = `data:image/jpeg;base64,${Buffer.from(info.photo).toString("base64")}`;
+		// 	info.photo = base64Photo;
+		// }
 
 		if (info) {
 			return {
