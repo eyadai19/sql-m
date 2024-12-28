@@ -1,5 +1,4 @@
 "use client";
-import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import {
 	Table,
@@ -15,13 +14,14 @@ import Mermaid from "react-mermaid2";
 
 interface Table {
 	tableName: string;
-	columns: { columnName: string; columnType: string }[];
+	columns: { columnName: string; columnType: string }[]; 
 	data: Record<string, any>[]; // البيانات في الجدول
 }
 
 export default function FetchTablesWithERD() {
 	const [tables, setTables] = useState<Table[]>([]);
 	const [erdDiagram, setErdDiagram] = useState<string>("");
+	const [hasAccess, setHasAccess] = useState<boolean | undefined>(undefined);
 
 	const fetchTables = async () => {
 		try {
@@ -37,9 +37,11 @@ export default function FetchTablesWithERD() {
 
 			const erd = generateERD(data);
 			setErdDiagram(erd);
+			setHasAccess(true); // تغيير حالة الوصول بعد نجاح جلب البيانات
 		} catch (error) {
 			console.error("خطأ أثناء جلب الجداول:", error);
 			alert("حدث خطأ أثناء جلب الجداول.");
+			setHasAccess(false); // تغيير حالة الوصول في حالة حدوث خطأ
 		}
 	};
 
@@ -78,6 +80,15 @@ export default function FetchTablesWithERD() {
 		fetchTables();
 	}, []);
 
+	// عرض الرسالة المتحركة إذا كانت hasAccess غير محددة
+	if (hasAccess === undefined) {
+		return (
+			<div className="flex h-screen items-center justify-center">
+				<div className="animate-spin rounded-full h-16 w-16 border-t-4 border-b-4 border-[#ADF0D1]"></div>
+			</div>
+		);
+	}
+
 	return (
 		<div className="flex min-h-screen items-center justify-center px-8"
 			style={{
@@ -90,14 +101,6 @@ export default function FetchTablesWithERD() {
 					</h1>
 				</CardHeader>
 				<CardContent>
-					<div className="mb-6 flex justify-center">
-						<Button
-							onClick={fetchTables}
-							className="rounded-md bg-[#00203F] px-4 py-2 text-white shadow hover:bg-[#ADF0D1] hover:text-[#00203F]"
-						>
-							عرض الجداول
-						</Button>
-					</div>
 					{erdDiagram && (
 						<div className="mb-8 rounded-lg border bg-white p-6 shadow-md">
 							<h2 className="mb-4 text-2xl font-bold text-[#00203F]">

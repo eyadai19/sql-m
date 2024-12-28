@@ -101,63 +101,72 @@ export default function AlterData() {
 			</button>
 
 			{popupVisible && (
-				<>
-					{/* الخلفية المعتمة */}
-					<div
-						className="fixed left-0 top-0 h-full w-full bg-black opacity-25"
-						style={{ zIndex: 9 }}
-					></div>
+  <>
+    {/* الخلفية المعتمة */}
+    <div
+      className="fixed left-0 top-0 h-full w-full bg-black opacity-25"
+      style={{ zIndex: 9 }}
+    ></div>
 
-					{/* النافذة المنبثقة */}
-					<div
-						ref={popupRef} // ربط الـ popup مع الـ ref
-						className="absolute rounded-md bg-white p-6 shadow-lg"
-						style={{
-							position: "fixed", // تحديد المكان بالنسبة للنافذة بالكامل
-							top: "50%", // وضعها في منتصف الصفحة عموديًا
-							left: "50%", // وضعها في منتصف الصفحة أفقيًا
-							transform: "translate(-50%, -50%)", // الترجمة لضبط المركز بالضبط
-							zIndex: 10,
-							minWidth: "250px",
-						}}
-					>
-						<div className="mb-4">
-							<h3 className="text-xl font-semibold text-[#00203F]">
-								How to use ALTER TABLE
-							</h3>
-							<p className="mt-2 text-[#00203F]">
-								To alter the structure of a table, use the following syntax:
-							</p>
-							<pre className="mt-2 flex items-center justify-between rounded-md bg-[#f5f5f5] p-3">
-								ALTER TABLE tableName ADD/DROP COLUMN columnName columnType;
-								<button
-									onClick={() =>
-										copyToClipboard(
-											"ALTER TABLE tableName ADD/DROP COLUMN columnName columnType;",
-										)
-									}
-									className="ml-4 rounded-full bg-[#ADF0D1] px-2 py-1 text-[#00203F] shadow hover:bg-[#00203F] hover:text-[#ADF0D1]"
-									title="Copy to clipboard"
-								>
-									<FontAwesomeIcon icon={faCopy} className="text-[#00203F]" />
-								</button>
-							</pre>
-							<p className="mt-2 text-[#00203F]">
-								Replace <code>tableName</code> with the name of the table,{" "}
-								<code>columnName</code> with the column name, and{" "}
-								<code>columnType</code> with the column type (only when adding a
-								column).
-							</p>
-						</div>
-						<button
-							onClick={closePopup}
-							className="w-full rounded-md bg-[#ADF0D1] py-2 text-[#00203F] hover:bg-[#00203F] hover:text-[#ADF0D1]"
-						>
-							Close
-						</button>
-					</div>
-				</>
-			)}
+    {/* النافذة المنبثقة */}
+    <div
+      ref={popupRef} // ربط الـ popup مع الـ ref
+      className="absolute rounded-md bg-white p-6 shadow-lg"
+      style={{
+        position: "fixed", // تحديد المكان بالنسبة للنافذة بالكامل
+        top: "50%", // وضعها في منتصف الصفحة عموديًا
+        left: "50%", // وضعها في منتصف الصفحة أفقيًا
+        transform: "translate(-50%, -50%)", // الترجمة لضبط المركز بالضبط
+        zIndex: 10,
+        minWidth: "250px",
+        maxWidth: "90%", // التأكد من أن النافذة لا تصبح عريضة جدًا على الشاشات الصغيرة
+      }}
+    >
+      <div className="mb-4">
+        <h3 className="text-xl font-semibold text-[#00203F]">
+          How to use ALTER TABLE
+        </h3>
+        <p className="mt-2 text-[#00203F]">
+          To alter the structure of a table, use the following syntax:
+        </p>
+        <pre
+          className="mt-2 flex items-center justify-between rounded-md bg-[#f5f5f5] p-3"
+          style={{
+            whiteSpace: "nowrap", // منع التفاف النص
+            overflowX: "auto", // تمكين التمرير الأفقي
+            wordWrap: "break-word", // لف الكلمات الطويلة
+          }}
+        >
+          ALTER TABLE tableName ADD/DROP COLUMN columnName columnType;
+          <button
+            onClick={() =>
+              copyToClipboard(
+                "ALTER TABLE tableName ADD/DROP COLUMN columnName columnType;",
+              )
+            }
+            className="ml-4 rounded-full bg-[#ADF0D1] px-2 py-1 text-[#00203F] shadow hover:bg-[#00203F] hover:text-[#ADF0D1]"
+            title="Copy to clipboard"
+          >
+            <FontAwesomeIcon icon={faCopy} className="text-[#00203F]" />
+          </button>
+        </pre>
+        <p className="mt-2 text-[#00203F]">
+          Replace <code>tableName</code> with the name of the table,{" "}
+          <code>columnName</code> with the column name, and{" "}
+          <code>columnType</code> with the column type (only when adding a
+          column).
+        </p>
+      </div>
+      <button
+        onClick={closePopup}
+        className="w-full rounded-md bg-[#ADF0D1] py-2 text-[#00203F] hover:bg-[#00203F] hover:text-[#ADF0D1]"
+      >
+        Close
+      </button>
+    </div>
+  </>
+)}
+
 		</div>
 	);
 }

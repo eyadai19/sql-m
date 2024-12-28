@@ -100,60 +100,69 @@ export default function DeleteData() {
 			</button>
 
 			{popupVisible && (
-				<>
-					<div
-						className="fixed left-0 top-0 h-full w-full bg-black opacity-25"
-						style={{ zIndex: 9 }}
-					></div>
+  <>
+    <div
+      className="fixed left-0 top-0 h-full w-full bg-black opacity-25"
+      style={{ zIndex: 9 }}
+    ></div>
 
-					<div
-						ref={popupRef}
-						className="absolute rounded-md bg-white p-6 shadow-lg"
-						style={{
-							position: "fixed",
-							top: "50%",
-							left: "50%",
-							transform: "translate(-50%, -50%)",
-							zIndex: 10,
-							minWidth: "250px",
-						}}
-					>
-						<div className="mb-4">
-							<h3 className="text-xl font-semibold text-[#00203F]">
-								How to use DELETE
-							</h3>
-							<p className="mt-2 text-[#00203F]">
-								To delete data from a table, use the following syntax:
-							</p>
-							<div className="mt-2 flex items-center justify-between rounded-md bg-[#f5f5f5] p-3">
-								<pre className="flex-1">
-									DELETE FROM tableName WHERE condition;
-								</pre>
-								<button
-									onClick={() =>
-										copyToClipboard("DELETE FROM tableName WHERE condition;")
-									}
-									className="ml-4 rounded-full bg-[#ADF0D1] px-2 py-1 text-[#00203F] shadow hover:bg-[#00203F] hover:text-[#ADF0D1]"
-									title="Copy to clipboard"
-								>
-									<FontAwesomeIcon icon={faCopy} className="text-[#00203F]" />
-								</button>
-							</div>
-							<p className="mt-2 text-[#00203F]">
-								Replace <code>tableName</code> with the name of the table and
-								<code>condition</code> with the specific condition for the data
-								you want to delete.
-							</p>
-						</div>
-						<button
-							onClick={closePopup}
-							className="w-full rounded-md bg-[#ADF0D1] py-2 text-[#00203F] hover:bg-[#00203F] hover:text-[#ADF0D1]"
-						>
-							Close
-						</button>
-					</div>
-				</>
-			)}
+    <div
+      ref={popupRef}
+      className="absolute rounded-md bg-white p-6 shadow-lg"
+      style={{
+        position: "fixed",
+        top: "50%",
+        left: "50%",
+        transform: "translate(-50%, -50%)",
+        zIndex: 10,
+        minWidth: "250px",
+        maxWidth: "90%", // لضمان أن النافذة المنبثقة لا تتجاوز عرض الشاشة
+      }}
+    >
+      <div className="mb-4">
+        <h3 className="text-xl font-semibold text-[#00203F]">
+          How to use DELETE
+        </h3>
+        <p className="mt-2 text-[#00203F]">
+          To delete data from a table, use the following syntax:
+        </p>
+        <div
+          className="mt-2 flex items-center justify-between rounded-md bg-[#f5f5f5] p-3"
+          style={{
+            overflowX: "auto", // تمكين التمرير الأفقي
+            wordWrap: "break-word", // لف الكلمات الطويلة
+            whiteSpace: "nowrap", // منع التفاف النص داخل الـ <pre>
+          }}
+        >
+          <pre className="flex-1">
+            DELETE FROM tableName WHERE condition;
+          </pre>
+          <button
+            onClick={() =>
+              copyToClipboard("DELETE FROM tableName WHERE condition;")
+            }
+            className="ml-4 rounded-full bg-[#ADF0D1] px-2 py-1 text-[#00203F] shadow hover:bg-[#00203F] hover:text-[#ADF0D1]"
+            title="Copy to clipboard"
+          >
+            <FontAwesomeIcon icon={faCopy} className="text-[#00203F]" />
+          </button>
+        </div>
+        <p className="mt-2 text-[#00203F]">
+          Replace <code>tableName</code> with the name of the table and
+          <code>condition</code> with the specific condition for the data you want
+          to delete.
+        </p>
+      </div>
+      <button
+        onClick={closePopup}
+        className="w-full rounded-md bg-[#ADF0D1] py-2 text-[#00203F] hover:bg-[#00203F] hover:text-[#ADF0D1]"
+      >
+        Close
+      </button>
+    </div>
+  </>
+)}
+
 		</div>
 	);
 }

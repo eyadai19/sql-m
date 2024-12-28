@@ -46,6 +46,7 @@ export default function SqlQuiz({
 	const [showModal, setShowModal] = useState(false);
 	const [score, setScore] = useState<number | null>(null);
 	const [hasAccess, setHasAccess] = useState<boolean | undefined>(undefined);
+	const [isSubmitting, setIsSubmitting] = useState(false);
 
 	useEffect(() => {
 		const checkAccess = async () => {
@@ -84,6 +85,8 @@ export default function SqlQuiz({
 			return;
 		}
 
+		setIsSubmitting(true); // Start the loading spinner
+
 		const updatedData = {
 			...data,
 			question: questions.map((q) => q.question), // تحديث الأسئلة في data
@@ -91,6 +94,8 @@ export default function SqlQuiz({
 
 		// استدعاء quizAction بعد التأكد من تحديث الأسئلة
 		const result = await quizAction(updatedData);
+		setIsSubmitting(false); // End the loading spinner
+
 		if (result && "score" in result && "correctAnswers" in result) {
 			setScore(result.score);
 			setCorrectAnswers(result.correctAnswers);
@@ -128,8 +133,13 @@ export default function SqlQuiz({
 	}
 
 	if (hasAccess === undefined) {
-		return <p>Loading...</p>;
+		return (
+			<div className="flex h-screen items-center justify-center">
+				<div className="animate-spin rounded-full h-16 w-16 border-t-4 border-b-4 border-[#ADF0D1]"></div>
+			</div>
+		);
 	}
+
 	return (
 		<div
 			className="flex min-h-screen items-center justify-center px-8"
@@ -156,12 +166,15 @@ export default function SqlQuiz({
 											<Input
 												{...field}
 												placeholder="Type your answer here..."
+												className="text-lg" // Increase text size for input
 											/>
 										</FormControl>
 										<FormMessage />
 										{results[index] !== null && (
 											<p
-												className={`mt-2 ${results[index] ? "text-green-600" : "text-red-600"}`}
+												className={`mt-2 ${
+													results[index] ? "text-green-600" : "text-red-600"
+												}`}
 											>
 												{results[index]
 													? "Correct!"
@@ -173,8 +186,16 @@ export default function SqlQuiz({
 							/>
 						))}
 
-						<Button type="submit" className="mt-4 bg-[#00203F] text-white">
-							Submit Answers
+						<Button
+							type="submit"
+							className="mt-4 bg-[#00203F] text-white w-full"
+							disabled={isSubmitting} // Disable button while submitting
+						>
+							{isSubmitting ? (
+								<div className="animate-spin rounded-full h-6 w-6 border-t-4 border-b-4 border-white"></div> // Loading spinner
+							) : (
+								"Submit Answers"
+							)}
 						</Button>
 					</form>
 				</Form>

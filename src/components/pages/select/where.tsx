@@ -40,10 +40,12 @@ export default function Where({
 			</div>
 		);
 	}
-
-	if (hasAccess === undefined) {
-		return <p>Loading...</p>;
-	}
+	if (!hasAccess === undefined) {
+		return (
+				<div className="flex h-screen items-center justify-center">
+					<div className="animate-spin rounded-full h-16 w-16 border-t-4 border-b-4 border-[#ADF0D1]"></div>
+				</div>
+			);}
 
 	return (
 		<div>
