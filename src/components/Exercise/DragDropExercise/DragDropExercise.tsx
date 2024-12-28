@@ -1,104 +1,179 @@
-"use client";
+'use client';
 
-import { useState } from "react";
-import { DragDropContext } from "@hello-pangea/dnd";
-import { Card, CardContent } from "@/components/ui/card";
-import { DragDropExerciseProps } from "@/lib/types/exerciseTypes";
-import ExerciseHeader from "../common/ExerciseHeader";
-import TaskPrompt from "../common/TaskPrompt";
-import Hints from "../common/Hints";
-import DroppableList from "./DroppableList";
-import ControlButtons from "../common/ControlButtons";
+import { useState, useEffect } from 'react';
+import { Progress } from '@/components/ui/progress';
+import { Card, CardContent } from '@/components/ui/card';
+import { DragDropContainer } from './DragDropContainer';
+import  ExerciseHeader  from '../common/ExerciseHeader';
+import  TaskPrompt  from '../common/TaskPrompt';
+import  Hints  from '../common/Hints';
+import  ControlButtons  from '../common/ControlButtons';
+import { formatTime } from '@/lib/utils';
+import type { DragDropExerciseProps, ExerciseState, DragDropItem } from './types';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Code, BookOpen } from 'lucide-react';
+
+const INITIAL_STATE: ExerciseState = {
+  attempts: 0,
+  startTime: null,
+  elapsedTime: 0,
+  isComplete: false,
+  score: 0,
+  showAnswer: false,
+  showHints: true,
+  showTips: false,
+  activeHint: 0,
+};
 
 export default function DragDropExercise({
   title,
   prompt,
   items,
+  mode,
+  headings,
   correctOrder,
   difficulty,
   hints = [],
   tips = [],
   onComplete,
 }: DragDropExerciseProps) {
-  const [dragItems, setDragItems] = useState(items);
-  const [attempts, setAttempts] = useState(0);
-  const [isCorrect, setIsCorrect] = useState(false);
-  const [startTime] = useState(Date.now());
-  const [activeHint, setActiveHint] = useState(-1);
-  const [showHints, setShowHints] = useState(false);
-  const [showTips, setShowTips] = useState(false);
-  const [showAnswer, setShowAnswer] = useState(false);
+  const [currentOrder, setCurrentOrder] = useState<DragDropItem[]>(() =>
+    shuffleArray(items)
+  );
+  const [state, setState] = useState<ExerciseState>(INITIAL_STATE);
 
-  const checkOrder = () => {
-    setAttempts((prev) => prev + 1);
-    const currentOrder = dragItems.map((item) => item.id);
-    const correct = currentOrder.every((id, index) => id === correctOrder[index]);
-
-    if (correct && !isCorrect) {
-      setIsCorrect(true);
-      const timeSpent = Math.round((Date.now() - startTime) / 1000);
-      onComplete({ time: timeSpent, trials: attempts + 1 });
+  useEffect(() => {
+    let timer: NodeJS.Timeout;
+    if (state.startTime && !state.isComplete) {
+      timer = setInterval(() => {
+        setState((prev) => ({
+          ...prev,
+          elapsedTime: Math.floor((Date.now() - prev.startTime!) / 1000),
+        }));
+      }, 1000);
     }
-  };
+    return () => clearInterval(timer);
+  }, [state.startTime, state.isComplete]);
 
-  const handleDragEnd = (result: any) => {
-    if (!result.destination) return;
+  function handleReorder(newOrder: string[]) {
+    if (!state.startTime) {
+      setState((prev) => ({ ...prev, startTime: Date.now() }));
+    }
+    setCurrentOrder(newOrder.map(id => items.find(item => item.id === id)!));
+  }
 
-    const items = Array.from(dragItems);
-    const [reorderedItem] = items.splice(result.source.index, 1);
-    items.splice(result.destination.index, 0, reorderedItem);
+  function handleRun() {
+    const isCorrect = correctOrder.every((id, index) => id === currentOrder[index].id);
+    const newScore = calculateScore(currentOrder.map(item => item.id), correctOrder);
 
-    setDragItems(items);
-    checkOrder();
-  };
+    setState((prev) => ({
+      ...prev,
+      attempts: prev.attempts + 1,
+      isComplete: isCorrect,
+      score: newScore,
+    }));
 
-  const handleReset = () => {
-    setDragItems(items);
-    setShowAnswer(false);
-    setActiveHint(-1);
-    setShowHints(false);
-  };
+    if (isCorrect) {
+      onComplete({
+        time: state.elapsedTime,
+        trials: state.attempts + 1,
+      });
+    }
+  }
 
-  const handleShowAnswer = () => {
+  function handleReset() {
+    setCurrentOrder(shuffleArray(items));
+    setState(INITIAL_STATE);
+  }
+
+  function handleShowAnswer() {
     const orderedItems = correctOrder.map(id => 
       items.find(item => item.id === id)!
     );
-    setDragItems(orderedItems);
-    setShowAnswer(true);
-  };
+    setCurrentOrder(orderedItems);
+    setState((prev) => ({ ...prev, showAnswer: true }));
+  }
+
+
+function shuffleArray<T>(array: T[]): T[] {
+  const newArray = [...array];
+  for (let i = newArray.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [newArray[i], newArray[j]] = [newArray[j], newArray[i]];
+  }
+  return newArray;
+}
+
+function calculateScore(current: string[], correct: string[]): number {
+  let matches = 0;
+  for (let i = 0; i < correct.length; i++) {
+    if (current[i] === correct[i]) matches++;
+  }
+  return Math.round((matches / correct.length) * 100);
+}
 
   return (
-    <Card className="mx-auto mb-3 w-full max-w-6xl bg-white/40 backdrop-blur-xl ">
+    <Card className="mx-auto w-full max-w-4xl bg-white/40 my-3">
       <ExerciseHeader
         title={title}
         difficulty={difficulty}
-        attempts={attempts}
-        isCompleted={isCorrect}
+        attempts={state.attempts}
+        isCompleted={state.isComplete}
       />
+      <CardContent className='space-y-6'>
+      <TaskPrompt prompt={prompt} />
 
-      <CardContent className="space-y-6">
-        <TaskPrompt prompt={prompt} />
+      <Tabs defaultValue="exercise" className="w-full">
+					<TabsList className="grid w-full grid-cols-2 ">
+						<TabsTrigger value="exercise" className="flex items-center gap-2">
+							<Code className="h-4 w-4" />
+							Exercise
+						</TabsTrigger>
+						<TabsTrigger value="help" className="flex items-center gap-2">
+							<BookOpen className="h-4 w-4" />
+							Help & Tips
+						</TabsTrigger>
+					</TabsList>
+					<TabsContent value="exercise" className="space-y-6">
 
-        <DragDropContext onDragEnd={handleDragEnd}>
-          <DroppableList items={dragItems} />
-        </DragDropContext>
+      <div className="mb-6">
+        <DragDropContainer
+          items={currentOrder}
+          onReorder={handleReorder}
+        />
+      </div>
+
+        <Progress value={state.score} className="h-2" />
 
         <ControlButtons
+          onRun={handleRun}
           onReset={handleReset}
           onShowAnswer={handleShowAnswer}
-          showAnswer={showAnswer}
+          showAnswer={state.showAnswer}
         />
+        </TabsContent>
+					<TabsContent value="help" className="space-y-6">
 
         <Hints
           hints={hints}
-          activeHint={activeHint}
-          onNextHint={() => setActiveHint((prev) => prev + 1)}
+          activeHint={state.activeHint}
+          onNextHint={() => setState(prev => ({ ...prev, activeHint: prev.activeHint + 1 }))}
           tips={tips}
-          showTips={showTips}
-          onToggleTips={() => setShowTips((prev) => !prev)}
-          showHints={showHints}
-          onToggleHints={() => setShowHints((prev) => !prev)}
+          showTips={state.showTips}
+          onToggleTips={() => setState(prev => ({ ...prev, showTips: !prev.showTips }))}
+          showHints={state.showHints}
+          onToggleHints={() => setState(prev => ({ ...prev, showHints: !prev.showHints }))}
         />
+
+        {state.isComplete && (
+          <div className="rounded-lg bg-green-50 p-4 text-green-700">
+            🎉 Congratulations! You completed the exercise in {state.attempts}{' '}
+            attempts and {formatTime(state.elapsedTime)}.
+          </div>
+        )}
+        </TabsContent>
+      
+      </Tabs>
       </CardContent>
     </Card>
   );

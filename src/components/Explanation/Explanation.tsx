@@ -1,7 +1,7 @@
 "use client";
-import { Badge } from "@/components/ui/badge";
+
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import {
 	Collapsible,
 	CollapsibleContent,
@@ -17,32 +17,18 @@ import {
 	ExternalLink,
 	Lightbulb,
 } from "lucide-react";
-import React, { useState } from "react";
+import { useState } from "react";
 import CodeBlock from "./CodeBlock";
-
-interface ExplanationProps {
-	title?: string;
-	howItWorks: string;
-	syntax: string;
-	example: {
-		code: string;
-		explanation: string;
-		liveDemo?: React.ReactNode;
-	};
-	notes: string[];
-	additionalResources?: {
-		title: string;
-		url: string;
-	}[];
-	difficulty?: "Beginner" | "Intermediate" | "Advanced";
-	tags?: string[];
-}
+import ExplanationHeader from "./ExplanationHeader";
+import ExplanationSection from "./ExplanationSection";
+import type { ExplanationProps } from "./types";
 
 export default function Explanation({
 	title = "Getting Started",
 	howItWorks,
 	syntax,
 	example,
+	sections = [],
 	notes,
 	additionalResources = [],
 	difficulty = "Beginner",
@@ -50,77 +36,81 @@ export default function Explanation({
 }: ExplanationProps) {
 	const [isResourcesOpen, setIsResourcesOpen] = useState(false);
 	const [activeTab, setActiveTab] = useState("explanation");
+	const [expandedSections, setExpandedSections] = useState<Set<number>>(
+		new Set(),
+	);
 
-	const difficultyColor = {
-		Beginner: "bg-green-100 text-green-800",
-		Intermediate: "bg-yellow-100 text-yellow-800",
-		Advanced: "bg-red-100 text-red-800",
-	}[difficulty];
+	const toggleSection = (index: number) => {
+		const newExpanded = new Set(expandedSections);
+		if (expandedSections.has(index)) {
+			newExpanded.delete(index);
+		} else {
+			newExpanded.add(index);
+		}
+		setExpandedSections(newExpanded);
+	};
 
 	return (
 		<Card className="mx-auto mb-3 w-full max-w-4xl bg-white/40 shadow-lg backdrop-blur-xl">
-			<CardHeader className="space-y-4">
-				<div className="flex items-center justify-between">
-					<CardTitle className="text-2xl font-bold text-sailorBlue">
-						{title}
-					</CardTitle>
-					<Badge className={cn("ml-2", difficultyColor)}>{difficulty}</Badge>
-				</div>
-				{tags.length > 0 && (
-					<div className="flex flex-wrap gap-2">
-						{tags.map((tag) => (
-							<Badge key={tag} variant="secondary" className="text-xs">
-								{tag}
-							</Badge>
-						))}
-					</div>
-				)}
-			</CardHeader>
+			<ExplanationHeader title={title} difficulty={difficulty} tags={tags} />
 
-			<CardContent className="space-y-6">
+			<CardContent className="space-y-6 p-4 sm:p-6">
 				<Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
 					<TabsList className="grid w-full grid-cols-2">
 						<TabsTrigger
 							value="explanation"
 							className="flex items-center gap-2"
 						>
-							<BookOpen className="h-4 w-4" />
+							<BookOpen className="hidden h-4 w-4 sm:block" />
 							Explanation
 						</TabsTrigger>
 						<TabsTrigger
 							value="implementation"
 							className="flex items-center gap-2"
 						>
-							<Code className="h-4 w-4" />
+							<Code className="hidden h-4 w-4 sm:block" />
 							Implementation
 						</TabsTrigger>
 					</TabsList>
 
 					<TabsContent value="explanation" className="mt-6 space-y-6">
 						<section className="space-y-2">
-							<h2 className="flex items-center gap-2 text-xl font-semibold text-sailorBlue">
+							<h2 className="flex items-center gap-2 text-lg font-semibold text-sailorBlue sm:text-xl">
 								<Lightbulb className="h-5 w-5" />
 								How It Works
 							</h2>
-							<p className="text-base text-sailorBlue">{howItWorks}</p>
+							<p className="text-sm text-sailorBlue sm:text-base">
+								{howItWorks}
+							</p>
 						</section>
 
+						{sections.length > 0 && (
+							<section className="space-y-4">
+								{sections.map((section, index) => (
+									<ExplanationSection
+										key={index}
+										section={section}
+										index={index}
+										isExpanded={expandedSections.has(index)}
+										onToggle={() => toggleSection(index)}
+									/>
+								))}
+							</section>
+						)}
+
 						<section className="space-y-2">
-							<h2 className="text-xl font-semibold text-sailorBlue">
+							<h2 className="text-lg font-semibold text-sailorBlue sm:text-xl">
 								Notes & Tips
 							</h2>
 							<Card className="border-sailorBlue/40 bg-gray-100/40">
 								<CardContent className="p-4">
-									<ul className="list-disc space-y-2 pl-5">
+									<ul className="list-disc space-y-2 pl-4">
 										{notes.map((note, index) => (
 											<li
 												key={index}
-												className="flex items-start text-base text-sailorBlue"
+												className="flex items-start gap-2 text-sm text-sailorBlue sm:text-base"
 											>
-												
-												{note.length > 0 && (
-												<AlertCircle className="mr-2 mt-0.5 h-5 w-5 flex-shrink-0 text-sailorBlue" />
-												)}												
+												<AlertCircle className="mt-0.5 h-4 w-4 flex-shrink-0 text-sailorBlue" />
 												<span>{note}</span>
 											</li>
 										))}
@@ -132,14 +122,18 @@ export default function Explanation({
 
 					<TabsContent value="implementation" className="mt-6 space-y-6">
 						<section className="space-y-2">
-							<h2 className="text-xl font-semibold text-sailorBlue">Syntax</h2>
+							<h2 className="text-lg font-semibold text-sailorBlue sm:text-xl">
+								Syntax
+							</h2>
 							<CodeBlock initialCode={syntax} />
 						</section>
 
 						<section className="space-y-2">
-							<h2 className="text-xl font-semibold text-sailorBlue">Example</h2>
+							<h2 className="text-lg font-semibold text-sailorBlue sm:text-xl">
+								Example
+							</h2>
 							<CodeBlock initialCode={example.code} />
-							<p className="mt-2 text-base text-sailorBlue">
+							<p className="mt-2 text-sm text-sailorBlue sm:text-base">
 								{example.explanation}
 							</p>
 
@@ -166,7 +160,7 @@ export default function Explanation({
 						<CollapsibleTrigger asChild>
 							<Button
 								variant="outline"
-								className="flex w-full items-center justify-between p-4"
+								className="flex w-full items-center justify-between bg-white/30 p-4"
 							>
 								<span className="flex items-center gap-2">
 									<BookOpen className="h-4 w-4" />
@@ -190,7 +184,7 @@ export default function Explanation({
 													href={resource.url}
 													target="_blank"
 													rel="noopener noreferrer"
-													className="flex items-center text-sm gap-2 text-sailorBlue transition-colors hover:text-sailorBlue/80"
+													className="flex items-center gap-2 text-sm text-sailorBlue transition-colors hover:text-sailorBlue/80"
 												>
 													<ExternalLink className="h-4 w-4" />
 													{resource.title}

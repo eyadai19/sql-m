@@ -20,7 +20,7 @@ import ResultsView from "./common/ResultsView";
 import SQLEditor from "./common/SQLEditor";
 import TablesView from "./common/TablesView";
 import TaskPrompt from "./common/TaskPrompt";
-import Hints from "./Hints";
+import Hints from "./common/Hints";
 
 export type ResultType = QueryResult | null;
 export type ErrorType = string | null;
@@ -62,6 +62,8 @@ export default function Exercise({
 	const [attempts, setAttempts] = useState(1);
 	const [activeHint, setActiveHint] = useState(0);
 	const [showTips, setShowTips] = useState(false);
+	const [showHints, setShowHints] = useState(true);
+
 	const exerciseStartTime = useRef<number | null>(null);
 
 	useEffect(() => {
@@ -173,7 +175,7 @@ export default function Exercise({
 	};
 
 	return (
-		<Card className="mx-auto mb-3 w-full max-w-4xl bg-white/40 backdrop-blur-xl">
+		<Card className=" mb-3 w-full max-w-4xl bg-white/40 backdrop-blur-xl">
 			<ExerciseHeader
 				title={title}
 				difficulty={difficulty}
@@ -183,7 +185,7 @@ export default function Exercise({
 
 			<CardContent className="space-y-6">
 				<Tabs defaultValue="exercise" className="w-full">
-					<TabsList className="grid w-full grid-cols-2">
+					<TabsList className="grid w-full grid-cols-2 ">
 						<TabsTrigger value="exercise" className="flex items-center gap-2">
 							<Code className="h-4 w-4" />
 							Exercise
@@ -224,16 +226,19 @@ export default function Exercise({
 					</TabsContent>
 
 					<TabsContent value="help" className="space-y-6">
+						
 						<Hints
-							hints={hints}
-							activeHint={activeHint}
-							onNextHint={() =>
-								setActiveHint((prev) => Math.min(prev + 1, hints.length - 1))
-							}
-							tips={tips}
-							showTips={showTips}
-							onToggleTips={() => setShowTips((prev) => !prev)}
-						/>
+          hints={hints}
+          activeHint={activeHint}
+          onNextHint={() =>
+			setActiveHint((prev) => Math.min(prev + 1, hints.length - 1))
+		}
+          tips={tips}
+          showTips={showTips}
+		onToggleTips={() => setShowTips((prev) => !prev)}
+          showHints={showHints}
+          onToggleHints={() => setShowHints((prev) => !prev)}
+        />
 					</TabsContent>
 				</Tabs>
 			</CardContent>

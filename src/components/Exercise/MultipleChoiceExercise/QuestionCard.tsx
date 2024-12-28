@@ -20,9 +20,9 @@ export default function QuestionCard({
   isCorrect,
 }: QuestionCardProps) {
   return (
-    <div className="border rounded-lg p-6 bg-white">
+    <div className="border rounded-lg p-6 bg-white/30">
       <div className="space-y-4">
-        <p className="text-lg font-medium">{question.question}</p>
+        <p className="text-sm font-medium">{question.question}</p>
 
         {question.imageUrl && (
           <div className="relative w-full h-48 mb-4">
@@ -48,7 +48,7 @@ export default function QuestionCard({
 
         {showExplanation && (
           <div
-            className={`mt-4 p-4 rounded-lg ${
+            className={`mt-4 p-4 rounded-lg text-sm ${
               isCorrect
                 ? "bg-green-50 text-green-800"
                 : "bg-red-50 text-red-800"

@@ -84,7 +84,7 @@ export default function MultipleChoiceExercise({
   };
 
   return (
-    <Card className="mx-auto mb-3 w-full max-w-4xl bg-white/40 backdrop-blur-xl">
+    <Card className="mx-auto mb-3 w-full max-w-4xl bg-white/40 backdrop-blur-xl my-3">
       <ExerciseHeader
         title={title}
         difficulty={difficulty}

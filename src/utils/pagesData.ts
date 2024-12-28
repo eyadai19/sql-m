@@ -1,20 +1,10 @@
-interface ExplanationParams {
-	title?: string;
-	howItWorks: string;
-	syntax: string;
-	example: {
-		code: string;
-		explanation: string;
-		liveDemo?: React.ReactNode;
-	};
-	notes: string[];
-	additionalResources?: {
-		title: string;
-		url: string;
-	}[];
-	difficulty?: "Beginner" | "Intermediate" | "Advanced";
-	tags?: string[];
-}
+import type { TrueFalseExerciseProps as TrueFalseParams } from "@/components/Exercise/TrueFalseExercise/types";
+import type {
+	DragDropExerciseProps as DragDropExerciseParams,
+	MultipleChoiceExerciseProps as MultipleChoiceParams,
+} from "@/lib/types/exerciseTypes";
+
+import type { ExplanationProps as ExplanationParams } from "@/components/Explanation/types";
 
 interface ExerciseParams {
 	title?: string;
@@ -30,8 +20,11 @@ interface ExerciseParams {
 }
 
 interface PageParams {
-	exerciseParams: ExerciseParams;
-	explanationParams: ExplanationParams;
+	exerciseParams?: ExerciseParams;
+	explanationParams?: ExplanationParams;
+	trueFalseParams?: TrueFalseParams;
+	multipleChoiceParams?: MultipleChoiceParams;
+	dragDropParams?: DragDropExerciseParams;
 }
 
 interface PageData {
@@ -311,57 +304,208 @@ AND DATE_HIRED < CURRENT_DATE - INTERVAL '90 days';`,
 	},
 	dataTypes: {
 		exerciseParams: {
-			title: "Understanding SQL Data Types",
+			title: "Query: Data Types and Type Conversion",
 			prompt:
-				"Analyze the employees table and identify the correct data types for a new employee record. Write a query to insert a new employee named 'Mark Wilson' as a 'Software Engineer' with a salary of 65000, hired on '2024-03-15', with status 'active' in department 1.",
-			tables: ["employees"],
-			difficulty: "Easy",
+				"Analyze the following table structure and write queries to demonstrate proper data type usage and type conversion. Focus on handling different numeric, string, and date types correctly.",
+			tables: ["products"],
+			difficulty: "Medium",
 			hints: [
-				"Consider the type of each field in the employees table",
-				"Pay attention to date format for date_hired",
-				"Remember that numeric fields don't use quotes",
+				"Consider type casting implications",
+				"Think about data precision requirements",
+				"Remember implicit vs explicit conversion rules",
 			],
 			tips: [
 				"Use appropriate data types for each column",
-				"Format dates as 'YYYY-MM-DD'",
-				"Remember that strings need quotes but numbers don't",
+				"Consider storage efficiency",
+				"Think about data validation requirements",
 			],
-			answer: `INSERT INTO employees (name, position, department_id, salary, date_hired, status)
-VALUES ('Mark Wilson', 'Software Engineer', 1, 65000, '2024-03-15', 'active');`,
+			answer: `-- Example table with various data types
+	CREATE TABLE products (
+	  id SERIAL PRIMARY KEY,
+	  name VARCHAR(100),
+	  price DECIMAL(10,2),
+	  quantity INTEGER,
+	  description TEXT,
+	  created_at TIMESTAMP,
+	  is_active BOOLEAN
+	);
+	
+	-- Demonstrate type conversion and formatting
+	SELECT 
+	  name,
+	  price::TEXT as price_string,
+	  CAST(created_at AS DATE) as date_only,
+	  quantity::FLOAT as quantity_float
+	FROM products;`,
 			seed: "seed1",
-			expectedRowCount: 1,
+			expectedRowCount: 5,
+		},
+		trueFalseParams: {
+			title: "True or False: Understanding Data Types",
+			prompt:
+				"Evaluate these statements about database data types. Mark each statement as True or False.",
+			difficulty: "Medium",
+			questions: [
+				{
+					id: "dt-1",
+					statement:
+						"CHAR and VARCHAR are identical in terms of storage efficiency.",
+					isCorrect: false,
+					explanation:
+						"False. CHAR always uses fixed-length storage, while VARCHAR uses variable-length storage based on the actual content length, making VARCHAR more storage-efficient for variable-length strings.",
+				},
+				{
+					id: "dt-2",
+					statement:
+						"DECIMAL data type guarantees exact numeric precision, making it suitable for financial calculations.",
+					isCorrect: true,
+					explanation:
+						"True. DECIMAL (or NUMERIC) provides exact precision and is ideal for financial calculations where rounding errors must be avoided.",
+				},
+				{
+					id: "dt-3",
+					statement:
+						"TIMESTAMP WITH TIME ZONE stores the actual time zone information along with the timestamp.",
+					isCorrect: true,
+					explanation:
+						"True. TIMESTAMP WITH TIME ZONE stores both the timestamp and time zone information, allowing for proper timezone handling and conversion.",
+				},
+				{
+					id: "dt-4",
+					statement: "INTEGER and BIGINT can store decimal numbers.",
+					isCorrect: false,
+					explanation:
+						"False. INTEGER and BIGINT are whole number data types. For decimal numbers, you need to use DECIMAL, NUMERIC, REAL, or DOUBLE PRECISION.",
+				},
+				{
+					id: "dt-5",
+					statement:
+						"TEXT data type has a maximum length limit of 65,535 bytes.",
+					isCorrect: false,
+					explanation:
+						"False. TEXT data type can store strings of unlimited length (limited only by the maximum row size for your database system).",
+				},
+			],
+			hints: [
+				"Consider storage implications of different types",
+				"Think about precision requirements",
+				"Remember type conversion rules",
+			],
+			tips: [
+				"Focus on practical use cases",
+				"Consider performance implications",
+				"Think about data integrity requirements",
+			],
+			onComplete: (data: { time: number; trials: number }) => {
+				console.log("Exercise completed:", data);
+			},
+		},
+		dragDropParams: {
+			title: "Sort: Choosing Appropriate Data Types",
+			prompt:
+				"Arrange the following steps in the correct order when selecting data types for a new database table.",
+			items: [
+				{
+					id: "1",
+					content:
+						"Identify the type of data to be stored (numbers, text, dates, etc.)",
+				},
+				{
+					id: "2",
+					content:
+						"Determine precision requirements (exact vs approximate numbers)",
+				},
+				{
+					id: "3",
+					content: "Consider storage space efficiency",
+				},
+				{
+					id: "4",
+					content: "Evaluate performance implications",
+				},
+				{
+					id: "5",
+					content: "Plan for future scaling and modifications",
+				},
+			],
+			mode: "simple" as const,
+			correctOrder: ["1", "2", "3", "4", "5"],
+			difficulty: "Medium" as const,
+			hints: [
+				"Think about what information you need first",
+				"Consider both immediate and future needs",
+				"Remember performance implications",
+			],
+			tips: [
+				"Start with basic requirements",
+				"Consider both storage and performance",
+				"Think about long-term maintenance",
+			],
+			onComplete: (data: { time: number; trials: number }) => {
+				console.log("Exercise completed:", data);
+			},
+		},
+		multipleChoiceParams: {
+			title: "Multiple Choice: Data Type Selection",
+			prompt: "Choose the most appropriate data type for each scenario.",
+			questions: [
+				{
+					id: "q1",
+					question:
+						"Which data type is most appropriate for storing currency values?",
+					imageUrl: "/images/data-types/numeric-types.png",
+					choices: [
+						{ id: "c1", text: "FLOAT" },
+						{ id: "c2", text: "DECIMAL(10,2)" },
+						{ id: "c3", text: "INTEGER" },
+					],
+					correctChoiceId: "c2",
+					explanation:
+						"DECIMAL(10,2) is ideal for currency as it provides exact decimal precision and prevents rounding errors that could occur with FLOAT.",
+				},
+			],
+			difficulty: "Medium",
+			onComplete: (data) => console.log(data),
 		},
 		explanationParams: {
-			title: "SQL Data Types Fundamentals",
+			title: "Understanding Database Data Types",
 			howItWorks:
-				"SQL data types define the type of value that can be stored in a table column. Each column in a table must have a specified data type that determines what kind of data can be stored in it and how that data can be used.",
-			syntax: `CREATE TABLE table_name (
-    column1 INTEGER,
-    column2 VARCHAR(255),
-    column3 DATE,
-    column4 DECIMAL(10,2)
-);`,
+				"Database data types define the kind of values that can be stored in a column and how those values can be used. Proper data type selection ensures data integrity, optimal storage usage, and efficient query performance.",
+			syntax: `-- Common Data Type Declarations:
+	-- Numeric Types
+	INTEGER                 -- Whole numbers
+	DECIMAL(precision,scale) -- Exact decimal numbers
+	REAL                    -- Approximate decimals
+	
+	-- String Types
+	CHAR(n)                 -- Fixed-length
+	VARCHAR(n)              -- Variable-length
+	TEXT                    -- Unlimited length
+	
+	-- Date/Time Types
+	DATE                    -- Date only
+	TIME                    -- Time only
+	TIMESTAMP              -- Date and time
+	TIMESTAMP WITH TIME ZONE -- Date, time with timezone`,
 			example: {
-				code: `-- Employees table data types example
-CREATE TABLE employees (
-    id INTEGER PRIMARY KEY,
-    name VARCHAR(100),
-    position VARCHAR(100),
-    department_id INTEGER,
-    salary DECIMAL(10,2),
-    date_hired DATE,
-    status VARCHAR(50),
-    last_working_day DATE NULL
-);`,
+				code: `-- Example Table with Various Data Types
+	CREATE TABLE products (
+	  id SERIAL PRIMARY KEY,
+	  name VARCHAR(100),
+	  price DECIMAL(10,2),
+	  description TEXT,
+	  created_at TIMESTAMP WITH TIME ZONE,
+	  is_available BOOLEAN
+	);`,
 				explanation:
-					"This example shows the data types used in our employees table. INTEGER is used for IDs, VARCHAR for text fields with specific lengths, DECIMAL for precise numeric values like salary, and DATE for temporal data.",
+					"This example shows common data types used in a typical products table. Each column uses an appropriate data type based on its requirements: SERIAL for auto-incrementing IDs, VARCHAR for limited-length strings, DECIMAL for precise numeric values, TEXT for unlimited-length strings, TIMESTAMP for date/time tracking, and BOOLEAN for true/false values.",
 			},
 			notes: [
-				"INTEGER: Whole numbers (e.g., id, department_id)",
-				"VARCHAR: Variable-length text with maximum size (e.g., name, position)",
-				"DECIMAL/NUMERIC: Precise decimal numbers (e.g., salary)",
-				"DATE: Calendar dates (e.g., date_hired)",
-				"NULL/NOT NULL: Specifies if a field can contain null values",
+				"Choose data types based on the actual data requirements",
+				"Consider storage efficiency and query performance",
+				"Use exact numeric types for financial calculations",
+				"Consider string length limitations and storage",
+				"Time zones are important for timestamp data",
 			],
 			additionalResources: [
 				{
@@ -369,125 +513,336 @@ CREATE TABLE employees (
 					url: "https://www.postgresql.org/docs/current/datatype.html",
 				},
 				{
-					title: "MySQL Data Types",
-					url: "https://dev.mysql.com/doc/refman/8.0/en/data-types.html",
+					title: "SQL Data Types Best Practices",
+					url: "https://www.sqlshack.com/sql-data-types-best-practices/",
 				},
 			],
 			difficulty: "Beginner",
 			tags: [
 				"Data Types",
-				"SQL Fundamentals",
 				"Database Design",
-				"Column Types",
+				"SQL",
+				"Storage",
+				"Performance",
+				"Data Integrity",
+			],
+			sections: [
+				{
+					title: "Numeric Types",
+					content:
+						"Numeric types include INTEGER for whole numbers, DECIMAL/NUMERIC for exact decimal numbers, and REAL/DOUBLE PRECISION for approximate decimal numbers. Choose based on precision requirements and storage considerations.",
+					image: {
+						url: "/images/data-types/numeric-types-comparison.png",
+						alt: "Numeric Data Types Comparison",
+						caption:
+							"Comparison of different numeric data types and their use cases",
+					},
+				},
+				{
+					title: "String Types",
+					content:
+						"String types include CHAR (fixed-length), VARCHAR (variable-length), and TEXT (unlimited length). Selection depends on storage requirements, performance needs, and data characteristics.",
+					image: {
+						url: "/images/data-types/string-types-comparison.png",
+						alt: "String Data Types Comparison",
+						caption:
+							"Comparison of different string data types and their storage characteristics",
+					},
+				},
+				{
+					title: "Date and Time Types",
+					content:
+						"Date/time types include DATE, TIME, TIMESTAMP, and their timezone-aware variants. Choose based on temporal precision requirements and timezone handling needs.",
+					image: {
+						url: "/images/data-types/datetime-types-comparison.png",
+						alt: "Date/Time Data Types Comparison",
+						caption:
+							"Overview of date and time data types and their applications",
+					},
+				},
 			],
 		},
 	},
+
 	references: {
 		exerciseParams: {
-			title: "Primary and Foreign Key Implementation",
+			title: "Query: Primary and Foreign Key Implementation",
 			prompt:
-				"Write a query that demonstrates the relationship between departments and employees using primary and foreign keys. List all departments and show how many employees each department has, including departments with no employees.",
-			tables: ["employees", "departments"],
+				"Given the users and orders tables, implement the necessary primary and foreign key constraints, then write queries to demonstrate referential integrity and join operations.",
+			tables: ["users", "orders"],
 			difficulty: "Medium",
 			hints: [
-				"Use the primary key (id) from departments table",
-				"Connect it with the foreign key (department_id) in employees table",
-				"Consider using COUNT and GROUP BY",
-				"Don't forget departments with no employees",
+				"Consider what makes each record unique in both tables",
+				"Think about how orders are connected to users",
+				"Remember to handle potential NULL values",
 			],
 			tips: [
-				"Use LEFT JOIN to include all departments",
-				"NULL handling might be necessary for departments with no employees",
-				"Consider using table aliases for better readability",
+				"Primary keys should be unique and not null",
+				"Foreign keys must reference existing primary keys",
+				"Consider using CASCADE options for referential actions",
 			],
-			answer: `SELECT 
-  d.id AS department_pk,
-  d.name AS department_name,
-  COUNT(e.id) AS employee_count
-FROM departments d
-LEFT JOIN employees e ON d.id = e.department_id
-GROUP BY d.id, d.name
-ORDER BY d.id;`,
-			seed: "seed2",
-			expectedRowCount: 4,
+			answer: `-- Create tables with proper constraints
+	CREATE TABLE users (
+	  id SERIAL PRIMARY KEY,
+	  email VARCHAR(255) UNIQUE NOT NULL,
+	  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+	);
+	
+	CREATE TABLE orders (
+	  id SERIAL PRIMARY KEY,
+	  user_id INTEGER REFERENCES users(id),
+	  total_amount DECIMAL(10,2) NOT NULL,
+	  order_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+	  CONSTRAINT fk_user
+		FOREIGN KEY (user_id)
+		REFERENCES users(id)
+		ON DELETE RESTRICT
+	);
+	
+	-- Query to demonstrate relationship
+	SELECT 
+	  u.email,
+	  COUNT(o.id) as order_count,
+	  SUM(o.total_amount) as total_spent
+	FROM users u
+	LEFT JOIN orders o ON u.id = o.user_id
+	GROUP BY u.id, u.email;`,
+			seed: "seed4",
+			expectedRowCount: 5,
+		},
+		trueFalseParams: {
+			title: "True or False: Understanding Database Keys and References",
+			prompt:
+				"Evaluate these statements about primary and foreign keys. Mark each statement as True or False.",
+			difficulty: "Medium",
+			questions: [
+				{
+					id: "ref-1",
+					statement:
+						"A table can have multiple foreign keys but only one primary key.",
+					isCorrect: true,
+					explanation:
+						"True. While a table can have only one primary key (which can be composite), it can have multiple foreign keys referencing different tables.",
+				},
+				{
+					id: "ref-2",
+					statement:
+						"Foreign key columns must have the same name as their referenced primary key columns.",
+					isCorrect: false,
+					explanation:
+						"False. Foreign key columns can have different names than their referenced primary key columns. Only the data types must match.",
+				},
+				{
+					id: "ref-3",
+					statement:
+						"ON DELETE CASCADE automatically deletes child records when the parent record is deleted.",
+					isCorrect: true,
+					explanation:
+						"True. The ON DELETE CASCADE referential action automatically removes dependent records in child tables when the referenced record in the parent table is deleted.",
+				},
+				{
+					id: "ref-4",
+					statement:
+						"A foreign key value must always reference an existing primary key value.",
+					isCorrect: false,
+					explanation:
+						"False. Foreign key values can be NULL (unless explicitly constrained as NOT NULL), but if they contain a value, it must reference an existing primary key.",
+				},
+				{
+					id: "ref-5",
+					statement:
+						"Primary keys can be modified after table creation without affecting foreign key relationships.",
+					isCorrect: false,
+					explanation:
+						"False. Modifying primary keys that are referenced by foreign keys requires careful handling of the referential integrity constraints and may require updating all referencing foreign keys.",
+				},
+			],
+			hints: [
+				"Think about referential integrity rules",
+				"Consider the implications of key constraints",
+				"Remember the relationship between primary and foreign keys",
+			],
+			tips: [
+				"Focus on maintaining data consistency",
+				"Consider practical database scenarios",
+				"Think about data integrity requirements",
+			],
+			onComplete: (data: { time: number; trials: number }) => {
+				console.log("Exercise completed:", data);
+			},
+		},
+		dragDropParams: {
+			title: "Sort: Implementing Database References",
+			prompt:
+				"Arrange the following steps in the correct order when implementing database references.",
+			items: [
+				{
+					id: "1",
+					content: "Identify the primary key columns in the parent table",
+				},
+				{
+					id: "2",
+					content: "Define appropriate data types for the foreign key columns",
+				},
+				{
+					id: "3",
+					content: "Add foreign key constraints with proper reference options",
+				},
+				{
+					id: "4",
+					content:
+						"Determine the referential actions (CASCADE, RESTRICT, etc.)",
+				},
+				{
+					id: "5",
+					content: "Create indexes on foreign key columns for performance",
+				},
+			],
+			mode: "simple" as const,
+			correctOrder: ["1", "2", "4", "3", "5"],
+			difficulty: "Medium" as const,
+			hints: [
+				"Think about dependencies between steps",
+				"Consider performance implications",
+				"Remember referential integrity requirements",
+			],
+			tips: [
+				"Plan your key strategy carefully",
+				"Consider maintenance implications",
+				"Think about query performance",
+			],
+			onComplete: (data: { time: number; trials: number }) => {
+				console.log("Exercise completed:", data);
+			},
+		},
+		multipleChoiceParams: {
+			title: "Multiple Choice: Database References",
+			prompt: "Choose the correct option for each database reference scenario.",
+			questions: [
+				{
+					id: "q1",
+					question:
+						"Which referential action should be used when deleting a user should also delete all their orders?",
+					imageUrl: "/images/references/referential-actions.png",
+					choices: [
+						{ id: "c1", text: "ON DELETE RESTRICT" },
+						{ id: "c2", text: "ON DELETE CASCADE" },
+						{ id: "c3", text: "ON DELETE SET NULL" },
+					],
+					correctChoiceId: "c2",
+					explanation:
+						"ON DELETE CASCADE is correct because it automatically deletes all related records in the child table when a parent record is deleted.",
+				},
+			],
+			difficulty: "Medium",
+			onComplete: (data) => console.log(data),
 		},
 		explanationParams: {
-			title: "Understanding Primary and Foreign Keys",
+			title: "Understanding Database References",
 			howItWorks:
-				"Primary keys (PK) and foreign keys (FK) are fundamental database concepts that ensure data integrity and establish relationships between tables. A primary key uniquely identifies each record in a table, while a foreign key references a primary key in another table, creating a relationship between them.",
-			syntax: `-- Creating a table with a Primary Key
-CREATE TABLE departments (
-  id INT PRIMARY KEY,  -- Primary Key
-  name VARCHAR(100)
-);
-
--- Creating a table with a Foreign Key
-CREATE TABLE employees (
-  id INT PRIMARY KEY,
-  department_id INT,  -- Foreign Key
-  FOREIGN KEY (department_id) 
-  REFERENCES departments(id)
-);`,
+				"Database references establish relationships between tables using primary and foreign keys. Primary keys uniquely identify records in a table, while foreign keys create references to primary keys in other tables, maintaining referential integrity.",
+			syntax: `-- Primary Key Syntax
+	CREATE TABLE parent (
+	  id SERIAL PRIMARY KEY,  -- Simple primary key
+	  -- Composite primary key
+	  (column1, column2) PRIMARY KEY
+	);
+	
+	-- Foreign Key Syntax
+	CREATE TABLE child (
+	  id SERIAL PRIMARY KEY,
+	  parent_id INTEGER REFERENCES parent(id),
+	  -- With additional options
+	  CONSTRAINT fk_parent
+		FOREIGN KEY (parent_id)
+		REFERENCES parent(id)
+		ON DELETE CASCADE
+		ON UPDATE CASCADE
+	);`,
 			example: {
-				code: `-- Example showing PK-FK relationship
-SELECT 
-  d.id AS department_pk,
-  e.department_id AS employee_fk,
-  d.name AS department_name,
-  e.name AS employee_name
-FROM departments d
-JOIN employees e ON d.id = e.department_id
-WHERE d.id = 1;`,
+				code: `-- Example with Users and Orders
+	CREATE TABLE users (
+	  id SERIAL PRIMARY KEY,
+	  email VARCHAR(255) UNIQUE NOT NULL
+	);
+	
+	CREATE TABLE orders (
+	  id SERIAL PRIMARY KEY,
+	  user_id INTEGER NOT NULL,
+	  amount DECIMAL(10,2),
+	  CONSTRAINT fk_user
+		FOREIGN KEY (user_id)
+		REFERENCES users(id)
+		ON DELETE RESTRICT
+	);`,
 				explanation:
-					"This query demonstrates how the primary key (id) in the departments table is referenced by the foreign key (department_id) in the employees table, creating a relationship between departments and their employees.",
+					"This example demonstrates a common reference relationship between users and orders tables. The orders table has a foreign key (user_id) that references the primary key (id) in the users table, ensuring each order belongs to a valid user.",
 			},
 			notes: [
-				"Primary Keys (PK):",
-				"- Must be unique for each record",
-				"- Cannot contain NULL values",
-				"- Should be immutable (shouldn't change)",
-				"- Often used as a reference point by other tables",
-				"",
-				"",
-				"",
-				"Foreign Keys (FK):",
-				"- References a primary key in another table",
-				"- Can be NULL (unless constrained otherwise)",
-				"- Maintains referential integrity",
-				"- Can be used to create relationships between tables",
-				"",
-				"",
-				"",
-				"Benefits:",
-				"- Ensures data integrity",
-				"- Prevents orphaned records",
-				"- Enables table relationships",
-				"- Supports data consistency",
+				"Primary keys must be unique and not null",
+				"Foreign keys maintain referential integrity",
+				"Consider appropriate referential actions",
+				"Index foreign key columns for performance",
+				"Use meaningful constraint names",
 			],
 			additionalResources: [
 				{
-					title: "Understanding Primary and Foreign Keys",
-					url: "https://www.w3schools.com/sql/sql_primarykey.asp",
+					title: "PostgreSQL Constraints Documentation",
+					url: "https://www.postgresql.org/docs/current/ddl-constraints.html",
 				},
 				{
-					title: "Database Keys and Relationships",
-					url: "https://www.postgresql.org/docs/current/tutorial-fk.html",
+					title: "Database Keys and Constraints Best Practices",
+					url: "https://www.postgresql.org/docs/current/ddl-constraints.html#DDL-CONSTRAINTS-FK",
 				},
 			],
 			difficulty: "Beginner",
 			tags: [
-				"Primary Key",
-				"Foreign Key",
-				"Database Design",
+				"Primary Keys",
+				"Foreign Keys",
+				"Constraints",
 				"Referential Integrity",
-				"Table Relationships",
-				"Data Integrity",
+				"Database Design",
+				"Performance",
+			],
+			sections: [
+				{
+					title: "Primary Keys",
+					content:
+						"Primary keys uniquely identify each record in a table. They can be single columns or composite (multiple columns). Primary keys must be unique and cannot contain NULL values.",
+					image: {
+						url: "/images/references/primary-key-types.png",
+						alt: "Primary Key Types",
+						caption:
+							"Different types of primary keys and their implementations",
+					},
+				},
+				{
+					title: "Foreign Keys",
+					content:
+						"Foreign keys create references to primary keys in other tables, establishing relationships between tables and maintaining referential integrity.",
+					image: {
+						url: "/images/references/foreign-key-relationship.png",
+						alt: "Foreign Key Relationships",
+						caption: "How foreign keys create relationships between tables",
+					},
+				},
+				{
+					title: "Referential Actions",
+					content:
+						"Referential actions (CASCADE, RESTRICT, SET NULL) determine what happens to foreign key values when referenced primary key values are updated or deleted.",
+					image: {
+						url: "/images/references/referential-actions.png",
+						alt: "Referential Actions",
+						caption: "Different types of referential actions and their effects",
+					},
+				},
 			],
 		},
 	},
+
 	ERD: {
 		exerciseParams: {
-			title: "Entity Relationship Diagram Analysis",
+			title: "Query: Entity Relationship Diagram Analysis",
 			prompt:
 				"Looking at the relationship between the employees and departments tables, identify the type of relationship and list all the attributes that establish this relationship. Then write a query that demonstrates this relationship by showing each department and its employees.",
 			tables: ["employees", "departments"],
@@ -520,6 +875,137 @@ LEFT JOIN employees e ON d.id = e.department_id
 ORDER BY d.name, e.name;`,
 			seed: "seed3",
 			expectedRowCount: 5,
+		},
+		trueFalseParams: {
+			title: "True and False: Understanding Entity-Relationship Diagrams",
+			prompt:
+				"Evaluate these statements about Entity-Relationship Diagrams (ERDs). Mark each statement as True or False.",
+			difficulty: "Medium" as const,
+			questions: [
+				{
+					id: "erd-1",
+					statement:
+						"In an ERD, a many-to-many relationship can be directly implemented in a relational database without a junction table.",
+					isCorrect: false,
+					explanation:
+						"False. Many-to-many relationships require a junction (bridge) table to be properly implemented in a relational database. This table contains foreign keys from both entities.",
+				},
+				{
+					id: "erd-2",
+					statement:
+						"Weak entities in an ERD must have a identifying relationship with a strong entity to be meaningful.",
+					isCorrect: true,
+					explanation:
+						"True. Weak entities depend on strong entities for their identification and cannot exist independently. They must have an identifying relationship with at least one strong entity.",
+				},
+				{
+					id: "erd-3",
+					statement:
+						"Composite attributes in an ERD can be broken down into multiple simple attributes.",
+					isCorrect: true,
+					explanation:
+						"True. Composite attributes are made up of multiple simple attributes. For example, 'address' can be broken down into street, city, state, and zip code.",
+				},
+				{
+					id: "erd-4",
+					statement:
+						"Derived attributes must be physically stored in the database table.",
+					isCorrect: false,
+					explanation:
+						"False. Derived attributes are calculated from other attributes and don't need to be stored physically. For example, age can be derived from date of birth.",
+				},
+				{
+					id: "erd-5",
+					statement:
+						"A single entity in an ERD can participate in multiple relationships simultaneously.",
+					isCorrect: true,
+					explanation:
+						"True. An entity can have relationships with multiple other entities. For example, a Student entity might relate to Course, Department, and Dormitory entities.",
+				},
+			],
+			hints: [
+				"Think about how relationships are implemented in actual database tables",
+				"Consider the dependencies between different types of entities",
+				"Remember the different types of attributes and their characteristics",
+			],
+			tips: [
+				"Visualize how the concepts would be implemented in a real database",
+				"Focus on the practical implications of each statement",
+				"Consider both logical design and physical implementation",
+			],
+			onComplete: (data: { time: number; trials: number }) => {
+				console.log("Exercise completed:", data);
+			},
+		},
+		dragDropParams: {
+			title: "Sort: Creating an ERD Diagram",
+			prompt:
+				"Arrange the following steps in the correct order to create an Entity-Relationship Diagram (ERD).",
+			items: [
+				{
+					id: "1",
+					content:
+						"Identify entities (e.g., Customer, Order, Product) that represent main objects in the system",
+				},
+				{
+					id: "2",
+					content:
+						"Define relationships between entities (e.g., Customer places Order, Order contains Product)",
+				},
+				{
+					id: "3",
+					content:
+						"Determine attributes for each entity (e.g., Customer: name, email, address)",
+				},
+				{
+					id: "4",
+					content:
+						"Specify cardinality for relationships (e.g., one-to-many, many-to-many)",
+				},
+				{
+					id: "5",
+					content:
+						"Add primary and foreign keys to establish entity connections",
+				},
+			],
+			mode: "simple" as const,
+			correctOrder: ["1", "3", "2", "4", "5"],
+			difficulty: "Medium" as const,
+			hints: [
+				"Think about what information you need before establishing connections",
+				"Consider which steps depend on having other information first",
+				"Remember that keys are used to implement relationships",
+			],
+			tips: [
+				"Start with the basic building blocks before adding details",
+				"Attributes help define what data each entity will store",
+				"Relationships and cardinality work together to show how entities interact",
+			],
+			onComplete: (data: { time: number; trials: number }) => {
+				console.log("Exercise completed:", data);
+			},
+		},
+		multipleChoiceParams: {
+			title: "Multiple Choice: ERD Relationships",
+			prompt: "Choose the correct relationship type for each scenario.",
+			questions: [
+				{
+					id: "q1",
+					question: "What type of relationship is shown in this ERD?",
+					imageUrl:
+						"/image/Education/Exercise/basic/erd/one-to-many-example.png",
+					choices: [
+						{ id: "c1", text: "One-to-One" },
+						{ id: "c2", text: "One-to-Many" },
+						{ id: "c3", text: "Many-to-Many" },
+					],
+					correctChoiceId: "c2",
+					explanation:
+						"This is a one-to-many relationship as shown by the crow's foot notation.",
+				},
+			],
+			difficulty: "Medium",
+			onComplete: (data) => console.log(data),
 		},
 		explanationParams: {
 			title: "Understanding Entity Relationship Diagrams (ERD)",
@@ -581,6 +1067,41 @@ N:M (Many-to-Many)   →  ──>│<──`,
 				"Data Modeling",
 				"Primary Key",
 				"Foreign Key",
+			],
+			sections: [
+				{
+					title: "One-to-One Relationships",
+					content:
+						"A one-to-one relationship means that each record in Table A is related to exactly one record in Table B, and vice versa. For example, each person has one passport, and each passport belongs to one person.",
+					image: {
+						url: "",
+						alt: "One-to-One Relationship Diagram",
+						caption:
+							"Visual representation of a one-to-one relationship between Person and Passport entities",
+					},
+				},
+				{
+					title: "One-to-Many Relationships",
+					content:
+						"A one-to-many relationship indicates that one record in Table A can be related to multiple records in Table B, but each record in Table B is related to only one record in Table A. For example, one department can have many employees.",
+					image: {
+						url: "",
+						alt: "One-to-Many Relationship Diagram",
+						caption:
+							"Illustration of a one-to-many relationship between Department and Employee entities",
+					},
+				},
+				{
+					title: "Many-to-Many Relationships",
+					content:
+						"A many-to-many relationship means that multiple records in Table A can be related to multiple records in Table B. For example, students can enroll in multiple courses, and courses can have multiple students.",
+					image: {
+						url: "",
+						alt: "Many-to-Many Relationship Diagram",
+						caption:
+							"Demonstration of a many-to-many relationship between Student and Course entities",
+					},
+				},
 			],
 		},
 	},

@@ -20,15 +20,14 @@ export default function DashboardLayout({
 	children: React.ReactNode;
 }) {
 	return (
-		<div>
-			<div className="fixed left-0 top-0 -z-20 min-h-screen w-full bg-gradient-to-r from-teal-400 to-blue-500 opacity-25"></div>
+		<div className="relative h-full before:absolute before:inset-0 before:-z-10 before:bg-gradient-to-r before:from-teal-400 before:to-blue-500 before:opacity-25">
 			<ProfileNavbar logoutAction={logoutAction} />
 			<SidebarProvider>
 				<AppSidebar
 					getQuizAction={getQuizAction}
 					getUnlockIndex={getUnlockIndex}
 				/>
-				<main>
+				<main className="overflow-auto">
 					<SidebarTrigger />
 					<RenderHeadings />
 					{children}
