@@ -9,6 +9,7 @@ export default function CommunityPage({
 	postCommentAction,
 	postLikeAction,
 	postCommentLikeAction,
+	addPostAction,
 }: {
 	fetchAllPostsAction: () => Promise<
 		Post[] | { field: string; message: string }
@@ -16,13 +17,18 @@ export default function CommunityPage({
 	postCommentAction: (
 		postId: string,
 		content: string,
-	photo: string | null,
+		photo: string | null,
 	) => Promise<{ field: string; message: string } | undefined>;
 	postLikeAction: (
 		postId: string,
 	) => Promise<{ field: string; message: string } | undefined>;
 	postCommentLikeAction: (
 		commentId: string,
+	) => Promise<{ field: string; message: string } | undefined>;
+	addPostAction: (
+		title: string,
+		content: string,
+		photo: string | null,
 	) => Promise<{ field: string; message: string } | undefined>;
 }) {
 	const [posts, setPosts] = useState<Post[] | null>(null);
@@ -47,13 +53,14 @@ export default function CommunityPage({
 			</div>
 		);
 	}
-	
+
 	if (!posts) {
 		return (
-				<div className="flex h-screen items-center justify-center">
-					<div className="animate-spin rounded-full h-16 w-16 border-t-4 border-b-4 border-[#ADF0D1]"></div>
-				</div>
-			);}
+			<div className="flex h-screen items-center justify-center">
+				<div className="h-16 w-16 animate-spin rounded-full border-b-4 border-t-4 border-[#ADF0D1]"></div>
+			</div>
+		);
+	}
 
 	return (
 		<div

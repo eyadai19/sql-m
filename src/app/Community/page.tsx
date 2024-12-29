@@ -21,6 +21,7 @@ export default function Community() {
 				postLikeAction={postLikeAction}
 				postCommentAction={postCommentAction}
 				postCommentLikeAction={postCommentLikeAction}
+				addPostAction={addPostAction}
 			/>
 		</div>
 	);

@@ -16,6 +16,7 @@ export default function ProfilePage({
 	UpdateProfileAction,
 	userPostAction,
 	editPostAction,
+	deletePostAction,
 }: {
 	ProfileAction: () => Promise<
 		ProfileData | { field: string; message: string } | undefined
@@ -28,6 +29,9 @@ export default function ProfilePage({
 		postId: string,
 		title: string | null,
 		content: string | null,
+	) => Promise<{ field: string; message: string } | undefined>;
+	deletePostAction: (
+		postId: string,
 	) => Promise<{ field: string; message: string } | undefined>;
 }) {
 	const [info, setInfo] = useState<ProfileData | null>(null);
