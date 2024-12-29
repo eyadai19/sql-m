@@ -7,6 +7,7 @@ import { ProfileData } from "@/lib/types/authSchemas";
 import { eq } from "drizzle-orm";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
+import { editPostAction, userPostAction } from "../Community/page";
 
 export default function Profile() {
 	return (
@@ -15,6 +16,8 @@ export default function Profile() {
 			<ProfilePage
 				ProfileAction={ProfileAction}
 				UpdateProfileAction={UpdateProfileAction}
+				userPostAction={userPostAction}
+				editPostAction={editPostAction}
 			/>
 		</div>
 	);

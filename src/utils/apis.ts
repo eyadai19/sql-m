@@ -1,8 +1,9 @@
-const ngrok_url = "https://53a2-34-135-214-110.ngrok-free.app/";
+const ngrok_url = "https://673d-34-55-182-91.ngrok-free.app/";
 export const ngrok_url_generate_sql = `${ngrok_url}generate_sql`;
 export const ngrok_url_compare = `${ngrok_url}compare`;
 export const ngrok_url_en_to_ar = `${ngrok_url}translate_en_to_ar`;
 export const ngrok_url_ar_to_en = `${ngrok_url}translate_ar_to_en`;
+export const ngrok_url_analyze_toxicity = `${ngrok_url}analyze_toxicity`;
 
 export const userDbApi = "http://localhost:3000/api/db";
 export const getContextApi = "http://localhost:3000/api/getContext";

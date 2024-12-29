@@ -16,7 +16,7 @@ export default function CommunityPage({
 	postCommentAction: (
 		postId: string,
 		content: string,
-		photo: string,
+	photo: string | null,
 	) => Promise<{ field: string; message: string } | undefined>;
 	postLikeAction: (
 		postId: string,
