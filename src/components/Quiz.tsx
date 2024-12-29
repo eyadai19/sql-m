@@ -29,9 +29,9 @@ export default function SqlQuiz({
 	quizAction: (
 		input: z.infer<typeof userQuizAnswerSchema>,
 	) => Promise<
-		| { score: number; correctAnswers: string[] }
-		| userExcerciseAnswerError
-		| undefined
+			{ score: number; correctAnswers: string[] }
+			| userExcerciseAnswerError
+			| undefined
 	>;
 	quizQuestionAction: () => Promise<
 		{ question: string }[] | { field: string; message: string } | undefined
@@ -47,6 +47,8 @@ export default function SqlQuiz({
 	const [score, setScore] = useState<number | null>(null);
 	const [hasAccess, setHasAccess] = useState<boolean | undefined>(undefined);
 	const [isSubmitting, setIsSubmitting] = useState(false);
+	const [isDisabled, setIsDisabled] = useState(false);
+	const [isOverlayVisible, setIsOverlayVisible] = useState(false);
 
 	useEffect(() => {
 		const checkAccess = async () => {
@@ -85,22 +87,23 @@ export default function SqlQuiz({
 			return;
 		}
 
-		setIsSubmitting(true); // Start the loading spinner
+		setIsSubmitting(true);
+		setIsOverlayVisible(true);
 
 		const updatedData = {
 			...data,
-			question: questions.map((q) => q.question), // تحديث الأسئلة في data
+			question: questions.map((q) => q.question),
 		};
 
-		// استدعاء quizAction بعد التأكد من تحديث الأسئلة
 		const result = await quizAction(updatedData);
-		setIsSubmitting(false); // End the loading spinner
+		setIsSubmitting(false);
 
 		if (result && "score" in result && "correctAnswers" in result) {
 			setScore(result.score);
 			setCorrectAnswers(result.correctAnswers);
 			setIsSubmitted(true);
 			setShowModal(true);
+			setIsDisabled(true);
 
 			const newResults = questions.map(
 				(q, index) =>
@@ -111,6 +114,7 @@ export default function SqlQuiz({
 		} else if (result && "message" in result) {
 			console.error(result.message);
 		}
+		setIsOverlayVisible(false);
 	};
 
 	const handleGoBack = () => {
@@ -142,72 +146,102 @@ export default function SqlQuiz({
 
 	return (
 		<div
-			className="flex min-h-screen items-center justify-center px-8"
+			className="flex min-h-screen items-center justify-center px-8 relative"
 			style={{
 				background: "linear-gradient(to bottom, #00203F, #ADF0D1)",
 			}}
 		>
-			{/* Quiz form layout */}
-			<div className="container mx-auto max-w-3xl rounded-lg bg-white px-4 py-8">
-				<h1 className="mb-8 text-center text-3xl font-bold text-[#00203F]">
-					Quiz
-				</h1>
+			{isOverlayVisible && (
+				<div className="absolute inset-0 z-50 bg-gray-600 bg-opacity-50"></div>
+			)}
+			<div className="container mx-auto max-w-3xl rounded-lg bg-white px-4 py-8 relative z-10">
+				<div className="flex justify-between items-center mb-8">
+					<h1 className="text-3xl font-bold text-[#00203F]">Quiz</h1>
+					{score !== null && (
+						<span className="text-xl font-semibold text-[#00203F]">
+							Score: {score?.toFixed(2)} / 100
+						</span>
+					)}
+				</div>
 
 				<Form {...form}>
 					<form onSubmit={form.handleSubmit(handleSubmit)}>
-						{questions.map((question, index) => (
-							<FormField
-								key={index}
-								name={`answer.${index}`}
-								render={({ field }) => (
-									<FormItem>
-										<FormLabel>{question.question}</FormLabel>
-										<FormControl>
-											<Input
-												{...field}
-												placeholder="Type your answer here..."
-												className="text-lg" // Increase text size for input
-											/>
-										</FormControl>
-										<FormMessage />
-										{results[index] !== null && (
-											<p
-												className={`mt-2 ${
-													results[index] ? "text-green-600" : "text-red-600"
-												}`}
-											>
-												{results[index]
-													? "Correct!"
-													: `Incorrect. Correct answer: ${correctAnswers[index]}`}
-											</p>
+						<div className="space-y-6">
+							{questions.map((question, index) => (
+								<div
+									key={index}
+									className="p-4 border rounded-lg shadow-sm bg-gray-50"
+								>
+									<FormField
+										name={`answer.${index}`}
+										render={({ field }) => (
+											<FormItem>
+												<FormLabel className="text-lg font-medium text-gray-700">
+													{question.question}
+												</FormLabel>
+												<FormControl>
+													<Input
+														{...field}
+														placeholder="Type your answer here..."
+														className="text-lg"
+														disabled={isDisabled}
+													/>
+												</FormControl>
+												<FormMessage />
+												{results[index] !== null && (
+													<p
+														className={`mt-2 ${
+															results[index]
+																? "text-green-600"
+																: "text-red-600"
+														}`}
+													>
+														{results[index]
+															? "Correct!"
+															: `Incorrect. Correct answer: ${correctAnswers[index]}`}
+													</p>
+												)}
+											</FormItem>
 										)}
-									</FormItem>
-								)}
-							/>
-						))}
+									/>
+								</div>
+							))}
+						</div>
 
-						<Button
-							type="submit"
-							className="mt-4 bg-[#00203F] text-white w-full"
-							disabled={isSubmitting} // Disable button while submitting
-						>
-							{isSubmitting ? (
-								<div className="animate-spin rounded-full h-6 w-6 border-t-4 border-b-4 border-white"></div> // Loading spinner
-							) : (
-								"Submit Answers"
+						<div className="flex space-x-4 mt-4">
+							<Button
+								type="submit"
+								className="bg-[#00203F] text-white w-full"
+								disabled={isSubmitting || isDisabled}
+							>
+								{isSubmitting ? (
+									<div className="animate-spin rounded-full h-6 w-6 border-t-4 border-b-4 border-white"></div>
+								) : (
+									"Submit Answers"
+								)}
+							</Button>
+							{isSubmitted && (
+								<Button
+									type="button"
+									className="bg-gray-500 text-white w-full"
+									onClick={handleGoBack}
+								>
+									Back
+								</Button>
 							)}
-						</Button>
+						</div>
 					</form>
 				</Form>
 			</div>
 
-			{/* Modal for Results */}
 			{showModal && (
 				<div className="fixed inset-0 z-50 flex items-center justify-center bg-gray-600 bg-opacity-50">
-					<div className="w-full max-w-lg rounded-lg bg-white p-8 shadow-lg">
+					<div className="w-full max-w-lg rounded-lg bg-white p-8 shadow-lg text-center">
 						<h2 className="mb-4 text-2xl font-bold text-[#00203F]">
 							Your Score: {score?.toFixed(2)} / 100
 						</h2>
+						
+
 						<Button
 							onClick={handleReviewAnswers}
 							className="bg-[#00203F] text-white"

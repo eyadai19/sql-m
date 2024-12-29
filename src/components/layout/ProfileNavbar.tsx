@@ -1,9 +1,8 @@
 "use client";
 import Link from "next/link";
 import { useState, useEffect } from "react";
-import { FaDatabase, FaEdit, FaUserCircle } from "react-icons/fa";
+import { FaDatabase, FaEdit, FaUserCircle, FaBook } from "react-icons/fa";
 import { RiCommunityFill } from "react-icons/ri";
-
 import {
 	FaArrowLeft,
 	FaBars,
@@ -100,6 +99,14 @@ export function ProfileNavbar({
 							>
 								<RiCommunityFill size={24} />
 							</Link>
+							{/* Learning Icon */}
+							<Link
+								href="http://localhost:3000/basic/dataType"
+								className="transition-colors hover:text-white"
+								title="Learning"
+							>
+								<FaBook size={24} />
+							</Link>
 							<button
 								onClick={() => {
 									handleLogout();
@@ -121,13 +128,13 @@ export function ProfileNavbar({
 
 				{/* Drawer with links (Visible only on mobile when the Drawer is open) */}
 				{isDrawerOpen && (
-					<div className="fixed top-0 right-0 z-10 flex flex-col items-start justify-start space-y-6 bg-[#00304a] text-lg h-full w-64 py-4 px-6">
+					<div className ="bg=[#00203F]  fixed top-0 right-0 z-10 flex flex-col items-start justify-start space-y-6 text-lg h-full w-64 py-4 px-6">
 						{/* Back Button in Drawer */}
 						<button
 							onClick={() => {
 								toggleDrawer();
 							}}
-							className="transition-colors hover:text-white mb-4"
+							className="  transition-colors hover:text-white mb-4"
 							title="Go Back"
 						>
 							<FaArrowLeft size={40} />
@@ -177,6 +184,15 @@ export function ProfileNavbar({
 						>
 							<RiCommunityFill size={40} />
 							<span>Community</span>
+						</Link>
+						{/* Learning Icon with Text */}
+						<Link
+							href="http://localhost:3000/basic/dataType"
+							className="flex items-center space-x-4 transition-colors hover:text-white"
+							title="Learning"
+						>
+							<FaBook size={40} />
+							<span>Learning</span>
 						</Link>
 						{/* Logout Button with Text */}
 						<button

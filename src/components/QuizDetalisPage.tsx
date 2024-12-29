@@ -13,8 +13,8 @@ export default function QuizDetalisPage({
 	>;
 }) {
 	const [quizData, setQuizData] = useState<
-		{ question: string; answer: string; accuracy: number }[]
-	>([]);
+		{ question: string; answer: string; accuracy: number }[] | null
+	>(null); // تعديل النوع ليشمل null
 	const [error, setError] = useState<string | null>(null);
 	const router = useRouter();
 
@@ -22,7 +22,7 @@ export default function QuizDetalisPage({
 		const fetchQuizData = async () => {
 			try {
 				const data = await QuizDetailsAction();
-				
+
 				if (Array.isArray(data)) {
 					setQuizData(
 						data.map((item) => ({
@@ -57,6 +57,15 @@ export default function QuizDetalisPage({
 		return `rgb(${r}, ${g}, ${b})`;
 	};
 
+	if (!quizData) {
+		// عرض شاشة التحميل إذا لم تكن البيانات موجودة ولم يكن هناك خطأ
+		return (
+			<div className="flex h-screen items-center justify-center">
+				<div className="animate-spin rounded-full h-16 w-16 border-t-4 border-b-4 border-[#ADF0D1]"></div>
+			</div>
+		);
+	}
+
 	if (error) {
 		return (
 			<div className="flex min-h-screen items-center justify-center text-red-500">
@@ -72,7 +81,7 @@ export default function QuizDetalisPage({
 				background: "linear-gradient(to bottom, #00203F, #ADF0D1)",
 			}}
 		>
-			{/* زر الرجوع */}
+			زر الرجوع
 			<div className="absolute right-4 top-4">
 				<button
 					className="rounded-full bg-white p-2 shadow-lg transition duration-300 hover:bg-gray-100"
