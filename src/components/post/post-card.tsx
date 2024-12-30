@@ -79,7 +79,7 @@ export default function PostCard({
 	};
 
 	return (
-		<Card className="mx-auto max-w-2xl overflow-hidden">
+		<Card className="mx-auto my-3 max-w-4xl overflow-hidden">
 			<div className="p-4 sm:p-6">
 				<PostHeader
 					userPhoto={post.user.photo}
