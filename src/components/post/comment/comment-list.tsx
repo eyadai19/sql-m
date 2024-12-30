@@ -1,5 +1,5 @@
-import { Comment } from "@/app/Community/page";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Comment } from "@/lib/types/post";
 import { formatDistanceToNow } from "date-fns";
 import { useState } from "react";
 import { FaHeart } from "react-icons/fa"; // مكتبة أيقونات Font Awesome
@@ -17,7 +17,7 @@ export function CommentList({
 	const [likeCounts, setLikeCounts] = useState<{ [key: string]: number }>(
 		comments.reduce(
 			(acc, comment) => {
-				acc[comment.id] = comment.likes || 0; 
+				acc[comment.id] = comment.likes || 0;
 				return acc;
 			},
 			{} as { [key: string]: number },

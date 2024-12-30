@@ -8,15 +8,7 @@ import { useEffect, useRef, useState } from "react";
 import { FiEye } from "react-icons/fi";
 import "swiper/css";
 import "swiper/css/navigation";
-import { Autoplay, Navigation } from "swiper/modules";
-import { Swiper, SwiperSlide } from "swiper/react";
-import {
-	Carousel,
-	CarouselContent,
-	CarouselItem,
-	CarouselNext,
-	CarouselPrevious,
-} from "./ui/carousel";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "./ui/tabs";
 import { UserPosts } from "./UserPosts";
 
 export default function ProfilePage({
@@ -196,247 +188,195 @@ export default function ProfilePage({
 	}
 
 	return (
-		<div
-			className="flex min-h-screen items-center justify-center px-8"
-			style={{
-				background: "linear-gradient(to bottom, #00203F, #ADF0D1)",
-			}}
-		>
-			<Carousel className="mx-auto w-full max-w-6xl">
-				<CarouselContent>
-					{/* Profile View */}
-					<CarouselItem>
-						<div className="m-4 rounded-lg bg-white p-8 shadow-md">
-							<div className="flex flex-col items-start gap-12 md:flex-row">
-								<div
-									className="m-8 w-full max-w-6xl rounded-lg p-12 shadow-md"
-									style={{ background: "#ffffff" }}
-								>
-									<div className="flex flex-col items-start gap-12 md:flex-row">
-										{/* القسم الأيسر */}
-										<div
-											className="flex w-full flex-col gap-8 md:w-1/2"
-											style={{ background: "#f1f5f9" }}
-										>
-											{/* بطاقة المعلومات الشخصية */}
-											<div
-												className="relative rounded-lg p-6 shadow-sm"
-												style={{ background: "#f9fafb" }}
-											>
-												<div className="-mt-16 flex justify-center">
-													<div className="h-32 w-32 overflow-hidden rounded-full border-4 border-gray-300 bg-gray-200">
-														{newPhoto ? (
-															<img
-																src={newPhoto}
-																alt="New Profile"
-																className="h-full w-full object-cover"
-															/>
-														) : info.photo ? (
-															<img
-																src={info.photo}
-																alt="User Profile"
-																className="h-full w-full object-cover"
-															/>
-														) : (
-															<span className="flex h-full items-center justify-center text-gray-500">
-																No Image
-															</span>
-														)}
-													</div>
-												</div>
-												{isEditing ? (
-													<div className="mt-4 text-center">
-														<input
-															type="file"
-															accept="image/*"
-															onChange={handleFileChange}
-															className="mb-4 w-full text-sm text-gray-600"
-														/>
-														<input
-															type="text"
-															name="firstName"
-															value={formData.firstName}
-															onChange={handleInputChange}
-															className="mb-2 w-full rounded border px-4 py-2 text-gray-800"
-															placeholder="First Name"
-														/>
-														<input
-															type="text"
-															name="lastName"
-															value={formData.lastName}
-															onChange={handleInputChange}
-															className="mb-4 w-full rounded border px-4 py-2 text-gray-800"
-															placeholder="Last Name"
-														/>
-														<div className="flex justify-center gap-4">
-															<button
-																onClick={handleSave}
-																className="rounded bg-gray-700 px-6 py-2 text-white shadow-sm transition duration-300 hover:bg-gray-800"
-															>
-																Save
-															</button>
-															<button
-																onClick={handleCancelEdit}
-																className="rounded bg-red-500 px-6 py-2 text-white shadow-sm transition duration-300 hover:bg-red-600"
-															>
-																Cancel
-															</button>
-														</div>
-													</div>
+		<div className="min-h-screen bg-gradient-to-b from-[#00203F] to-[#ADF0D1] px-4 py-8 md:px-8">
+			<div className="mx-auto max-w-7xl">
+				<Tabs defaultValue="profile" className="w-full">
+					<TabsList className="mb-8 grid w-full grid-cols-2">
+						<TabsTrigger value="profile">Profile</TabsTrigger>
+						<TabsTrigger value="posts">Posts</TabsTrigger>
+					</TabsList>
+
+					<TabsContent value="profile" className="space-y-4">
+						<div className="rounded-lg bg-white p-8 shadow-lg md:p-8">
+							<div className="grid gap-8 md:grid-cols-2">
+								{/* Left Column */}
+								<div className="space-y-6">
+									{/* Profile Card */}
+									<div className="relative rounded-lg bg-gray-50 p-6 shadow-sm">
+										<div className="-mt-10 flex justify-center">
+											<div className="h-32 w-32 overflow-hidden rounded-full border-4 border-gray-300 bg-gray-200">
+												{newPhoto ? (
+													<img
+														src={newPhoto}
+														alt="New Profile"
+														className="h-full w-full object-cover"
+													/>
+												) : info.photo ? (
+													<img
+														src={info.photo}
+														alt="User Profile"
+														className="h-full w-full object-cover"
+													/>
 												) : (
-													<div className="mt-8 text-center">
-														<h1 className="text-2xl font-bold text-gray-800">{`${info.firstName} ${info.lastName}`}</h1>
-														<p className="text-sm text-gray-500">
-															@{info.username}
-														</p>
-														<p className="mt-4 text-lg font-medium text-gray-700">{`Stage: ${info.stage.stage}`}</p>
-													</div>
+													<span className="flex h-full items-center justify-center text-gray-500">
+														No Image
+													</span>
 												)}
-												<div className="mt-6 flex items-center justify-between px-4">
-													<div
-														onClick={handleAchievementsClick}
-														className="flex cursor-pointer items-center text-gray-700 hover:text-gray-900"
+											</div>
+										</div>
+
+										{isEditing ? (
+											<div className="mt-4 space-y-4">
+												<input
+													type="file"
+													accept="image/*"
+													onChange={handleFileChange}
+													className="w-full text-sm text-gray-600"
+												/>
+												<input
+													type="text"
+													name="firstName"
+													value={formData.firstName}
+													onChange={handleInputChange}
+													className="w-full rounded border px-4 py-2 text-gray-800"
+													placeholder="First Name"
+												/>
+												<input
+													type="text"
+													name="lastName"
+													value={formData.lastName}
+													onChange={handleInputChange}
+													className="w-full rounded border px-4 py-2 text-gray-800"
+													placeholder="Last Name"
+												/>
+												<div className="flex justify-center gap-4">
+													<button
+														onClick={handleSave}
+														className="rounded bg-gray-700 px-6 py-2 text-white transition hover:bg-gray-800"
 													>
-														<FontAwesomeIcon icon={faMedal} className="mr-2" />
-														<span className="font-medium">Achievements</span>
-													</div>
-													{!isEditing && (
-														<div
-															className="flex cursor-pointer items-center text-gray-700 hover:text-gray-900"
-															onClick={handleEditClick}
-														>
-															<FontAwesomeIcon icon={faEdit} className="mr-2" />
-															<span className="font-medium">Edit</span>
-														</div>
-													)}
+														Save
+													</button>
+													<button
+														onClick={handleCancelEdit}
+														className="rounded bg-red-500 px-6 py-2 text-white transition hover:bg-red-600"
+													>
+														Cancel
+													</button>
 												</div>
 											</div>
+										) : (
+											<div className="mt-8 text-center">
+												<h1 className="text-2xl font-bold text-gray-800">{`${info.firstName} ${info.lastName}`}</h1>
+												<p className="text-sm text-gray-500">
+													@{info.username}
+												</p>
+												<p className="mt-4 text-lg font-medium text-gray-700">{`Stage: ${info.stage.stage}`}</p>
+											</div>
+										)}
 
-											{/* الشاشة المتحركة */}
-											<Swiper
-												onSwiper={(swiper) => (swiperRef.current = swiper)}
-												loop={true}
-												spaceBetween={30}
-												slidesPerView={1}
-												autoplay={{ delay: 3000 }}
-												navigation
-												modules={[Autoplay, Navigation]}
-												className="w-full rounded-lg shadow-sm"
+										<div className="mt-6 flex items-center justify-between px-4">
+											<button
+												onClick={handleAchievementsClick}
+												className="flex items-center text-gray-700 hover:text-gray-900"
 											>
-												<SwiperSlide>
-													<div className="p-6 text-center">
-														<h2 className="text-xl font-bold text-gray-700">
-															Learn With AI
-														</h2>
-														<p className="mt-2 text-gray-600">
-															Improve your knowledge in SQL.
-														</p>
-														<button className="mt-4 rounded bg-gray-700 px-6 py-2 text-white shadow-sm transition duration-300 hover:bg-gray-800">
-															Chat!
-														</button>
-													</div>
-												</SwiperSlide>
-											</Swiper>
-										</div>
-
-										{/* القسم الأيمن */}
-										<div
-											className="mt-10 w-full md:w-1/2"
-											style={{ background: "#f1f5f9" }}
-										>
-											<div
-												className="rounded-lg p-6 shadow-sm"
-												style={{ background: "#f9fafb" }}
-											>
-												<h2 className="mb-6 text-xl font-bold text-gray-700">
-													Quizzes Overview
-												</h2>
-												<div
-													className="overflow-y-auto"
-													style={{ maxHeight: "300px" }}
+												<FontAwesomeIcon icon={faMedal} className="mr-2" />
+												<span className="font-medium">Achievements</span>
+											</button>
+											{!isEditing && (
+												<button
+													onClick={handleEditClick}
+													className="flex items-center text-gray-700 hover:text-gray-900"
 												>
-													<table className="w-full border-collapse rounded-md text-left text-sm">
-														<thead className="bg-gray-200">
-															<tr>
-																<th className="border px-6 py-4 text-left text-xs uppercase tracking-wider text-gray-600">
-																	No.
-																</th>
-																<th className="border px-6 py-4 text-left text-xs uppercase tracking-wider text-gray-600">
-																	Stage
-																</th>
-																<th className="border px-6 py-4 text-left text-xs uppercase tracking-wider text-gray-600">
-																	Mark %
-																</th>
-																<th className="border px-6 py-4 text-center"></th>
-															</tr>
-														</thead>
-														<tbody>
-															{info.quizzes.map((quiz, index) => (
-																<tr
-																	key={quiz.id}
-																	className="odd:bg-white even:bg-gray-100 hover:bg-gray-200"
-																>
-																	<td className="border px-6 py-4 text-gray-700">
-																		{index + 1}
-																	</td>
-																	<td className="border px-6 py-4 text-gray-700">
-																		{info.stage.stage}
-																	</td>
-																	<td className="border px-6 py-4 text-gray-700">
-																		{quiz.mark!.toFixed(2)}%
-																	</td>
-																	<td className="border px-6 py-4 text-center">
-																		<button
-																			onClick={() => handleReviewClick(quiz.id)}
-																			className="flex h-8 w-8 items-center justify-center rounded-full bg-gray-700 text-white shadow-md transition duration-300 hover:bg-gray-800"
-																		>
-																			<FiEye className="text-sm" />
-																		</button>
-																	</td>
-																</tr>
-															))}
-														</tbody>
-													</table>
-												</div>
-											</div>
+													<FontAwesomeIcon icon={faEdit} className="mr-2" />
+													<span className="font-medium">Edit</span>
+												</button>
+											)}
 										</div>
+									</div>
+
+									{/* AI Learning Section */}
+									<div className="rounded-lg bg-gray-50 p-6 shadow-sm">
+										<h2 className="text-xl font-bold text-gray-700">
+											Learn With AI
+										</h2>
+										<p className="mt-2 text-gray-600">
+											Improve your knowledge in SQL.
+										</p>
+										<button className="mt-4 rounded bg-gray-700 px-6 py-2 text-white transition hover:bg-gray-800">
+											Chat!
+										</button>
+									</div>
+								</div>
+
+								{/* Right Column - Quizzes Overview */}
+								<div className="rounded-lg bg-gray-50 p-6 shadow-sm">
+									<h2 className="mb-6 text-xl font-bold text-gray-700">
+										Quizzes Overview
+									</h2>
+									<div className="overflow-x-auto">
+										<table className="w-full text-left text-sm">
+											<thead className="bg-gray-200">
+												<tr>
+													<th className="px-4 py-2">No.</th>
+													<th className="px-4 py-2">Stage</th>
+													<th className="px-4 py-2">Mark %</th>
+													<th className="px-4 py-2"></th>
+												</tr>
+											</thead>
+											<tbody>
+												{info.quizzes.map((quiz, index) => (
+													<tr
+														key={quiz.id}
+														className="odd:bg-white even:bg-gray-100"
+													>
+														<td className="px-4 py-2">{index + 1}</td>
+														<td className="px-4 py-2">{info.stage.stage}</td>
+														<td className="px-4 py-2">
+															{quiz.mark!.toFixed(2)}%
+														</td>
+														<td className="px-4 py-2">
+															<button
+																onClick={() => handleReviewClick(quiz.id)}
+																className="rounded-full bg-gray-700 p-2 text-white transition hover:bg-gray-800"
+															>
+																<FiEye className="h-4 w-4" />
+															</button>
+														</td>
+													</tr>
+												))}
+											</tbody>
+										</table>
 									</div>
 								</div>
 							</div>
 						</div>
-					</CarouselItem>
-					{/* Posts View */}
-					<CarouselItem>
-						<div className="m-4 rounded-lg bg-white shadow-md">
-							<div className="border-b p-4">
-								<h2 className="text-2xl font-bold">My Posts</h2>
-								<UserPosts />
-							</div>
-						</div>
-					</CarouselItem>
-				</CarouselContent>
-				<div className="mt-4 flex justify-center gap-4">
-					<CarouselPrevious />
-					<CarouselNext />
-				</div>
-			</Carousel>
+					</TabsContent>
 
-			{/* نافذة Achievements */}
+					<TabsContent value="posts">
+						<div className="rounded-lg bg-white p-4 shadow-lg md:p-8">
+							<h2 className="mb-6 text-2xl font-bold">Posts</h2>
+							<UserPosts />
+						</div>
+					</TabsContent>
+				</Tabs>
+			</div>
+
+			{/* Achievements Modal */}
 			{showAchievementsModal && (
-				<div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
-					<div className="w-11/12 rounded-lg bg-white p-6 shadow-lg md:w-1/3">
+				<div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 p-4">
+					<div className="w-full max-w-md rounded-lg bg-white p-6 shadow-lg">
 						<h2 className="text-xl font-bold text-gray-700">Achievements</h2>
-						<ul className="mt-4">
+						<ul className="mt-4 space-y-2">
 							{achievements.map((achievement, index) => (
 								<li key={index} className="text-gray-600">
 									{achievement}
 								</li>
 							))}
 						</ul>
-						<div className="mt-4 flex justify-end">
+						<div className="mt-6 flex justify-end">
 							<button
 								onClick={closeAchievementsModal}
-								className="rounded-lg bg-red-500 px-6 py-2 text-white"
+								className="rounded bg-red-500 px-6 py-2 text-white transition hover:bg-red-600"
 							>
 								Close
 							</button>

@@ -1,15 +1,12 @@
 "use client";
-
-import { Post } from "@/app/Community/page";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { cn } from "@/lib/utils";
-import { formatDistanceToNow } from "date-fns";
-import { Heart, MessageCircle } from "lucide-react";
+import { Post } from "@/lib/types/post";
 import { useState } from "react";
-import { CommentForm } from "./comment-form";
-import { CommentList } from "./comment-list";
+import { CommentForm } from "./comment/comment-form";
+import { CommentList } from "./comment/comment-list";
+import { PostActions } from "./PostActions";
+import { PostContent } from "./PostContent";
+import { PostHeader } from "./PostHeader";
 
 export default function PostCard({
 	post,
@@ -25,16 +22,26 @@ export default function PostCard({
 		postId: string,
 		content: string,
 		photo: string | null,
-	) => Promise<{ field: string; message: string } | undefined>;
-	postCommentLikeAction: (
-		commentId: string,
-	) => Promise<{ field: string; message: string } | undefined>;
+	) => Promise<
+		| {
+				field: string;
+				message: string;
+		  }
+		| undefined
+	>;
+	postCommentLikeAction: (commentId: string) => Promise<
+		| {
+				field: string;
+				message: string;
+		  }
+		| undefined
+	>;
 }) {
 	const [isLiking, setIsLiking] = useState(false);
 	const [likesCount, setLikesCount] = useState(post.likesCount);
-	const [isLiked, setIsLiked] = useState(false); // حالة إذا كان المستخدم قد قام باللايك
+	const [isLiked, setIsLiked] = useState(false);
 	const [showComments, setShowComments] = useState(false);
-	const [feedbackMessage, setFeedbackMessage] = useState<string | null>(null); // لتخزين رسائل التنبيه
+	const [feedbackMessage, setFeedbackMessage] = useState<string | null>(null);
 
 	const handleLike = async () => {
 		if (isLiking) return;
@@ -46,102 +53,67 @@ export default function PostCard({
 				console.error("Error liking post:", result.message);
 				setFeedbackMessage(result.message);
 			} else {
-				// تحديث الحالة بشكل فوري
 				setIsLiked(!isLiked);
 				setLikesCount((prev) => (isLiked ? prev - 1 : prev + 1));
 				setFeedbackMessage(
-					isLiked ? "تم إزالة الإعجاب بنجاح" : "تم الإعجاب بالمنشور بنجاح",
+					isLiked ? "Like removed" : "Post liked successfully",
 				);
 			}
 		} catch (error) {
 			console.error("Unexpected error while liking post:", error);
-			setFeedbackMessage("حدث خطأ أثناء تنفيذ الإجراء. حاول مرة أخرى.");
+			setFeedbackMessage("An error occurred. Please try again.");
 		} finally {
 			setIsLiking(false);
-
-			// إخفاء الرسالة بعد 3 ثوانٍ
-			setTimeout(() => {
-				setFeedbackMessage(null);
-			}, 3000);
+			setTimeout(() => setFeedbackMessage(null), 3000);
 		}
 	};
 
+	const handleEdit = () => {
+		// Implement edit functionality
+		console.log("Edit post:", post.id);
+	};
+
+	const handleDelete = () => {
+		// Implement delete functionality
+		console.log("Delete post:", post.id);
+	};
+
 	return (
-		<Card className="mx-auto max-w-2xl">
-			<div className="p-6">
-				{/* Header */}
-				<div className="mb-4 flex items-center gap-4">
-					<Avatar className="h-12 w-12">
-						{post.user.photo && (
-							<div>
-								<AvatarImage src={post.user.photo} alt={post.user.name} />,
-							</div>
-						)}
-						<AvatarFallback>
-							{post.user.name.slice(0, 2).toUpperCase()}
-						</AvatarFallback>
-					</Avatar>
-					<div>
-						<h2 className="font-semibold">{post.user.name}</h2>
-						<p className="text-sm text-muted-foreground">
-							{formatDistanceToNow(new Date(post.createdTime), {
-								addSuffix: true,
-							})}
-						</p>
+		<Card className="mx-auto max-w-2xl overflow-hidden">
+			<div className="p-4 sm:p-6">
+				<PostHeader
+					userPhoto={post.user.photo}
+					userName={post.user.name}
+					createdTime={post.createdTime}
+					canEdit={true} // Add logic to determine if user can edit
+					onEdit={handleEdit}
+					onDelete={handleDelete}
+				/>
+
+				<PostContent
+					title={post.title}
+					content={post.content}
+					photo={post.photo}
+				/>
+
+				<PostActions
+					isLiked={isLiked}
+					isLiking={isLiking}
+					likesCount={likesCount}
+					commentsCount={post.comments.length}
+					onLike={handleLike}
+					onToggleComments={() => setShowComments(!showComments)}
+				/>
+
+				{feedbackMessage && (
+					<div className="mt-4 text-center text-sm text-muted-foreground">
+						{feedbackMessage}
 					</div>
-				</div>
-
-				{/* Content */}
-				<div className="space-y-4">
-					<h3 className="text-xl font-semibold">{post.title}</h3>
-					<p className="text-base">{post.content}</p>
-					{post.photo && (
-						<div className="relative aspect-video overflow-hidden rounded-lg">
-							{/* eslint-disable-next-line @next/next/no-img-element */}
-							<img
-								src={post.photo}
-								alt="Post image"
-								className="h-full w-full object-cover"
-							/>
-						</div>
-					)}
-				</div>
-
-				{/* Actions */}
-				<div className="mt-6 flex items-center gap-6">
-					<Button
-						variant="ghost"
-						size="sm"
-						className={cn("flex items-center gap-2", isLiked && "text-red-500")}
-						onClick={handleLike}
-						disabled={isLiking}
-					>
-						<Heart className={cn("h-5 w-5", isLiked && "fill-current")} />
-						<span>{likesCount}</span>
-					</Button>
-
-					<Button
-						variant="ghost"
-						size="sm"
-						className="flex items-center gap-2"
-						onClick={() => setShowComments(!showComments)}
-					>
-						<MessageCircle className="h-5 w-5" />
-						<span>{post.comments.length}</span>
-					</Button>
-				</div>
+				)}
 			</div>
 
-			{/* Feedback Message */}
-			{feedbackMessage && (
-				<div className="p-4 text-center text-sm text-muted-foreground">
-					{feedbackMessage}
-				</div>
-			)}
-
-			{/* Comments Section */}
 			{showComments && (
-				<div className="space-y-6 border-t p-6">
+				<div className="space-y-6 border-t bg-muted/10 p-4 sm:p-6">
 					<CommentForm
 						postCommentAction={postCommentAction}
 						postId={post.id}

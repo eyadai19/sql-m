@@ -1,4 +1,4 @@
-import CommunityPage from "@/components/Community";
+import CommunityPage from "@/components/community/Community";
 import { ProfileNavbar } from "@/components/layout/ProfileNavbar";
 
 import { logoutAction } from "../Profile/page";

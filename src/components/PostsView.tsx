@@ -9,7 +9,7 @@ interface PostsViewProps {
 
 export function PostsView({ posts }: PostsViewProps) {
 	return (
-		<div className="grid gap-6 p-6">
+		<div className="grid gap-6">
 			{posts.map((post) => (
 				<Card key={post.id} className="overflow-hidden">
 					<div className="p-4">

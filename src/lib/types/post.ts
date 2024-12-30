@@ -9,6 +9,8 @@ export interface Comment {
 	content: string;
 	createdTime: Date;
 	user: User;
+	likes: number;
+	isLiked: boolean;
 }
 
 export interface Post {
