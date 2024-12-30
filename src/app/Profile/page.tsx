@@ -1,3 +1,4 @@
+import { editPostAction, userPostAction } from "@/app/actions/postsAction";
 import { ProfileNavbar } from "@/components/layout/ProfileNavbar";
 import ProfilePage from "@/components/profile";
 import { getUser, lucia } from "@/lib/auth";
@@ -7,7 +8,6 @@ import { ProfileData } from "@/lib/types/authSchemas";
 import { eq } from "drizzle-orm";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
-import { editPostAction, userPostAction } from "../Community/page";
 
 export default function Profile() {
 	return (

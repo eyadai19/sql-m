@@ -1,6 +1,6 @@
 "use client";
 
-import { Post } from "@/app/Community/page";
+import { Post } from "@/lib/types/post";
 import { useEffect, useState } from "react";
 import PostCard from "./post/post-card";
 
@@ -16,7 +16,7 @@ export default function CommunityPage({
 	postCommentAction: (
 		postId: string,
 		content: string,
-	photo: string | null,
+		photo: string | null,
 	) => Promise<{ field: string; message: string } | undefined>;
 	postLikeAction: (
 		postId: string,
@@ -47,13 +47,14 @@ export default function CommunityPage({
 			</div>
 		);
 	}
-	
+
 	if (!posts) {
 		return (
-				<div className="flex h-screen items-center justify-center">
-					<div className="animate-spin rounded-full h-16 w-16 border-t-4 border-b-4 border-[#ADF0D1]"></div>
-				</div>
-			);}
+			<div className="flex h-screen items-center justify-center">
+				<div className="h-16 w-16 animate-spin rounded-full border-b-4 border-t-4 border-[#ADF0D1]"></div>
+			</div>
+		);
+	}
 
 	return (
 		<div
