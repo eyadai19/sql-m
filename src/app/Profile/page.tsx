@@ -8,11 +8,7 @@ import { ProfileData } from "@/lib/types/authSchemas";
 import { eq } from "drizzle-orm";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
-import {
-	deletePostAction,
-	editPostAction,
-	userPostAction,
-} from "../Community/page";
+import { deletePostAction } from "../actions/postsAction";
 
 export default function Profile() {
 	return (

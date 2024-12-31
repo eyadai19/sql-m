@@ -12,6 +12,7 @@ export default function CommunityPage({
 	postCommentAction,
 	postLikeAction,
 	postCommentLikeAction,
+	addPostAction,
 }: {
 	fetchAllPostsAction: () => Promise<
 		Post[] | { field: string; message: string }
@@ -26,6 +27,11 @@ export default function CommunityPage({
 	) => Promise<{ field: string; message: string } | undefined>;
 	postCommentLikeAction: (
 		commentId: string,
+	) => Promise<{ field: string; message: string } | undefined>;
+	addPostAction: (
+		title: string,
+		content: string,
+		photo: string | null,
 	) => Promise<{ field: string; message: string } | undefined>;
 }) {
 	const [posts, setPosts] = useState<Post[] | null>(null);

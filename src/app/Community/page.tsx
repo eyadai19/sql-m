@@ -3,6 +3,7 @@ import { ProfileNavbar } from "@/components/layout/ProfileNavbar";
 
 import { logoutAction } from "../Profile/page";
 import {
+	addPostAction,
 	fetchAllPostsAction,
 	postCommentAction,
 	postCommentLikeAction,

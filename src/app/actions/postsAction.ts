@@ -22,11 +22,13 @@ export async function fetchAllPostsAction(): Promise<
 				comments: {
 					with: {
 						user: true,
+						likes: true,
 					},
 				},
 				likes: true,
 			},
 		});
+		const user = await getUser();
 
 		return posts.map((post) => ({
 			id: post.id,
@@ -49,6 +51,7 @@ export async function fetchAllPostsAction(): Promise<
 					name: comment.user.firstName + " " + comment.user.lastName,
 					photo: post.user.photo,
 				},
+				likes: comment.likes.length,
 			})),
 			likesCount: post.likes.length,
 		}));
@@ -231,6 +234,7 @@ export async function userPostAction(): Promise<
 				comments: {
 					with: {
 						user: true,
+						likes: true,
 					},
 				},
 				likes: true,
@@ -258,6 +262,7 @@ export async function userPostAction(): Promise<
 					name: comment.user.firstName + " " + comment.user.lastName,
 					photo: post.user.photo,
 				},
+				likes: comment.likes.length,
 			})),
 			likesCount: post.likes.length,
 		}));

@@ -10,7 +10,7 @@ export interface Comment {
 	createdTime: Date;
 	user: User;
 	likes: number;
-	isLiked: boolean;
+	// isLiked: boolean;
 }
 
 export interface Post {

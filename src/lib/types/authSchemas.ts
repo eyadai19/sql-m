@@ -1,4 +1,3 @@
-import { Post } from "@/app/Community/page";
 import { z } from "zod";
 import { BaseZodError } from "./errorUtilities";
 
@@ -27,7 +26,6 @@ export type LoginFormError = BaseZodError<typeof loginFormSchema>;
 export type RegisterFormError = BaseZodError<typeof registerFormSchema>;
 
 export type ProfileData = {
-	posts: Post[];
 	id: string;
 	username: string;
 	firstName: string;
@@ -35,6 +33,6 @@ export type ProfileData = {
 	photo: string | null;
 	createdTime: Date;
 	lastUpdateTime: Date;
-	stage: { id: string; stage: string , index: number };
+	stage: { id: string; stage: string; index: number };
 	quizzes: { id: string; mark: number | null }[];
 };

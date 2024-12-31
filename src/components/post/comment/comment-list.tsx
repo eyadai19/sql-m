@@ -2,7 +2,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Comment } from "@/lib/types/post";
 import { formatDistanceToNow } from "date-fns";
 import { useState } from "react";
-import { FaHeart } from "react-icons/fa"; // مكتبة أيقونات Font Awesome
+import { FaHeart } from "react-icons/fa";
 
 export function CommentList({
 	comments,
