@@ -1,3 +1,4 @@
+import { editPostAction, userPostAction } from "@/app/actions/postsAction";
 import { ProfileNavbar } from "@/components/layout/ProfileNavbar";
 import ProfilePage from "@/components/profile";
 import { getUser, lucia } from "@/lib/auth";

@@ -1,5 +1,4 @@
 "use client";
-import { Post } from "@/app/Community/page";
 import { ProfileData } from "@/lib/types/authSchemas";
 import { UploadButton } from "@/utils/uploadthing";
 import { faEdit, faMedal } from "@fortawesome/free-solid-svg-icons";
@@ -10,8 +9,8 @@ import Confetti from "react-confetti";
 import { FiEye } from "react-icons/fi";
 import "swiper/css";
 import "swiper/css/navigation";
-import { Autoplay, Navigation } from "swiper/modules";
-import { Swiper, SwiperSlide } from "swiper/react";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "./ui/tabs";
+import { UserPosts } from "./UserPosts";
 
 export default function ProfilePage({
 	ProfileAction,
@@ -78,6 +77,22 @@ export default function ProfilePage({
 		};
 		fetchProfileData();
 	}, [ProfileAction]);
+
+	const [posts, setPosts] = useState<Post[] | null>(null);
+	const [postsError, setPostError] = useState<string | null>(null);
+
+	useEffect(() => {
+		async function fetchPosts() {
+			const result = await userPostAction();
+			if ("field" in result) {
+				setPostError(result.message);
+			} else {
+				setPosts(result);
+			}
+		}
+
+		fetchPosts();
+	}, []);
 
 	const handleReviewClick = (quizId: string) => {
 		router.push(`/QuizDetalis/${quizId}`);
@@ -194,7 +209,14 @@ export default function ProfilePage({
 			style={{
 				background: "linear-gradient(to bottom, #00203F, #ADF0D1)",
 			}}
-		>
+    >
+        <Tabs defaultValue="profile" className="w-full">
+					<TabsList className="mb-8 grid w-full grid-cols-2">
+						<TabsTrigger value="profile">Profile</TabsTrigger>
+						<TabsTrigger value="posts">Posts</TabsTrigger>
+					</TabsList>
+			<TabsContent value="profile" className="space-y-4">
+        
 			<div
 				className="m-8 w-full max-w-6xl rounded-lg p-12 shadow-md"
 				style={{ background: "#ffffff" }}
@@ -417,7 +439,8 @@ export default function ProfilePage({
 											))}
 										</tbody>
 									</table>
-								</div>
+                            </div>
+                            
 								{/* عرض البطاقة في الشاشات الصغيرة */}
 								<div className="block md:hidden">
 									{info.quizzes.map((quiz, index) => (
@@ -514,6 +537,16 @@ export default function ProfilePage({
 					)}
 				</div>
 			</div>
-		</div>
+            </TabsContent>
+            <TabsContent value="posts">
+						<div className="rounded-lg bg-white p-4 shadow-lg md:p-8">
+							<h2 className="mb-6 text-2xl font-bold">Posts</h2>
+							<UserPosts />
+						</div>
+					</TabsContent>
+				</Tabs>
+            </div>
+            
+	
 	);
 }
