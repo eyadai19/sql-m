@@ -6,12 +6,12 @@ import { faEdit, faMedal } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
+import Confetti from "react-confetti";
 import { FiEye } from "react-icons/fi";
 import "swiper/css";
 import "swiper/css/navigation";
 import { Autoplay, Navigation } from "swiper/modules";
 import { Swiper, SwiperSlide } from "swiper/react";
-import Confetti from "react-confetti";
 
 export default function ProfilePage({
 	ProfileAction,
@@ -54,7 +54,7 @@ export default function ProfilePage({
 
 	const router = useRouter();
 	const swiperRef = useRef<any>(null);
-
+	let maxStage: number;
 	useEffect(() => {
 		const fetchProfileData = async () => {
 			const result = await ProfileAction();
@@ -69,6 +69,7 @@ export default function ProfilePage({
 			} else {
 				await setInfo(result as ProfileData);
 
+				maxStage = result.stage.index;
 				setFormData({
 					firstName: result.firstName,
 					lastName: result.lastName,
@@ -114,6 +115,7 @@ export default function ProfilePage({
 	};
 
 	const handleSave = async () => {
+		setIsSaving(true);
 		const updatedData = new FormData();
 		updatedData.append("firstName", formData.firstName);
 		updatedData.append("lastName", formData.lastName);
@@ -123,6 +125,8 @@ export default function ProfilePage({
 		}
 
 		const result = await UpdateProfileAction(updatedData, uploadedPhotoUrl);
+		setIsSaving(false);
+
 		if (result) {
 			setIsEditing(false);
 			const updatedProfile = await ProfileAction();
@@ -141,25 +145,28 @@ export default function ProfilePage({
 		}
 	};
 
-  const handleAchievementsClick = () => {
-    // قائمة العبارات والأيقونات
-    const stagesAchievements = [
-      { message: "Welcome to the journey!", icon: "🎉" },
-      { message: "Bronze Medal: Congrats on completing Stage 1!", icon: "🥉" },
-      { message: "Silver Medal: Great job on Stage 2!", icon: "🥈" },
-      { message: "Gold Medal: You conquered Stage 3!", icon: "🥇" },
-      { message: "Platinum Medal: Outstanding achievement in Stage 4!", icon: "🏆" },
-    ];
-  
-    // تحديد المراحل التي سيتم عرضها بناءً على المتغير
-    const achievementsToShow = stagesAchievements
-      .slice(0, maxStage + 1)
-      .map((stage) => `${stage.icon} ${stage.message}`);
-  
-    // تحديث الحالة للعرض
-    setAchievements(achievementsToShow);
-    setShowAchievementsModal(true);
-  };
+	const handleAchievementsClick = () => {
+		// قائمة العبارات والأيقونات
+		const stagesAchievements = [
+			{ message: "Welcome to the journey!", icon: "🎉" },
+			{ message: "Bronze Medal: Congrats on completing Stage 1!", icon: "🥉" },
+			{ message: "Silver Medal: Great job on Stage 2!", icon: "🥈" },
+			{ message: "Gold Medal: You conquered Stage 3!", icon: "🥇" },
+			{
+				message: "Platinum Medal: Outstanding achievement in Stage 4!",
+				icon: "🏆",
+			},
+		];
+
+		// تحديد المراحل التي سيتم عرضها بناءً على المتغير
+		const achievementsToShow = stagesAchievements
+			.slice(0, maxStage)
+			.map((stage) => `${stage.icon} ${stage.message}`);
+
+		// تحديث الحالة للعرض
+		setAchievements(achievementsToShow);
+		setShowAchievementsModal(true);
+	};
 
 	const closeAchievementsModal = () => {
 		setShowAchievementsModal(false);
@@ -366,197 +373,147 @@ export default function ProfilePage({
 								Quizzes Overview
 							</h2>
 							<div className="overflow-y-auto" style={{ maxHeight: "300px" }}>
-								<table className="w-full border-collapse rounded-md text-left text-sm">
-									<thead className="bg-gray-200">
-										<tr>
-											<th className="border px-6 py-4 text-left text-xs uppercase tracking-wider text-gray-600">
-												No.
-											</th>
-											<th className="border px-6 py-4 text-left text-xs uppercase tracking-wider text-gray-600">
-												Stage
-											</th>
-											<th className="border px-6 py-4 text-left text-xs uppercase tracking-wider text-gray-600">
-												Mark %
-											</th>
-											<th className="border px-6 py-4 text-center"></th>
-										</tr>
-									</thead>
-									<tbody>
-										{info.quizzes.map((quiz, index) => (
-											<tr
-												key={quiz.id}
-												className="odd:bg-white even:bg-gray-100 hover:bg-gray-200"
-											>
-												<td className="border px-6 py-4 text-gray-700">
-													{index + 1}
-												</td>
-												<td className="border px-6 py-4 text-gray-700">
-													{info.stage.stage}
-												</td>
-												<td className="border px-6 py-4 text-gray-700">
-													{quiz.mark!.toFixed(2)}%
-												</td>
-												<td className="border px-6 py-4 text-center">
-													<button
-														onClick={() => handleReviewClick(quiz.id)}
-														className="flex h-8 w-8 items-center justify-center rounded-full bg-gray-700 text-white shadow-md transition duration-300 hover:bg-gray-800"
-													>
-														<FiEye className="text-sm" />
-													</button>
-												</td>
+								{/* عرض الجدول في الشاشات الكبيرة */}
+								<div className="hidden md:block">
+									<table className="w-full border-collapse rounded-md text-left text-sm">
+										<thead className="bg-gray-200">
+											<tr>
+												<th className="border px-6 py-4 text-left text-xs uppercase tracking-wider text-gray-600">
+													No.
+												</th>
+												<th className="border px-6 py-4 text-left text-xs uppercase tracking-wider text-gray-600">
+													Stage
+												</th>
+												<th className="border px-6 py-4 text-left text-xs uppercase tracking-wider text-gray-600">
+													Mark %
+												</th>
+												<th className="border px-6 py-4 text-center"></th>
 											</tr>
-										))}
-									</tbody>
-								</table>
+										</thead>
+										<tbody>
+											{info.quizzes.map((quiz, index) => (
+												<tr
+													key={quiz.id}
+													className="odd:bg-white even:bg-gray-100 hover:bg-gray-200"
+												>
+													<td className="border px-6 py-4 text-gray-700">
+														{index + 1}
+													</td>
+													<td className="border px-6 py-4 text-gray-700">
+														{info.stage.stage}
+													</td>
+													<td className="border px-6 py-4 text-gray-700">
+														{quiz.mark!.toFixed(2)}%
+													</td>
+													<td className="border px-6 py-4 text-center">
+														<button
+															onClick={() => handleReviewClick(quiz.id)}
+															className="flex h-8 w-8 items-center justify-center rounded-full bg-gray-700 text-white shadow-md transition duration-300 hover:bg-gray-800"
+														>
+															<FiEye className="text-sm" />
+														</button>
+													</td>
+												</tr>
+											))}
+										</tbody>
+									</table>
+								</div>
+								{/* عرض البطاقة في الشاشات الصغيرة */}
+								<div className="block md:hidden">
+									{info.quizzes.map((quiz, index) => (
+										<div
+											key={quiz.id}
+											className="mb-4 rounded-lg border bg-white p-4 shadow-md hover:bg-gray-50"
+										>
+											<div className="mb-2 flex justify-between text-gray-700">
+												<span className="font-bold">No.:</span>
+												<span>{index + 1}</span>
+											</div>
+											<div className="mb-2 flex justify-between text-gray-700">
+												<span className="font-bold">Stage:</span>
+												<span>{info.stage.stage}</span>
+											</div>
+											<div className="mb-4 flex justify-between text-gray-700">
+												<span className="font-bold">Mark:</span>
+												<span>{quiz.mark!.toFixed(2)}%</span>
+											</div>
+											<div className="flex justify-center">
+												<button
+													onClick={() => handleReviewClick(quiz.id)}
+													className="flex h-8 w-8 items-center justify-center rounded-full bg-gray-700 text-white shadow-md transition duration-300 hover:bg-gray-800"
+												>
+													<FiEye className="text-sm" />
+												</button>
+											</div>
+										</div>
+									))}
+								</div>
 							</div>
 						</div>
+						{/* </div> */}
+						{/* </div> */}
+						{/* نافذة Achievements */}
+						{showAchievementsModal && (
+							<div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
+								<div className="w-11/12 rounded-lg bg-white p-6 shadow-lg md:w-1/3">
+									<h2 className="text-xl font-bold text-gray-700">
+										Achievements
+									</h2>
+									<ul className="mt-4">
+										{achievements.map((achievement, index) => (
+											<li key={index} className="text-gray-600">
+												{achievement}
+											</li>
+										))}
+									</ul>
+									<div className="mt-4 flex justify-end">
+										<button
+											onClick={closeAchievementsModal}
+											className="rounded-lg bg-red-500 px-6 py-2 text-white"
+										>
+											Close
+										</button>
+									</div>
+								</div>
+							</div>
+						)}
 					</div>
+
+					{/* نافذة Achievements */}
+					{showAchievementsModal && (
+						<div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
+							{/* تأثير الاحتفال */}
+							<Confetti
+								width={window.innerWidth}
+								height={window.innerHeight}
+								numberOfPieces={200}
+								recycle={false}
+							/>
+							{/* الشاشة المنبثقة */}
+							<div className="relative z-50 w-11/12 rounded-lg bg-white p-6 shadow-lg md:w-1/3">
+								<h2 className="text-xl font-bold text-gray-700">
+									Achievements
+								</h2>
+								<ul className="mt-4">
+									{achievements.map((achievement, index) => (
+										<li key={index} className="text-gray-600">
+											{achievement}
+										</li>
+									))}
+								</ul>
+								<div className="mt-4 flex justify-end">
+									<button
+										onClick={closeAchievementsModal}
+										className="rounded-lg bg-red-500 px-6 py-2 text-white"
+									>
+										Close
+									</button>
+								</div>
+							</div>
+						</div>
+					)}
 				</div>
 			</div>
-          {/* القسم الأيمن */}
-          <div className="mt-10 w-full md:w-1/2" style={{ background: "#f1f5f9" }}>
-  <div className="rounded-lg p-6 shadow-sm" style={{ background: "#f9fafb" }}>
-    <h2 className="mb-6 text-xl font-bold text-gray-700">Quizzes Overview</h2>
-    <div className="overflow-y-auto" style={{ maxHeight: "300px" }}>
-      {/* عرض الجدول في الشاشات الكبيرة */}
-      <div className="hidden md:block">
-        <table className="w-full border-collapse rounded-md text-left text-sm">
-          <thead className="bg-gray-200">
-            <tr>
-              <th className="border px-6 py-4 text-left text-xs uppercase tracking-wider text-gray-600">
-                No.
-              </th>
-              <th className="border px-6 py-4 text-left text-xs uppercase tracking-wider text-gray-600">
-                Stage
-              </th>
-              <th className="border px-6 py-4 text-left text-xs uppercase tracking-wider text-gray-600">
-                Mark %
-              </th>
-              <th className="border px-6 py-4 text-center"></th>
-            </tr>
-          </thead>
-          <tbody>
-            {info.quizzes.map((quiz, index) => (
-              <tr
-                key={quiz.id}
-                className="odd:bg-white even:bg-gray-100 hover:bg-gray-200"
-              >
-                <td className="border px-6 py-4 text-gray-700">{index + 1}</td>
-                <td className="border px-6 py-4 text-gray-700">
-                  {info.stage.stage}
-                </td>
-                <td className="border px-6 py-4 text-gray-700">
-                  {quiz.mark!.toFixed(2)}%
-                </td>
-                <td className="border px-6 py-4 text-center">
-                  <button
-                    onClick={() => handleReviewClick(quiz.id)}
-                    className="flex h-8 w-8 items-center justify-center rounded-full bg-gray-700 text-white shadow-md transition duration-300 hover:bg-gray-800"
-                  >
-                    <FiEye className="text-sm" />
-                  </button>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
-
-      {/* عرض البطاقة في الشاشات الصغيرة */}
-      <div className="block md:hidden">
-        {info.quizzes.map((quiz, index) => (
-          <div
-            key={quiz.id}
-            className="mb-4 rounded-lg border bg-white p-4 shadow-md hover:bg-gray-50"
-          >
-            <div className="mb-2 flex justify-between text-gray-700">
-              <span className="font-bold">No.:</span>
-              <span>{index + 1}</span>
-            </div>
-            <div className="mb-2 flex justify-between text-gray-700">
-              <span className="font-bold">Stage:</span>
-              <span>{info.stage.stage}</span>
-            </div>
-            <div className="mb-4 flex justify-between text-gray-700">
-              <span className="font-bold">Mark:</span>
-              <span>{quiz.mark!.toFixed(2)}%</span>
-            </div>
-            <div className="flex justify-center">
-              <button
-                onClick={() => handleReviewClick(quiz.id)}
-                className="flex h-8 w-8 items-center justify-center rounded-full bg-gray-700 text-white shadow-md transition duration-300 hover:bg-gray-800"
-              >
-                <FiEye className="text-sm" />
-              </button>
-            </div>
-          </div>
-        ))}
-      </div>
-    </div>
-  </div>
-</div>
-</div>
-
-</div>
-
-
-
-			{/* نافذة Achievements */}
-			{showAchievementsModal && (
-				<div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
-					<div className="w-11/12 rounded-lg bg-white p-6 shadow-lg md:w-1/3">
-						<h2 className="text-xl font-bold text-gray-700">Achievements</h2>
-						<ul className="mt-4">
-							{achievements.map((achievement, index) => (
-								<li key={index} className="text-gray-600">
-									{achievement}
-								</li>
-							))}
-						</ul>
-						<div className="mt-4 flex justify-end">
-							<button
-								onClick={closeAchievementsModal}
-								className="rounded-lg bg-red-500 px-6 py-2 text-white"
-							>
-								Close
-							</button>
-						</div>
-					</div>
-				</div>
-			)}
 		</div>
 	);
-      {/* نافذة Achievements */}
-      {showAchievementsModal && (
-  <div className="fixed inset-0 flex items-center justify-center z-50 bg-black bg-opacity-50">
-    {/* تأثير الاحتفال */}
-    <Confetti
-      width={window.innerWidth}
-      height={window.innerHeight}
-      numberOfPieces={200}
-      recycle={false}
-    />
-    {/* الشاشة المنبثقة */}
-    <div className="relative bg-white p-6 rounded-lg shadow-lg w-11/12 md:w-1/3 z-50">
-      <h2 className="text-xl font-bold text-gray-700">Achievements</h2>
-      <ul className="mt-4">
-        {achievements.map((achievement, index) => (
-          <li key={index} className="text-gray-600">
-            {achievement}
-          </li>
-        ))}
-      </ul>
-      <div className="mt-4 flex justify-end">
-        <button
-          onClick={closeAchievementsModal}
-          className="px-6 py-2 bg-red-500 text-white rounded-lg"
-        >
-          Close
-        </button>
-      </div>
-    </div>
-  </div>
-)}
-    </div>
-  );
 }

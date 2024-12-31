@@ -65,12 +65,6 @@ async function ProfileAction(): Promise<
 			},
 		});
 
-		// if (info?.photo) {
-		// 	// Convert photo from Uint8Array to Base64
-		// 	const base64Photo = `data:image/jpeg;base64,${Buffer.from(info.photo).toString("base64")}`;
-		// 	info.photo = base64Photo;
-		// }
-
 		if (info) {
 			return {
 				id: info.id,
@@ -83,6 +77,7 @@ async function ProfileAction(): Promise<
 				stage: {
 					id: info.stage.id,
 					stage: info.stage.stage,
+					index: info.stage.index,
 				},
 				quizzes: info.quizzes.map((quiz) => ({
 					id: quiz.id,
@@ -99,7 +94,7 @@ async function ProfileAction(): Promise<
 
 async function UpdateProfileAction(
 	form: FormData,
-	photo: string | null
+	photo: string | null,
 ): Promise<string | { field: string; message: string } | undefined> {
 	"use server";
 
@@ -118,13 +113,21 @@ async function UpdateProfileAction(
 		if (!user) {
 			return { field: "root", message: "User not found" };
 		}
-		const updatedUser = await db
-			.update(TB_user)
-			.set({
+
+		const updateData: { firstName: string; lastName: string; photo?: string } =
+			{
 				firstName,
 				lastName,
-				photo: photo,
-			})
+			};
+
+		if (photo) {
+			updateData.photo = photo;
+		}
+
+		// تنفيذ التحديث
+		const updatedUser = await db
+			.update(TB_user)
+			.set(updateData)
 			.where(eq(TB_user.id, user.id));
 
 		if (updatedUser) {

@@ -33,6 +33,6 @@ export type ProfileData = {
 	photo: string | null;
 	createdTime: Date;
 	lastUpdateTime: Date;
-	stage: { id: string; stage: string };
+	stage: { id: string; stage: string , index: number };
 	quizzes: { id: string; mark: number | null }[];
 };
