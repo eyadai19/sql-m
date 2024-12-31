@@ -1,6 +1,7 @@
 "use client";
 import { Post } from "@/app/Community/page";
 import { ProfileData } from "@/lib/types/authSchemas";
+import { UploadButton } from "@/utils/uploadthing";
 import { faEdit, faMedal } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { useRouter } from "next/navigation";
@@ -23,6 +24,7 @@ export default function ProfilePage({
 	>;
 	UpdateProfileAction: (
 		data: FormData,
+		photo: string | null,
 	) => Promise<string | { field: string; message: string } | undefined>;
 	userPostAction: () => Promise<Post[] | { field: string; message: string }>;
 	editPostAction: (
@@ -34,10 +36,14 @@ export default function ProfilePage({
 		postId: string,
 	) => Promise<{ field: string; message: string } | undefined>;
 }) {
+	const [isSaving, setIsSaving] = useState(false);
+
 	const [info, setInfo] = useState<ProfileData | null>(null);
 	const [error, setError] = useState<string | null>(null);
 	const [isEditing, setIsEditing] = useState(false);
 	const [newPhoto, setNewPhoto] = useState<string | null>(null);
+	const [uploadedPhotoUrl, setUploadedPhotoUrl] = useState<string | null>(null);
+
 	const [formData, setFormData] = useState({
 		firstName: "",
 		lastName: "",
@@ -111,36 +117,26 @@ export default function ProfilePage({
 		updatedData.append("firstName", formData.firstName);
 		updatedData.append("lastName", formData.lastName);
 
-		if (newPhoto) {
-			const fileInput = document.querySelector(
-				'input[type="file"]',
-			) as HTMLInputElement;
-			if (fileInput?.files?.[0]) {
-				updatedData.append("photo", fileInput.files[0]);
-			}
+		if (uploadedPhotoUrl) {
+			updatedData.append("photo", uploadedPhotoUrl);
 		}
 
-		const result = await UpdateProfileAction(updatedData);
-		if (!result) {
-			setError("Failed to fetch profile data.");
-			return;
-		} else {
+		const result = await UpdateProfileAction(updatedData, uploadedPhotoUrl);
+		if (result) {
 			setIsEditing(false);
 			const updatedProfile = await ProfileAction();
-			if (!updatedProfile) {
-				setError("Failed to fetch profile data.");
-				return;
-			}
-
-			if ("field" in updatedProfile) {
-				setError(updatedProfile.message);
+			if (!updatedProfile || "field" in updatedProfile) {
+				setError("Failed to update profile data.");
 			} else {
 				setInfo(updatedProfile as ProfileData);
 				setFormData({
 					firstName: updatedProfile.firstName,
 					lastName: updatedProfile.lastName,
 				});
+				setUploadedPhotoUrl(null);
 			}
+		} else {
+			setError("Failed to update profile.");
 		}
 	};
 
@@ -192,40 +188,58 @@ export default function ProfilePage({
 						className="flex w-full flex-col gap-8 md:w-1/2"
 						style={{ background: "#f1f5f9" }}
 					>
-						{/* بطاقة المعلومات الشخصية */}
 						<div
 							className="relative rounded-lg p-6 shadow-sm"
 							style={{ background: "#f9fafb" }}
 						>
 							<div className="-mt-16 flex justify-center">
-								<div className="h-32 w-32 overflow-hidden rounded-full border-4 border-gray-300 bg-gray-200">
-									{newPhoto ? (
-										<img
-											src={newPhoto}
-											alt="New Profile"
-											className="h-full w-full object-cover"
-										/>
-									) : info.photo ? (
-										<img
-											src={info.photo}
-											alt="User Profile"
-											className="h-full w-full object-cover"
-										/>
-									) : (
-										<span className="flex h-full items-center justify-center text-gray-500">
-											No Image
-										</span>
-									)}
-								</div>
+								<label
+									htmlFor="photo"
+									className={`relative cursor-pointer ${isEditing ? "" : "pointer-events-none"}`}
+								>
+									<div className="relative flex h-32 w-32 items-center justify-center overflow-hidden rounded-full border-4 border-gray-300 bg-gray-200">
+										{newPhoto ? (
+											<img
+												src={newPhoto}
+												alt="New Profile"
+												className="h-full w-full object-cover"
+											/>
+										) : info?.photo ? (
+											<img
+												src={info.photo}
+												alt="User Profile"
+												className="h-full w-full object-cover"
+											/>
+										) : (
+											<span className="flex h-full items-center justify-center text-gray-500">
+												No Image
+											</span>
+										)}
+										{/* UploadButton - يغطي كامل الدائرة */}
+										{isEditing && (
+											<UploadButton
+												endpoint="imageUploader"
+												className={`absolute inset-0 h-full w-full cursor-pointer opacity-0`}
+												onUploadProgress={() => {
+													setIsSaving(true);
+												}}
+												onClientUploadComplete={(res) => {
+													const uploadedFile = res[0];
+													setNewPhoto(uploadedFile.url);
+													setUploadedPhotoUrl(uploadedFile.url);
+													setIsSaving(false);
+												}}
+												onUploadError={(error) => {
+													console.error("Upload failed", error);
+												}}
+											/>
+										)}
+									</div>
+								</label>
 							</div>
+
 							{isEditing ? (
 								<div className="mt-4 text-center">
-									<input
-										type="file"
-										accept="image/*"
-										onChange={handleFileChange}
-										className="mb-4 w-full text-sm text-gray-600"
-									/>
 									<input
 										type="text"
 										name="firstName"
@@ -245,9 +259,15 @@ export default function ProfilePage({
 									<div className="flex justify-center gap-4">
 										<button
 											onClick={handleSave}
-											className="rounded bg-gray-700 px-6 py-2 text-white shadow-sm transition duration-300 hover:bg-gray-800"
+											className="relative rounded bg-gray-700 px-6 py-2 text-white shadow-sm transition duration-300 hover:bg-gray-800"
 										>
-											Save
+											{isSaving ? (
+												<span className="absolute inset-0 flex cursor-wait items-center justify-center">
+													<div className="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent"></div>
+												</span>
+											) : (
+												<span>Save</span>
+											)}
 										</button>
 										<button
 											onClick={handleCancelEdit}
@@ -259,9 +279,13 @@ export default function ProfilePage({
 								</div>
 							) : (
 								<div className="mt-8 text-center">
-									<h1 className="text-2xl font-bold text-gray-800">{`${info.firstName} ${info.lastName}`}</h1>
+									<h1 className="text-2xl font-bold text-gray-800">
+										{info.firstName} {info.lastName}
+									</h1>
 									<p className="text-sm text-gray-500">@{info.username}</p>
-									<p className="mt-4 text-lg font-medium text-gray-700">{`Stage: ${info.stage.stage}`}</p>
+									<p className="mt-4 text-lg font-medium text-gray-700">
+										Stage: {info.stage.stage}
+									</p>
 								</div>
 							)}
 							<div className="mt-6 flex items-center justify-between px-4">

@@ -99,13 +99,13 @@ async function ProfileAction(): Promise<
 
 async function UpdateProfileAction(
 	form: FormData,
+	photo: string | null
 ): Promise<string | { field: string; message: string } | undefined> {
 	"use server";
 
 	try {
 		const firstName = form.get("firstName")?.toString();
 		const lastName = form.get("lastName")?.toString();
-		const photo = form.get("photo") as File | null;
 
 		if (!firstName || !lastName) {
 			return {
@@ -118,22 +118,12 @@ async function UpdateProfileAction(
 		if (!user) {
 			return { field: "root", message: "User not found" };
 		}
-
-		let photoBase64: string | undefined = undefined;
-
-		if (photo) {
-			const arrayBuffer = await photo.arrayBuffer();
-			const photoBuffer = Buffer.from(arrayBuffer);
-
-			photoBase64 = photoBuffer.toString("base64");
-		}
-
 		const updatedUser = await db
 			.update(TB_user)
 			.set({
 				firstName,
 				lastName,
-				photo: photoBase64,
+				photo: photo,
 			})
 			.where(eq(TB_user.id, user.id));
 

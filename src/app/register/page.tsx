@@ -13,17 +13,15 @@ import { z } from "zod";
 export default function RegisterPage() {
 	return <RegisterForm registerAction={RegisterAction} />;
 }
-
 export async function RegisterAction(
 	input: z.infer<typeof registerFormSchema>,
+	photoUrl: string | null,
 ): Promise<RegisterFormError | undefined> {
 	"use server";
 
 	try {
-		// تحقق من صحة البيانات
 		const { ...data } = await registerFormSchema.parseAsync(input);
 
-		// جلب أول مرحلة
 		const stage = await db.query.TB_stage.findFirst({
 			where: (stage, { eq }) => eq(stage.index, 0),
 		});
@@ -32,13 +30,12 @@ export async function RegisterAction(
 			return { field: "root", message: "No initial stage found" };
 		}
 
-		// إنشاء المستخدم بدون صورة مبدئيًا
 		const newUser = {
 			id: nanoid(),
 			...data,
 			password: hash(data.password),
 			stageId: stageID,
-			photo: null, // سيتم تحديث الصورة لاحقًا
+			photo: null,
 		};
 
 		try {
@@ -47,36 +44,12 @@ export async function RegisterAction(
 			return { field: "username", message: "Username is already taken" };
 		}
 
-		if (data.photo) {
+		if (photoUrl) {
 			try {
-				const uploadResponse = await fetch(
-					"https://api.uploadthing.com/upload",
-					{
-						method: "POST",
-						headers: {
-							"Content-Type": "application/json",
-							Authorization: `Bearer ${process.env.UPLOADTHING_SECRET}`,
-						},
-						body: JSON.stringify({
-							file: data.photo,
-						}),
-					},
-				);
-
-				if (!uploadResponse.ok) {
-					console.error("Image upload failed:", uploadResponse.statusText);
-					throw new Error("Failed to upload image");
-				}
-
-				const uploadResult = await uploadResponse.json();
-				const photoUrl = uploadResult?.url;
-
-				if (photoUrl) {
-					await db
-						.update(TB_user)
-						.set({ photo: photoUrl })
-						.where(eq(TB_user.id, newUser.id));
-				}
+				await db
+					.update(TB_user)
+					.set({ photo: photoUrl })
+					.where(eq(TB_user.id, newUser.id));
 			} catch (uploadError) {
 				console.error(
 					"An error occurred while uploading the photo:",

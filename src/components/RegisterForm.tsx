@@ -1,6 +1,7 @@
 "use client";
 
 import { registerFormSchema } from "@/lib/types/authSchemas";
+import { UploadButton } from "@/utils/uploadthing";
 import { zodResolver } from "@hookform/resolvers/zod";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -16,6 +17,7 @@ export default function RegisterForm({
 }: {
 	registerAction: (
 		input: z.infer<typeof registerFormSchema>,
+		photoUrl: string | null,
 	) => Promise<any | undefined>;
 }) {
 	const form = useForm<z.infer<typeof registerFormSchema>>({
@@ -30,24 +32,20 @@ export default function RegisterForm({
 		},
 	});
 
-	const [preview, setPreview] = useState<string | null>(null);
-	const [photoFile, setPhotoFile] = useState<File | null>(null);
 	const router = useRouter();
 	const [isLoading, setIsLoading] = useState(true);
+	const [photoUrl, setPhotoUrl] = useState<string | null>(null); // حفظ رابط الصورة
 
 	useEffect(() => {
 		async function checkLoginStatus() {
 			try {
 				const response = await fetch("/api/is_logged_in");
-
 				if (!response.ok) {
 					console.error("Failed to fetch login status:", response.statusText);
 					setIsLoading(false);
 					return;
 				}
-
 				const data = await response.json();
-
 				if (data.isLoggedIn) {
 					router.push("/Profile");
 				} else {
@@ -61,48 +59,31 @@ export default function RegisterForm({
 
 		checkLoginStatus();
 	}, [router]);
-	const handleImageChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-		const file = event.target.files?.[0];
-		if (file) {
-			setPhotoFile(file);
-			const reader = new FileReader();
-			reader.onload = () => {
-				const result = reader.result as ArrayBuffer;
-				const blob = new Blob([result], { type: file.type });
-				const previewUrl = URL.createObjectURL(blob);
-				setPreview(previewUrl);
-			};
-			reader.readAsArrayBuffer(file);
-		} else {
-			setPreview(null);
-			setPhotoFile(null);
-		}
-	};
+
+	// const handleImageChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+	// 	const file = event.target.files?.[0];
+	// 	if (file) {
+	// 		setPhotoFile(file);
+	// 		const previewUrl = URL.createObjectURL(file);
+	// 		setPreview(previewUrl);
+	// 	} else {
+	// 		setPreview(null);
+	// 		setPhotoFile(null);
+	// 	}
+	// };
 
 	async function onSubmit(values: z.infer<typeof registerFormSchema>) {
-		let photoBase64: string | null = null;
-
-		if (photoFile) {
-			const arrayBuffer = await photoFile.arrayBuffer();
-			const photoBuffer = Buffer.from(arrayBuffer);
-
-			photoBase64 = photoBuffer.toString("base64");
-		}
-
-		const error = await registerAction({
-			...values,
-			photo: photoBase64,
-		});
+		const error = await registerAction(values, photoUrl);
 
 		if (error) {
 			form.setError(error.field, { message: error.message });
-			return;
 		}
 	}
+
 	if (isLoading) {
 		return (
 			<div className="flex h-screen items-center justify-center">
-				<div className="animate-spin rounded-full h-16 w-16 border-t-4 border-b-4 border-[#ADF0D1]"></div>
+				<div className="h-16 w-16 animate-spin rounded-full border-b-4 border-t-4 border-[#ADF0D1]"></div>
 			</div>
 		);
 	}
@@ -135,27 +116,37 @@ export default function RegisterForm({
 								"0 10px 15px -3px rgba(0, 32, 63, 0.5), 0 4px 6px rgba(0, 32, 63, 0.3)",
 						}}
 					>
-						<div className="mb-3 flex flex-col items-center">
-							<label htmlFor="photo" className="relative cursor-pointer">
+						<div className="relative mb-3 flex flex-col items-center">
+							{photoUrl ? (
 								<div className="flex h-24 w-24 items-center justify-center overflow-hidden rounded-full border-4 border-[#afafaf] bg-[#003A63]">
-									{preview ? (
-										<img
-											src={preview}
-											alt="Profile Preview"
-											className="h-full w-full object-cover"
-										/>
-									) : (
-										<span className="text-lg text-white">+</span>
-									)}
+									<img
+										src={photoUrl}
+										alt="Profile Preview"
+										className="h-full w-full object-cover"
+									/>
 								</div>
-								<input
-									id="photo"
-									type="file"
-									accept="image/*"
-									onChange={handleImageChange}
-									className="hidden"
-								/>
-							</label>
+							) : (
+								<div>
+									<label htmlFor="photo" className="relative cursor-pointer">
+										<div className="flex h-24 w-24 items-center justify-center overflow-hidden rounded-full border-4 border-[#afafaf] bg-[#003A63]">
+											<span className="text-lg text-white">+</span>
+										</div>
+									</label>
+									{/* إخفاء UploadButton خلف الدائرة */}
+									<div className="absolute inset-0 flex items-center justify-center opacity-0">
+										<UploadButton
+											endpoint="imageUploader"
+											onClientUploadComplete={(res) => {
+												const uploadedFile = res[0];
+												setPhotoUrl(uploadedFile.url);
+											}}
+											onUploadError={(error) => {
+												// console.error("Upload failed", error);
+											}}
+										/>
+									</div>
+								</div>
+							)}
 						</div>
 
 						<Form {...form}>
