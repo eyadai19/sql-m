@@ -2394,7 +2394,30 @@ WHERE e.status = 'active';`,
 				explanation:
 					"Shows how LEFT JOIN preserves all records from the first table while matching available data from the second table.",
 			},
-
+			sections: [
+				{
+					title: "Understanding Lifted Join Without a WHERE Clause",
+					content:
+						"A lifted join is a special kind of SQL JOIN operation where all combinations of matching rows from two tables are returned. When there is no WHERE clause in a lifted join between table A and table B on A.key = B.key, all rows from A are matched with the corresponding rows in B based on the key column. Rows from A that do not find a match in B will still appear in the result, with the values from B being NULL for those rows. This operation is similar to a LEFT JOIN. The image illustrates table A and table B being joined without any additional filtering or condition applied, showing how unmatched rows from table A appear in the result set with NULL values from table B.",
+					image: {
+						url: "/image/Education/joins/left join/1.png",
+						alt: "Visualization of lifted join without WHERE clause",
+						caption:
+							"Lifted join without a WHERE clause, demonstrating unmatched rows with NULL values from table B.",
+					},
+				},
+				{
+					title: "Applying a Condition in a Lifted Join",
+					content:
+						"When a WHERE clause is added to the lifted join operation, the result is filtered based on the specified condition. In this case, the lifted join is between table A and table B on A.key = B.key, and the WHERE condition specifies B.key IS NULL. This means that only rows from A that do not have a matching row in B (i.e., unmatched rows) are included in the result. The image demonstrates how rows from A that do not have corresponding entries in B are isolated in the result set based on the WHERE condition. This effectively excludes any rows from the result where a match was found in B, highlighting the filtering effect of the WHERE clause.",
+					image: {
+						url: "/image/Education/joins/left join/2.png",
+						alt: "Visualization of lifted join with WHERE condition",
+						caption:
+							"Lifted join with WHERE clause filtering rows to include only unmatched rows from table A.",
+					},
+				},
+			],
 			notes: [
 				"Keeps all left table records",
 				"Handles missing relationships",
@@ -2469,6 +2492,30 @@ GROUP BY d.name;`,
 				"Handles missing relationships",
 				"Common in inventory and resource management",
 			],
+			sections: [
+				{
+					title: "Understanding Right Join Without a WHERE Clause",
+					content:
+						"A right join in SQL is a type of join that includes all rows from the right table (table B) and the matching rows from the left table (table A). When there is no WHERE clause in a right join between table A and table B on A.key = B.key, all rows from table B are included in the result set. Rows from B that do not find a match in A will still appear, with the values from A being NULL for those rows. This operation ensures that no data from table B is excluded, even if there is no corresponding entry in table A. The image demonstrates table A and table B being joined, highlighting unmatched rows from table B with NULL values in the columns from table A.",
+					image: {
+						url: "/image/Education/joins/right join/1.png",
+						alt: "Visualization of right join without WHERE clause",
+						caption:
+							"Right join without a WHERE clause, showing unmatched rows from table B with NULL values from table A.",
+					},
+				},
+				{
+					title: "Applying a Condition in a Right Join",
+					content:
+						"When a WHERE clause is added to the right join operation, the result set is filtered based on the specified condition. For a right join between table A and table B on A.key = B.key, if the WHERE condition specifies A.key IS NULL, only rows from B that do not have a corresponding entry in A are included in the result. This filtering isolates unmatched rows from table B, effectively excluding rows that found a match in table A. The image illustrates how rows from table B without corresponding matches in A are retained in the result set due to the WHERE condition.",
+					image: {
+						url: "/image/Education/joins/right join/2.png",
+						alt: "Visualization of right join with WHERE condition",
+						caption:
+							"Right join with WHERE clause filtering rows to include only unmatched rows from table B.",
+					},
+				},
+			],
 			additionalResources: [
 				{
 					title: "W3Schools SQL RIGHT JOIN",
@@ -2529,6 +2576,30 @@ FULL OUTER JOIN departments d ON e.department_id = d.id;`,
 				"Useful for data completeness analysis",
 				"Identifies missing relationships",
 				"Important for data quality checks",
+			],
+			sections: [
+				{
+					title: "Understanding Full Outer Join Without a WHERE Clause",
+					content:
+						"A full outer join combines the results of both left and right joins. It includes all rows from both tables A and B, with matching rows combined into a single row. If there is no match, the result will still include the row from one table, with NULL values for the columns of the other table. For example, in a full outer join between table A and table B on A.key = B.key, rows from A without matches in B and rows from B without matches in A are included, with NULL values for the unmatched columns. The image illustrates this concept, showing how unmatched rows from both tables appear in the result set.",
+					image: {
+						url: "/image/Education/joins/full outer join/1.png",
+						alt: "Visualization of full outer join without WHERE clause",
+						caption:
+							"Full outer join without a WHERE clause, showing unmatched rows from both tables with NULL values for the other table's columns.",
+					},
+				},
+				{
+					title: "Applying a Condition in a Full Outer Join",
+					content:
+						"When a WHERE clause is added to a full outer join, the result set is filtered to include only specific rows based on the condition. For example, in a full outer join between table A and table B on A.key = B.key, a WHERE condition like A.key IS NULL OR B.key IS NULL isolates rows that are unmatched in one of the tables. This means that only rows from A without matches in B and rows from B without matches in A will appear in the result set. The image demonstrates how unmatched rows from both tables are retained while matched rows are excluded based on the WHERE condition.",
+					image: {
+						url: "/image/Education/joins/full outer join/2.png",
+						alt: "Visualization of full outer join with WHERE condition",
+						caption:
+							"Full outer join with WHERE clause filtering unmatched rows from both tables based on the condition.",
+					},
+				},
 			],
 			additionalResources: [
 				{
@@ -2597,6 +2668,19 @@ LEFT JOIN employees e2 ON e1.manager_id = e2.id;`,
 				"Common in organizational structures",
 				"Handles recursive relationships",
 				"Important for tree-like data",
+			],
+			sections: [
+				{
+					title: "Understanding Self-Join",
+					content:
+						"A self-join is a join operation where a table is joined with itself. It is useful for comparing rows within the same table or finding relationships between rows in the same dataset. For instance, if we have a table A, we can perform a self-join by creating two aliases for the table (e.g., A1 and A2) and joining them based on a condition. The query SELECT * FROM A AS A1 JOIN A AS A2 ON A1.key = A2.key retrieves all rows from A where A1.key matches A2.key. The image illustrates this concept, showing how rows from the same table are matched based on the specified key.",
+					image: {
+						url: "/image/Education/joins/self join/1.png",
+						alt: "Visualization of a self-join operation",
+						caption:
+							"Self-join example where a table is joined with itself to find relationships within its rows.",
+					},
+				},
 			],
 			additionalResources: [
 				{
