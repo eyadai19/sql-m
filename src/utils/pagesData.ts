@@ -530,35 +530,128 @@ AND DATE_HIRED < CURRENT_DATE - INTERVAL '90 days';`,
 				{
 					title: "Numeric Types",
 					content:
-						"Numeric types include INTEGER for whole numbers, DECIMAL/NUMERIC for exact decimal numbers, and REAL/DOUBLE PRECISION for approximate decimal numbers. Choose based on precision requirements and storage considerations.",
-					image: {
-						url: "/images/data-types/numeric-types-comparison.png",
-						alt: "Numeric Data Types Comparison",
-						caption:
-							"Comparison of different numeric data types and their use cases",
-					},
+						"Numeric types are used to store numbers in various formats depending on precision, range, and storage requirements. Common numeric types include:\n\n" +
+						"- **INTEGER**: Used for whole numbers (e.g., 1, 42, -7). Suitable for counters, IDs, and whole-value data.\n" +
+						"- **DECIMAL/NUMERIC**: Stores exact decimal numbers (e.g., 10.5, 42.99). Often used in financial calculations where precision is critical.\n" +
+						"- **REAL/DOUBLE PRECISION**: Designed for approximate decimal numbers (e.g., 3.14, 2.71828). Ideal for scientific computations requiring floating-point numbers.\n\n" +
+						"Choose the appropriate numeric type based on precision needs and storage considerations, as certain types consume more space than others.",
+					code: `
+CREATE TABLE Products (
+	ProductID INT PRIMARY KEY,
+	Price DECIMAL(10, 2),
+	DiscountRate REAL
+);
+				  `,
+					examples: [
+						{
+							title: "Using DECIMAL for Monetary Values",
+							code: `
+CREATE TABLE Orders (
+	OrderID INT PRIMARY KEY,
+	TotalAmount DECIMAL(12, 2)
+);
+					  `,
+							explanation:
+								"The 'TotalAmount' column uses DECIMAL to ensure precise monetary values, allowing up to 12 digits in total with 2 digits after the decimal point.",
+						},
+						{
+							title: "Using INTEGER for Counters",
+							code: `
+CREATE TABLE Visitors (
+	VisitorID INT PRIMARY KEY,
+	VisitsCount INT
+);
+					  `,
+							explanation:
+								"The 'VisitsCount' column uses INTEGER to store the number of times a visitor has accessed a service, ensuring whole numbers.",
+						},
+					],
 				},
 				{
 					title: "String Types",
 					content:
-						"String types include CHAR (fixed-length), VARCHAR (variable-length), and TEXT (unlimited length). Selection depends on storage requirements, performance needs, and data characteristics.",
-					image: {
-						url: "/images/data-types/string-types-comparison.png",
-						alt: "String Data Types Comparison",
-						caption:
-							"Comparison of different string data types and their storage characteristics",
-					},
+						"String types are used to store text data. Depending on the use case, you can choose:\n\n" +
+						"- **CHAR(n)**: Fixed-length strings. Best for uniformly sized text like postal codes.\n" +
+						"- **VARCHAR(n)**: Variable-length strings with a maximum length. Suitable for names, addresses, and user input.\n" +
+						"- **TEXT**: Unlimited-length strings. Ideal for storing large blocks of text like descriptions or comments.\n\n" +
+						"Consider performance and storage requirements when selecting string types. Fixed-length types (CHAR) are faster for uniformly sized data but less flexible than VARCHAR.",
+					code: `
+CREATE TABLE Employees (
+	EmployeeID INT PRIMARY KEY,
+	Name VARCHAR(50),
+	Role CHAR(10)
+);
+				  `,
+					examples: [
+						{
+							title: "Using VARCHAR for Variable Text",
+							code: `
+CREATE TABLE Users (
+	UserID INT PRIMARY KEY,
+	Username VARCHAR(30),
+	Email VARCHAR(100)
+);
+					  `,
+							explanation:
+								"The 'Username' column uses VARCHAR with a maximum length of 30 characters to handle varying lengths of usernames.",
+						},
+						{
+							title: "Using TEXT for Long Content",
+							code: `
+CREATE TABLE Articles (
+	ArticleID INT PRIMARY KEY,
+	Content TEXT
+);
+					  `,
+							explanation:
+								"The 'Content' column uses TEXT to store large amounts of textual data, such as article bodies or blog posts.",
+						},
+					],
 				},
 				{
 					title: "Date and Time Types",
 					content:
-						"Date/time types include DATE, TIME, TIMESTAMP, and their timezone-aware variants. Choose based on temporal precision requirements and timezone handling needs.",
-					image: {
-						url: "/images/data-types/datetime-types-comparison.png",
-						alt: "Date/Time Data Types Comparison",
-						caption:
-							"Overview of date and time data types and their applications",
-					},
+						"Date and time types are used to store temporal data. The main types include:\n\n" +
+						"- **DATE**: Stores calendar dates (e.g., 2025-01-01). Useful for birthdates, event dates, etc.\n" +
+						"- **TIME**: Stores time of day (e.g., 14:30:00). Ideal for scheduling.\n" +
+						"- **TIMESTAMP**: Combines date and time (e.g., 2025-01-01 14:30:00). Commonly used for logging.\n" +
+						"- **TIMEZONE-AWARE VARIANTS**: Store temporal data adjusted for time zones (e.g., TIMESTAMPTZ).\n\n" +
+						"Choose the appropriate type based on precision and whether timezone handling is required.",
+					code: `
+CREATE TABLE Events (
+	EventID INT PRIMARY KEY,
+	EventDate DATE,
+	StartTime TIME,
+	CreatedAt TIMESTAMP
+);
+				  `,
+					examples: [
+						{
+							title: "Using DATE for Calendar Events",
+							code: `
+CREATE TABLE Holidays (
+	HolidayID INT PRIMARY KEY,
+	HolidayName VARCHAR(50),
+	HolidayDate DATE
+);
+					  `,
+							explanation:
+								"The 'HolidayDate' column uses DATE to represent specific dates for holidays.",
+						},
+						{
+							title: "Using TIMESTAMP for Logging",
+							code: `
+CREATE TABLE LogEntries (
+	LogID INT PRIMARY KEY,
+	UserID INT,
+	Action VARCHAR(50),
+	LoggedAt TIMESTAMP
+);
+					  `,
+							explanation:
+								"The 'LoggedAt' column uses TIMESTAMP to record the exact date and time of user actions.",
+						},
+					],
 				},
 			],
 		},
@@ -808,33 +901,112 @@ AND DATE_HIRED < CURRENT_DATE - INTERVAL '90 days';`,
 				{
 					title: "Primary Keys",
 					content:
-						"Primary keys uniquely identify each record in a table. They can be single columns or composite (multiple columns). Primary keys must be unique and cannot contain NULL values.",
+						"Primary keys are essential in relational databases as they uniquely identify each record in a table. A primary key can consist of a single column or a combination of multiple columns, known as a composite key. These keys ensure that each record is distinct and enforce data integrity. A primary key must meet two key requirements: it cannot contain duplicate values and must not include NULL values. For example, in an 'Employee' table, the 'EmployeeID' column often serves as the primary key because it uniquely identifies each employee.",
 					image: {
-						url: "/images/references/primary-key-types.png",
+						url: "/image/Education/basic/references/primary-key.png",
 						alt: "Primary Key Types",
 						caption:
-							"Different types of primary keys and their implementations",
+							"Examples of primary keys and their implementation in database tables",
 					},
+					code: `
+CREATE TABLE Employee (
+EmployeeID INT PRIMARY KEY,
+Name VARCHAR(100),
+DepartmentID INT
+);
+				  `,
+					examples: [
+						{
+							title: "Single Column Primary Key",
+							code: `
+CREATE TABLE Department (
+	DepartmentID INT PRIMARY KEY,
+	DepartmentName VARCHAR(100)
+);
+					  `,
+							explanation:
+								"In this example, the 'DepartmentID' column serves as the primary key, uniquely identifying each department in the table.",
+						},
+						{
+							title: "Composite Primary Key",
+							code: `
+CREATE TABLE ProjectAssignment (
+	EmployeeID INT,
+	ProjectID INT,
+	AssignmentDate DATE,
+	PRIMARY KEY (EmployeeID, ProjectID)
+);
+					  `,
+							explanation:
+								"Here, the composite key is created using 'EmployeeID' and 'ProjectID', ensuring each combination of employee and project is unique.",
+						},
+					],
 				},
 				{
 					title: "Foreign Keys",
 					content:
-						"Foreign keys create references to primary keys in other tables, establishing relationships between tables and maintaining referential integrity.",
+						"Foreign keys play a critical role in relational databases by establishing and enforcing relationships between tables. A foreign key is a column or set of columns in one table that references the primary key in another table. This connection ensures referential integrity, meaning that the relationship between the two tables is consistent. For instance, in a company database, an 'Employee' table might have a 'DepartmentID' column as a foreign key that links to the 'DepartmentID' primary key in the 'Department' table. This enables the database to associate each employee with their respective department.",
 					image: {
-						url: "/images/references/foreign-key-relationship.png",
+						url: "/image/Education/basic/references/foreign-key.png",
 						alt: "Foreign Key Relationships",
-						caption: "How foreign keys create relationships between tables",
+						caption:
+							"Illustration of how foreign keys establish relationships between tables",
 					},
+					code: `
+CREATE TABLE Employee (
+	EmployeeID INT PRIMARY KEY,
+	Name VARCHAR(100),
+	DepartmentID INT,
+	FOREIGN KEY (DepartmentID) REFERENCES Department(DepartmentID)
+);
+				  `,
+					examples: [
+						{
+							title: "Simple Foreign Key Relationship",
+							code: `
+CREATE TABLE Orders (
+	OrderID INT PRIMARY KEY,
+	CustomerID INT,
+	OrderDate DATE,
+	FOREIGN KEY (CustomerID) REFERENCES Customers(CustomerID)
+);
+					  `,
+							explanation:
+								"In this example, the 'CustomerID' column in the 'Orders' table references the primary key 'CustomerID' in the 'Customers' table, creating a one-to-many relationship.",
+						},
+					],
 				},
 				{
 					title: "Referential Actions",
 					content:
-						"Referential actions (CASCADE, RESTRICT, SET NULL) determine what happens to foreign key values when referenced primary key values are updated or deleted.",
-					image: {
-						url: "/images/references/referential-actions.png",
-						alt: "Referential Actions",
-						caption: "Different types of referential actions and their effects",
-					},
+						"Referential actions define how changes to a referenced primary key affect foreign keys in dependent tables. These actions ensure data consistency across the database. Common referential actions include: \n\n" +
+						"- **CASCADE**: Automatically updates or deletes foreign key values in dependent tables when the referenced primary key value is updated or deleted.\n" +
+						"- **RESTRICT**: Prevents the deletion or update of a referenced primary key if it would leave foreign key references orphaned.\n" +
+						"- **SET NULL**: Sets the foreign key value to NULL in the dependent table if the referenced primary key is deleted or updated.\n\n" +
+						"For example, in a database with an 'Orders' table referencing a 'Customers' table, applying the CASCADE action ensures that deleting a customer also removes all related orders.",
+					code: `
+CREATE TABLE Orders (
+	OrderID INT PRIMARY KEY,
+	CustomerID INT,
+	FOREIGN KEY (CustomerID) REFERENCES Customers(CustomerID)
+	ON DELETE CASCADE
+	ON UPDATE CASCADE
+);
+				  `,
+					examples: [
+						{
+							title: "CASCADE Action",
+							code: `
+CREATE TABLE Enrollment (
+	StudentID INT,
+	CourseID INT,
+	FOREIGN KEY (StudentID) REFERENCES Students(StudentID) ON DELETE CASCADE
+);
+					  `,
+							explanation:
+								"In this example, if a student is deleted from the 'Students' table, their corresponding records in the 'Enrollment' table are also removed.",
+						},
+					],
 				},
 			],
 		},
@@ -992,8 +1164,7 @@ ORDER BY d.name, e.name;`,
 				{
 					id: "q1",
 					question: "What type of relationship is shown in this ERD?",
-					imageUrl:
-						"/image/Education/Exercise/basic/erd/one-to-many-example.png",
+					imageUrl: "/image/Education/basic/erd/one-to-many-example.png",
 					choices: [
 						{ id: "c1", text: "One-to-One" },
 						{ id: "c2", text: "One-to-Many" },
@@ -1070,37 +1241,136 @@ N:M (Many-to-Many)   →  ──>│<──`,
 			],
 			sections: [
 				{
-					title: "One-to-One Relationships",
+					title: "One-to-One Relationship",
 					content:
-						"A one-to-one relationship means that each record in Table A is related to exactly one record in Table B, and vice versa. For example, each person has one passport, and each passport belongs to one person.",
+						"In a one-to-one relationship, a single entity from one table is associated with a single entity in another table. This relationship is ideal for entities that are tightly related but require separate tables for organizational or security reasons. For example, in a company, each 'Employee' can be assigned a unique 'Workstation.' This ensures that every workstation is assigned to exactly one employee and vice versa.",
 					image: {
-						url: "",
+						url: "/image/Education/basic/erd/one-to-one.png",
 						alt: "One-to-One Relationship Diagram",
-						caption:
-							"Visual representation of a one-to-one relationship between Person and Passport entities",
+						caption: "Each Employee is linked to exactly one Workstation.",
 					},
+					code: `
+// Example in a relational database schema
+CREATE TABLE Employee (
+	EmployeeID INT PRIMARY KEY,
+	Name VARCHAR(100)
+);
+
+CREATE TABLE Workstation (
+	WorkstationID INT PRIMARY KEY,
+	EmployeeID INT UNIQUE,
+	FOREIGN KEY (EmployeeID) REFERENCES Employee(EmployeeID)
+);
+				  `,
+					examples: [
+						{
+							title: "One-to-One Relationship in Code",
+							code: `
+const EmployeeWorkstation = {
+	Employee: { id: 1, name: "John Doe" },
+	Workstation: { id: 101, assignedTo: 1 },
+};
+			`,
+							explanation:
+								"This JSON structure shows that Employee 1 is assigned to Workstation 101.",
+						},
+					],
 				},
 				{
-					title: "One-to-Many Relationships",
+					title: "One-to-Many Relationship",
 					content:
-						"A one-to-many relationship indicates that one record in Table A can be related to multiple records in Table B, but each record in Table B is related to only one record in Table A. For example, one department can have many employees.",
+						"A one-to-many relationship occurs when a single entity in one table can be associated with multiple entities in another. This is common in business scenarios. For instance, one 'Department' can have many 'Employees,' but each employee belongs to only one department.",
 					image: {
-						url: "",
+						url: "/image/Education/basic/erd/one-to-many.png",
 						alt: "One-to-Many Relationship Diagram",
 						caption:
-							"Illustration of a one-to-many relationship between Department and Employee entities",
+							"A single Department is associated with multiple Employees.",
 					},
+					code: `
+// Example in a relational database schema
+CREATE TABLE Department (
+	DepartmentID INT PRIMARY KEY,
+	Name VARCHAR(100)
+);
+
+CREATE TABLE Employee (
+	EmployeeID INT PRIMARY KEY,
+	Name VARCHAR(100),
+	DepartmentID INT,
+	FOREIGN KEY (DepartmentID) REFERENCES Department(DepartmentID)
+);
+				  `,
+					examples: [
+						{
+							title: "One-to-Many Relationship in Code",
+							code: `
+const DepartmentEmployees = {
+	Department: { id: 10, name: "Engineering" },
+	Employees: [
+	{ id: 1, name: "Alice" },
+	{ id: 2, name: "Bob" },
+	],
+};
+					  `,
+							explanation:
+								"This JSON shows that the Engineering department (ID 10) has two employees: Alice and Bob.",
+						},
+					],
 				},
 				{
-					title: "Many-to-Many Relationships",
+					title: "Many-to-Many Relationship",
 					content:
-						"A many-to-many relationship means that multiple records in Table A can be related to multiple records in Table B. For example, students can enroll in multiple courses, and courses can have multiple students.",
+						"In a many-to-many relationship, multiple entities in one table are associated with multiple entities in another. For example, in a company, many 'Employees' can work on multiple 'Projects,' and each project can involve many employees.",
 					image: {
-						url: "",
+						url: "/image/Education/basic/erd/many-to-many.png",
 						alt: "Many-to-Many Relationship Diagram",
 						caption:
-							"Demonstration of a many-to-many relationship between Student and Course entities",
+							"Employees can be assigned to multiple Projects, and each Project can have multiple Employees.",
 					},
+					code: `
+// Example in a relational database schema
+CREATE TABLE Employee (
+	EmployeeID INT PRIMARY KEY,
+	Name VARCHAR(100)
+);
+
+CREATE TABLE Project (
+	ProjectID INT PRIMARY KEY,
+	Name VARCHAR(100)
+);
+
+CREATE TABLE EmployeeProject (
+	EmployeeID INT,
+	ProjectID INT,
+	PRIMARY KEY (EmployeeID, ProjectID),
+	FOREIGN KEY (EmployeeID) REFERENCES Employee(EmployeeID),
+	FOREIGN KEY (ProjectID) REFERENCES Project(ProjectID)
+);
+				  `,
+					examples: [
+						{
+							title: "Many-to-Many Relationship in Code",
+							code: `
+const EmployeeProjects = {
+	Employees: [
+	{ id: 1, name: "Charlie" },
+	{ id: 2, name: "Dana" },
+	],
+	Projects: [
+	{ id: 101, name: "AI Development" },
+	{ id: 102, name: "Web Redesign" },
+	],
+	Assignments: [
+	{ employeeId: 1, projectId: 101 },
+	{ employeeId: 1, projectId: 102 },
+	{ employeeId: 2, projectId: 101 },
+	],
+};
+					  `,
+							explanation:
+								"This JSON illustrates that Charlie is working on both AI Development and Web Redesign projects, while Dana is only assigned to AI Development.",
+						},
+					],
 				},
 			],
 		},
@@ -1997,6 +2267,66 @@ WHERE e.salary > 70000;`,
 				explanation:
 					"Demonstrates a basic INNER JOIN retrieving matching records based on a relationship between tables.",
 			},
+			sections: [
+				{
+					title: "Inner Join",
+					content:
+						"An **Inner Join** is a SQL operation that retrieves records from two or more tables where the values in the specified columns match. It ensures that only rows with a corresponding match in both tables are included in the result set.\n\n" +
+						"Inner Joins are commonly used to combine data stored in related tables, such as combining employee details with their respective department information based on a shared key. The operation eliminates rows that do not have matching values in the joined tables.",
+					image: {
+						url: "/image/Education/joins/inner join/1.png",
+						alt: "Inner Join Example",
+						caption:
+							"Visualization of an Inner Join operation between two tables.",
+					},
+					code: `
+					SELECT 
+					  Employees.EmployeeID, 
+					  Employees.Name, 
+					  Departments.DepartmentName
+					FROM 
+					  Employees
+					INNER JOIN 
+					  Departments
+					ON 
+					  Employees.DepartmentID = Departments.DepartmentID;
+				  `,
+					examples: [
+						{
+							title: "Combining Employee and Department Data",
+							code: `
+						SELECT 
+						  Orders.OrderID, 
+						  Customers.CustomerName
+						FROM 
+						  Orders
+						INNER JOIN 
+						  Customers
+						ON 
+						  Orders.CustomerID = Customers.CustomerID;
+					  `,
+							explanation:
+								"This query retrieves orders along with customer names by joining the 'Orders' table with the 'Customers' table on their common column 'CustomerID'. Only records with matching CustomerIDs in both tables are included in the result.",
+						},
+						{
+							title: "Joining Products and Categories",
+							code: `
+						SELECT 
+						  Products.ProductName, 
+						  Categories.CategoryName
+						FROM 
+						  Products
+						INNER JOIN 
+						  Categories
+						ON 
+						  Products.CategoryID = Categories.CategoryID;
+					  `,
+							explanation:
+								"This query fetches product names along with their category names by joining the 'Products' table with the 'Categories' table on the 'CategoryID' column.",
+						},
+					],
+				},
+			],
 			notes: [
 				"Returns only matching records",
 				"Eliminates incomplete relationships",
@@ -2064,6 +2394,7 @@ WHERE e.status = 'active';`,
 				explanation:
 					"Shows how LEFT JOIN preserves all records from the first table while matching available data from the second table.",
 			},
+
 			notes: [
 				"Keeps all left table records",
 				"Handles missing relationships",
