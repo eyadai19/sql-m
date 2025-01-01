@@ -1,14 +1,16 @@
 import CommunityPage from "@/components/community/Community";
 import { ProfileNavbar } from "@/components/layout/ProfileNavbar";
 
-import { logoutAction } from "../Profile/page";
 import {
 	addPostAction,
+	deletePostAction,
+	editPostAction,
 	fetchAllPostsAction,
 	postCommentAction,
 	postCommentLikeAction,
 	postLikeAction,
-} from "../actions/postsAction";
+} from "../../lib/ServerAction/postsAction";
+import { logoutAction } from "../Profile/page";
 
 export default function Community() {
 	return (
@@ -20,6 +22,8 @@ export default function Community() {
 				postCommentAction={postCommentAction}
 				postCommentLikeAction={postCommentLikeAction}
 				addPostAction={addPostAction}
+				deletePostAction={deletePostAction}
+				editPostAction={editPostAction}
 			/>
 		</div>
 	);

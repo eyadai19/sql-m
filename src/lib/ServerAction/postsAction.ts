@@ -29,6 +29,10 @@ export async function fetchAllPostsAction(): Promise<
 			},
 		});
 		const user = await getUser();
+		if (!user) return { field: "root", message: "error" };
+		const userCommentLikes = await db.query.TB_comment_likes.findMany({
+			where: (comment, { eq }) => eq(comment.userId, user.id),
+		});
 
 		return posts.map((post) => ({
 			id: post.id,
@@ -49,11 +53,13 @@ export async function fetchAllPostsAction(): Promise<
 				user: {
 					id: comment.user.id,
 					name: comment.user.firstName + " " + comment.user.lastName,
-					photo: post.user.photo,
+					photo: comment.user.photo,
 				},
 				likes: comment.likes.length,
+				isLiked: userCommentLikes.some((like) => like.commentId === comment.id),
 			})),
 			likesCount: post.likes.length,
+			canEdit: post.userId == user.id ? true : false,
 		}));
 	} catch (error) {
 		console.error("Error fetching posts:", error);
@@ -240,6 +246,9 @@ export async function userPostAction(): Promise<
 				likes: true,
 			},
 		});
+		const userCommentLikes = await db.query.TB_comment_likes.findMany({
+			where: (comment, { eq }) => eq(comment.userId, user.id),
+		});
 
 		return posts.map((post) => ({
 			id: post.id,
@@ -263,8 +272,10 @@ export async function userPostAction(): Promise<
 					photo: post.user.photo,
 				},
 				likes: comment.likes.length,
+				isLiked: userCommentLikes.some((like) => like.commentId === comment.id),
 			})),
 			likesCount: post.likes.length,
+			canEdit: true,
 		}));
 	} catch (error) {
 		console.error("Error fetching posts:", error);

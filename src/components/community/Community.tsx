@@ -1,10 +1,17 @@
 "use client";
 
+import { Button } from "@/components/ui/button";
+import {
+	Select,
+	SelectContent,
+	SelectItem,
+	SelectTrigger,
+	SelectValue,
+} from "@/components/ui/select";
 import { Post } from "@/lib/types/post";
 import { useEffect, useState } from "react";
 import PostCard from "../post/post-card";
 import { CreatePostButton } from "./CreatePostButton";
-import { PostFilters } from "./PostFilters";
 import { WelcomeBanner } from "./WelcomeBanner";
 
 export default function CommunityPage({
@@ -13,6 +20,8 @@ export default function CommunityPage({
 	postLikeAction,
 	postCommentLikeAction,
 	addPostAction,
+	editPostAction,
+	deletePostAction,
 }: {
 	fetchAllPostsAction: () => Promise<
 		Post[] | { field: string; message: string }
@@ -33,9 +42,19 @@ export default function CommunityPage({
 		content: string,
 		photo: string | null,
 	) => Promise<{ field: string; message: string } | undefined>;
+	editPostAction: (
+		postId: string,
+		title: string | null,
+		content: string | null,
+	) => Promise<{ field: string; message: string } | undefined>;
+	deletePostAction: (
+		postId: string,
+	) => Promise<{ field: string; message: string } | undefined>;
 }) {
 	const [posts, setPosts] = useState<Post[] | null>(null);
 	const [error, setError] = useState<string | null>(null);
+	const [filter, setFilter] = useState<string>("all");
+	const [sort, setSort] = useState<string>("latest");
 
 	useEffect(() => {
 		const fetchData = async () => {
@@ -48,6 +67,39 @@ export default function CommunityPage({
 		};
 		fetchData();
 	}, [fetchAllPostsAction]);
+
+	const filterAndSortPosts = (posts: Post[]) => {
+		let filteredPosts = posts;
+		if (filter === "today") {
+			const today = new Date();
+			filteredPosts = posts.filter(
+				(post) =>
+					new Date(post.createdTime).toDateString() === today.toDateString(),
+			);
+		} else if (filter === "thisWeek") {
+			const today = new Date();
+			const weekAgo = new Date(today.setDate(today.getDate() - 7));
+			filteredPosts = posts.filter(
+				(post) => new Date(post.createdTime) >= weekAgo,
+			);
+		} else if (filter === "thisMonth") {
+			const today = new Date();
+			const monthStart = new Date(today.getFullYear(), today.getMonth(), 1);
+			filteredPosts = posts.filter(
+				(post) => new Date(post.createdTime) >= monthStart,
+			);
+		}
+		if (sort === "latest") {
+			filteredPosts.sort(
+				(a, b) =>
+					new Date(b.createdTime).getTime() - new Date(a.createdTime).getTime(),
+			);
+		} else if (sort === "popular") {
+			filteredPosts.sort((a, b) => b.likesCount - a.likesCount);
+		}
+		return filteredPosts;
+	};
+	const displayedPosts = posts ? filterAndSortPosts(posts) : [];
 
 	if (error) {
 		return (
@@ -76,27 +128,66 @@ export default function CommunityPage({
 				</div>
 
 				<div className="space-y-6">
-					<PostFilters />
-
+					<div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+						<div className="flex flex-wrap gap-2">
+							<Button
+								variant="outline"
+								size="sm"
+								onClick={() => setFilter("today")}
+								className={filter === "today" ? "bg-gray-200" : ""}
+							>
+								Today
+							</Button>
+							<Button
+								variant="outline"
+								size="sm"
+								onClick={() => setFilter("thisWeek")}
+								className={filter === "thisWeek" ? "bg-gray-200" : ""}
+							>
+								This Week
+							</Button>
+							<Button
+								variant="outline"
+								size="sm"
+								onClick={() => setFilter("thisMonth")}
+								className={filter === "thisMonth" ? "bg-gray-200" : ""}
+							>
+								This Month
+							</Button>
+						</div>
+						<Select
+							defaultValue="latest"
+							onValueChange={(value) => setSort(value)}
+						>
+							<SelectTrigger className="w-[180px]">
+								<SelectValue placeholder="Sort by" />
+							</SelectTrigger>
+							<SelectContent>
+								<SelectItem value="latest">Latest Posts</SelectItem>
+								<SelectItem value="popular">Most Liked</SelectItem>
+							</SelectContent>
+						</Select>
+					</div>
 					<div className="divide-y divide-gray-200 rounded-lg bg-white shadow">
-						{posts.map((post) => (
+						{displayedPosts.map((post) => (
 							<PostCard
 								key={post.id}
 								post={post}
 								postLikeAction={postLikeAction}
 								postCommentAction={postCommentAction}
 								postCommentLikeAction={postCommentLikeAction}
+								deletePostAction={deletePostAction}
+								editPostAction={editPostAction}
 							/>
 						))}
 
-						{/* Placeholder for empty state */}
-						{posts.length === 0 && (
+						{displayedPosts.length === 0 && (
 							<div className="flex flex-col items-center justify-center py-12">
 								<p className="text-lg font-medium text-gray-900">
-									No posts yet
+									No posts found
 								</p>
 								<p className="mt-1 text-sm text-gray-500">
-									Be the first to share something with the community!
+									Try a different filter or sort option.
 								</p>
 							</div>
 						)}

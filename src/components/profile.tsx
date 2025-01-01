@@ -12,7 +12,7 @@ import "swiper/css";
 import "swiper/css/navigation";
 import { Autoplay, Navigation } from "swiper/modules";
 import { Swiper, SwiperSlide } from "swiper/react";
-import { PostsView } from "./PostsView";
+import PostCard from "./post/post-card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "./ui/tabs";
 
 export default function ProfilePage({
@@ -21,6 +21,9 @@ export default function ProfilePage({
 	userPostAction,
 	editPostAction,
 	deletePostAction,
+	postCommentAction,
+	postLikeAction,
+	postCommentLikeAction,
 }: {
 	ProfileAction: () => Promise<
 		ProfileData | { field: string; message: string } | undefined
@@ -37,6 +40,17 @@ export default function ProfilePage({
 	) => Promise<{ field: string; message: string } | undefined>;
 	deletePostAction: (
 		postId: string,
+	) => Promise<{ field: string; message: string } | undefined>;
+	postCommentAction: (
+		postId: string,
+		content: string,
+		photo: string | null,
+	) => Promise<{ field: string; message: string } | undefined>;
+	postLikeAction: (
+		postId: string,
+	) => Promise<{ field: string; message: string } | undefined>;
+	postCommentLikeAction: (
+		commentId: string,
 	) => Promise<{ field: string; message: string } | undefined>;
 }) {
 	const [isSaving, setIsSaving] = useState(false);
@@ -546,9 +560,21 @@ export default function ProfilePage({
 					</div>
 				</TabsContent>
 				<TabsContent value="posts">
-					<div className="rounded-lg bg-white p-4 shadow-lg md:p-8">
-						<h2 className="mb-6 text-2xl font-bold">Posts</h2>
-						<PostsView posts={posts} />
+					<div className="w-fit rounded-lg bg-white p-4 shadow-lg md:p-8">
+						{/* <h2 className="mb-6 text-2xl font-bold">Posts</h2> */}
+						{/* <PostsView posts={posts} /> */}
+						{posts &&
+							posts.map((post) => (
+								<PostCard
+									key={post.id}
+									post={post}
+									postLikeAction={postLikeAction}
+									postCommentAction={postCommentAction}
+									postCommentLikeAction={postCommentLikeAction}
+									deletePostAction={deletePostAction}
+									editPostAction={editPostAction}
+								/>
+							))}
 					</div>
 				</TabsContent>
 			</Tabs>

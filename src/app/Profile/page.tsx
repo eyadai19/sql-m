@@ -1,14 +1,20 @@
-import { editPostAction, userPostAction } from "@/app/actions/postsAction";
 import { ProfileNavbar } from "@/components/layout/ProfileNavbar";
 import ProfilePage from "@/components/profile";
 import { getUser, lucia } from "@/lib/auth";
 import { db } from "@/lib/db";
 import { TB_user } from "@/lib/schema";
+import {
+	editPostAction,
+	postCommentAction,
+	postCommentLikeAction,
+	postLikeAction,
+	userPostAction,
+} from "@/lib/ServerAction/postsAction";
 import { ProfileData } from "@/lib/types/authSchemas";
 import { eq } from "drizzle-orm";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
-import { deletePostAction } from "../actions/postsAction";
+import { deletePostAction } from "../../lib/ServerAction/postsAction";
 
 export default function Profile() {
 	return (
@@ -20,6 +26,9 @@ export default function Profile() {
 				userPostAction={userPostAction}
 				editPostAction={editPostAction}
 				deletePostAction={deletePostAction}
+				postCommentAction={postCommentAction}
+				postCommentLikeAction={postCommentLikeAction}
+				postLikeAction={postLikeAction}
 			/>
 		</div>
 	);
