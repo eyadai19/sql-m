@@ -2583,7 +2583,7 @@ FULL OUTER JOIN departments d ON e.department_id = d.id;`,
 					content:
 						"A full outer join combines the results of both left and right joins. It includes all rows from both tables A and B, with matching rows combined into a single row. If there is no match, the result will still include the row from one table, with NULL values for the columns of the other table. For example, in a full outer join between table A and table B on A.key = B.key, rows from A without matches in B and rows from B without matches in A are included, with NULL values for the unmatched columns. The image illustrates this concept, showing how unmatched rows from both tables appear in the result set.",
 					image: {
-						url: "/image/Education/joins/full outer join/1.png",
+						url: "/image/Education/joins/outer join/1.png",
 						alt: "Visualization of full outer join without WHERE clause",
 						caption:
 							"Full outer join without a WHERE clause, showing unmatched rows from both tables with NULL values for the other table's columns.",
@@ -2594,7 +2594,7 @@ FULL OUTER JOIN departments d ON e.department_id = d.id;`,
 					content:
 						"When a WHERE clause is added to a full outer join, the result set is filtered to include only specific rows based on the condition. For example, in a full outer join between table A and table B on A.key = B.key, a WHERE condition like A.key IS NULL OR B.key IS NULL isolates rows that are unmatched in one of the tables. This means that only rows from A without matches in B and rows from B without matches in A will appear in the result set. The image demonstrates how unmatched rows from both tables are retained while matched rows are excluded based on the WHERE condition.",
 					image: {
-						url: "/image/Education/joins/full outer join/2.png",
+						url: "/image/Education/joins/outer join/2.png",
 						alt: "Visualization of full outer join with WHERE condition",
 						caption:
 							"Full outer join with WHERE clause filtering unmatched rows from both tables based on the condition.",
