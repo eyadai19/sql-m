@@ -10,6 +10,7 @@ import {
 	FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
+import { QuizInput } from "@/lib/types/exerciseTypes";
 import {
 	userExcerciseAnswerError,
 	userQuizAnswerSchema,
@@ -27,19 +28,38 @@ export default function SqlQuiz({
 	getAuthorizedQuiz,
 }: {
 	quizAction: (
-		input: z.infer<typeof userQuizAnswerSchema>,
+		data: QuizInput,
 	) => Promise<
-			{ score: number; correctAnswers: string[] }
-			| userExcerciseAnswerError
-			| undefined
+		| { score: number; correctAnswers: string[] }
+		| userExcerciseAnswerError
+		| undefined
 	>;
 	quizQuestionAction: () => Promise<
-		{ question: string }[] | { field: string; message: string } | undefined
+		| { field: string; message: string }
+		| undefined
+		| (
+				| { question: string; type: "NormalExercise" | "TrueFalseExercise" }
+				| {
+						question: string;
+						type: "DragDropExercise" | "MultipleChoiceExercise";
+						options: string[];
+				  }
+		  )[]
 	>;
 	getAuthorizedQuiz: () => Promise<boolean | undefined>;
 }) {
 	const router = useRouter();
-	const [questions, setQuestions] = useState<{ question: string }[]>([]);
+	const [questions, setQuestions] = useState<
+		| (
+				| { question: string; type: "NormalExercise" | "TrueFalseExercise" }
+				| {
+						question: string;
+						type: "DragDropExercise" | "MultipleChoiceExercise";
+						options: string[];
+				  }
+		  )[]
+		| undefined
+	>();
 	const [results, setResults] = useState<(boolean | null)[]>([]);
 	const [correctAnswers, setCorrectAnswers] = useState<string[]>([]);
 	const [isSubmitted, setIsSubmitted] = useState(false);
@@ -67,6 +87,7 @@ export default function SqlQuiz({
 			const fetchedQuestions = await quizQuestionAction();
 			if (Array.isArray(fetchedQuestions)) {
 				setQuestions(fetchedQuestions);
+				if (!questions) return;
 				setResults(Array(fetchedQuestions.length).fill(null));
 			}
 		};
@@ -74,15 +95,15 @@ export default function SqlQuiz({
 	}, [quizQuestionAction]);
 
 	const form = useForm<z.infer<typeof userQuizAnswerSchema>>({
-		resolver: zodResolver(userQuizAnswerSchema),
 		defaultValues: {
-			question: questions.map((q) => q.question),
-			answer: Array(questions.length).fill(""),
+			answer:
+				questions?.map((q) => (q.type === "DragDropExercise" ? [] : "")) || [],
 		},
+		resolver: zodResolver(userQuizAnswerSchema),
 	});
 
 	const handleSubmit = async (data: z.infer<typeof userQuizAnswerSchema>) => {
-		if (questions.length === 0) {
+		if (!questions) {
 			console.error("No questions available.");
 			return;
 		}
@@ -90,12 +111,34 @@ export default function SqlQuiz({
 		setIsSubmitting(true);
 		setIsOverlayVisible(true);
 
-		const updatedData = {
-			...data,
-			question: questions.map((q) => q.question),
-		};
+		const formattedData: QuizInput = questions
+			.map((q, index) => {
+				if (q.type === "NormalExercise" || q.type === "TrueFalseExercise") {
+					return {
+						question: q.question,
+						answer: data.answer[index] as string,
+						type: q.type,
+					};
+				} else if (q.type === "MultipleChoiceExercise") {
+					return {
+						question: q.question,
+						type: "MultipleChoiceExercise",
+						options: q.options,
+						answer: data.answer[index] as string,
+					};
+				} else if (q.type === "DragDropExercise") {
+					return {
+						question: q.question,
+						type: "DragDropExercise",
+						options: q.options,
+						order: data.answer[index] as string[],
+					};
+				}
+				return undefined;
+			})
+			.filter((item): item is QuizInput[number] => item !== undefined);
 
-		const result = await quizAction(updatedData);
+		const result = await quizAction(formattedData);
 		setIsSubmitting(false);
 
 		if (result && "score" in result && "correctAnswers" in result) {
@@ -105,11 +148,14 @@ export default function SqlQuiz({
 			setShowModal(true);
 			setIsDisabled(true);
 
-			const newResults = questions.map(
-				(q, index) =>
-					data.answer[index].trim().toLowerCase() ===
-					result.correctAnswers[index].trim().toLowerCase(),
-			);
+			const newResults = questions.map((q, index) => {
+				const answer = data.answer[index];
+				const correctAnswer = result.correctAnswers[index];
+
+				return typeof answer === "string" && typeof correctAnswer === "string"
+					? answer.trim().toLowerCase() === correctAnswer.trim().toLowerCase()
+					: false;
+			});
 			setResults(newResults);
 		} else if (result && "message" in result) {
 			console.error(result.message);
@@ -139,14 +185,14 @@ export default function SqlQuiz({
 	if (hasAccess === undefined) {
 		return (
 			<div className="flex h-screen items-center justify-center">
-				<div className="animate-spin rounded-full h-16 w-16 border-t-4 border-b-4 border-[#ADF0D1]"></div>
+				<div className="h-16 w-16 animate-spin rounded-full border-b-4 border-t-4 border-[#ADF0D1]"></div>
 			</div>
 		);
 	}
 
 	return (
 		<div
-			className="flex min-h-screen items-center justify-center px-8 relative"
+			className="relative flex min-h-screen items-center justify-center px-8"
 			style={{
 				background: "linear-gradient(to bottom, #00203F, #ADF0D1)",
 			}}
@@ -154,8 +200,8 @@ export default function SqlQuiz({
 			{isOverlayVisible && (
 				<div className="absolute inset-0 z-50 bg-gray-600 bg-opacity-50"></div>
 			)}
-			<div className="container mx-auto max-w-3xl rounded-lg bg-white px-4 py-8 relative z-10">
-				<div className="flex justify-between items-center mb-8">
+			<div className="container relative z-10 mx-auto max-w-3xl rounded-lg bg-white px-4 py-8">
+				<div className="mb-8 flex items-center justify-between">
 					<h1 className="text-3xl font-bold text-[#00203F]">Quiz</h1>
 					{score !== null && (
 						<span className="text-xl font-semibold text-[#00203F]">
@@ -167,33 +213,61 @@ export default function SqlQuiz({
 				<Form {...form}>
 					<form onSubmit={form.handleSubmit(handleSubmit)}>
 						<div className="space-y-6">
-							{questions.map((question, index) => (
+							{questions!.map((q, index) => (
 								<div
 									key={index}
-									className="p-4 border rounded-lg shadow-sm bg-gray-50"
+									className="rounded-lg border bg-gray-50 p-4 shadow-sm"
 								>
 									<FormField
 										name={`answer.${index}`}
 										render={({ field }) => (
 											<FormItem>
 												<FormLabel className="text-lg font-medium text-gray-700">
-													{question.question}
+													{q.question}
 												</FormLabel>
 												<FormControl>
-													<Input
-														{...field}
-														placeholder="Type your answer here..."
-														className="text-lg"
-														disabled={isDisabled}
-													/>
+													{q.type === "NormalExercise" ? (
+														<Input
+															{...field}
+															placeholder="Type your answer here..."
+															className="text-lg"
+															disabled={isDisabled}
+														/>
+													) : q.type === "TrueFalseExercise" ? (
+														<Input
+															{...field}
+															placeholder="Type your answer..."
+														/>
+													) : q.type === "MultipleChoiceExercise" ? (
+														<div>
+															{q.options.map(
+																(option: string, optIndex: number) => (
+																	<label key={optIndex} className="block">
+																		<input
+																			type="radio"
+																			value={option}
+																			checked={field.value === option}
+																			onChange={() => field.onChange(option)}
+																		/>
+																		<span>{option}</span>
+																	</label>
+																),
+															)}
+														</div>
+													) : q.type === "DragDropExercise" ? (
+														<div>
+															{/* Drag and drop implementation */}
+															<p>Drag and drop question interface here</p>
+														</div>
+													) : (
+														<div></div>
+													)}
 												</FormControl>
 												<FormMessage />
 												{results[index] !== null && (
 													<p
 														className={`mt-2 ${
-															results[index]
-																? "text-green-600"
-																: "text-red-600"
+															results[index] ? "text-green-600" : "text-red-600"
 														}`}
 													>
 														{results[index]
@@ -208,14 +282,14 @@ export default function SqlQuiz({
 							))}
 						</div>
 
-						<div className="flex space-x-4 mt-4">
+						<div className="mt-4 flex space-x-4">
 							<Button
 								type="submit"
-								className="bg-[#00203F] text-white w-full"
+								className="w-full bg-[#00203F] text-white"
 								disabled={isSubmitting || isDisabled}
 							>
 								{isSubmitting ? (
-									<div className="animate-spin rounded-full h-6 w-6 border-t-4 border-b-4 border-white"></div>
+									<div className="h-6 w-6 animate-spin rounded-full border-b-4 border-t-4 border-white"></div>
 								) : (
 									"Submit Answers"
 								)}
@@ -223,7 +297,7 @@ export default function SqlQuiz({
 							{isSubmitted && (
 								<Button
 									type="button"
-									className="bg-gray-500 text-white w-full"
+									className="w-full bg-gray-500 text-white"
 									onClick={handleGoBack}
 								>
 									Back
@@ -236,11 +310,10 @@ export default function SqlQuiz({
 
 			{showModal && (
 				<div className="fixed inset-0 z-50 flex items-center justify-center bg-gray-600 bg-opacity-50">
-					<div className="w-full max-w-lg rounded-lg bg-white p-8 shadow-lg text-center">
+					<div className="w-full max-w-lg rounded-lg bg-white p-8 text-center shadow-lg">
 						<h2 className="mb-4 text-2xl font-bold text-[#00203F]">
 							Your Score: {score?.toFixed(2)} / 100
 						</h2>
-						
 
 						<Button
 							onClick={handleReviewAnswers}

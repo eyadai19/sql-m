@@ -16,11 +16,12 @@ import { v4 as uuidv4 } from "uuid";
 import { z } from "zod";
 import ControlButtons from "./common/ControlButtons";
 import ExerciseHeader from "./common/ExerciseHeader";
+import Hints from "./common/Hints";
 import ResultsView from "./common/ResultsView";
 import SQLEditor from "./common/SQLEditor";
 import TablesView from "./common/TablesView";
 import TaskPrompt from "./common/TaskPrompt";
-import Hints from "./common/Hints";
+import { ExerciseTypes } from "@/lib/types/exerciseTypes";
 
 export type ResultType = QueryResult | null;
 export type ErrorType = string | null;
@@ -38,7 +39,8 @@ export interface ExerciseProps {
 	expectedRowCount?: number;
 	UserExcerciseAnswerAction: (
 		input: z.infer<typeof userExcerciseAnswerSchema>,
-		score: number,
+		score: number | null,
+		type: string,
 	) => Promise<userExcerciseAnswerError | undefined>;
 }
 
@@ -140,7 +142,7 @@ export default function Exercise({
 					};
 
 					try {
-						await UserExcerciseAnswerAction(inputData, score);
+						await UserExcerciseAnswerAction(inputData, score, ExerciseTypes.Normal);
 					} catch (error) {
 						console.error("UserExcerciseAnswerAction error:", error);
 					}
@@ -175,7 +177,7 @@ export default function Exercise({
 	};
 
 	return (
-		<Card className=" mb-3 w-full max-w-4xl bg-white/40 backdrop-blur-xl">
+		<Card className="mb-3 w-full max-w-4xl bg-white/40 backdrop-blur-xl">
 			<ExerciseHeader
 				title={title}
 				difficulty={difficulty}
@@ -185,7 +187,7 @@ export default function Exercise({
 
 			<CardContent className="space-y-6">
 				<Tabs defaultValue="exercise" className="w-full">
-					<TabsList className="grid w-full grid-cols-2 ">
+					<TabsList className="grid w-full grid-cols-2">
 						<TabsTrigger value="exercise" className="flex items-center gap-2">
 							<Code className="h-4 w-4" />
 							Exercise
@@ -226,19 +228,18 @@ export default function Exercise({
 					</TabsContent>
 
 					<TabsContent value="help" className="space-y-6">
-						
 						<Hints
-          hints={hints}
-          activeHint={activeHint}
-          onNextHint={() =>
-			setActiveHint((prev) => Math.min(prev + 1, hints.length - 1))
-		}
-          tips={tips}
-          showTips={showTips}
-		onToggleTips={() => setShowTips((prev) => !prev)}
-          showHints={showHints}
-          onToggleHints={() => setShowHints((prev) => !prev)}
-        />
+							hints={hints}
+							activeHint={activeHint}
+							onNextHint={() =>
+								setActiveHint((prev) => Math.min(prev + 1, hints.length - 1))
+							}
+							tips={tips}
+							showTips={showTips}
+							onToggleTips={() => setShowTips((prev) => !prev)}
+							showHints={showHints}
+							onToggleHints={() => setShowHints((prev) => !prev)}
+						/>
 					</TabsContent>
 				</Tabs>
 			</CardContent>

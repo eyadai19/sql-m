@@ -36,9 +36,13 @@ export const userChatBotExpInputSchema = z.object({
 	answer: z.string().min(1),
 });
 
+// export const userQuizAnswerSchema = z.object({
+// 	question: z.array(z.string()),
+// 	answer: z.array(z.string()),
+// });
 export const userQuizAnswerSchema = z.object({
 	question: z.array(z.string()),
-	answer: z.array(z.string()),
+	answer: z.array(z.union([z.string(), z.array(z.string())])), // يدعم نصوص ومصفوفات (للاختيار المتعدد)
 });
 
 export type UserView = z.infer<typeof userViewSchema>;

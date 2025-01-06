@@ -12,7 +12,8 @@ import {
 export async function UserExcerciseAnswerAction(
 	pageName: string,
 	input: z.infer<typeof userExcerciseAnswerSchema>,
-	score: number,
+	score: number | null,
+	type: string,
 ): Promise<userExcerciseAnswerError | undefined> {
 	if (!pageName) {
 		return { field: "root", message: "Level is missing" };
@@ -35,12 +36,17 @@ export async function UserExcerciseAnswerAction(
 	}
 	if (query.trials == 0) query.trials = 1;
 
+	let s: string | undefined;
+	if (score) {
+		s = score.toFixed(2);
+	}
 	const data = {
 		id: nanoid(),
 		userId: user.id,
 		levelId: levelId,
 		...query,
-		score: score.toFixed(2),
+		score: s,
+		type: type,
 	};
 
 	try {

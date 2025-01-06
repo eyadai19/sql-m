@@ -8,7 +8,7 @@ import {
 	TableHeader,
 	TableRow,
 } from "@/components/ui/table";
-import { userDbApi } from "@/utils/apis";
+import { userDbApi, userDbRelationshipsApi } from "@/utils/apis";
 import { useEffect, useState } from "react";
 import Mermaid from "react-mermaid2";
 
@@ -45,9 +45,7 @@ export default function FetchTablesWithERD() {
 
 			setTables(data);
 
-			const erdResponse = await fetch(
-				"http://localhost:3000/api/dbRelationships",
-			);
+			const erdResponse = await fetch(userDbRelationshipsApi);
 			const erdData = await erdResponse.json();
 
 			if (!response.ok) {

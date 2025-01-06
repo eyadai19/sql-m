@@ -20,8 +20,8 @@ interface ExerciseParams {
 }
 
 interface PageParams {
-	exerciseParams?: ExerciseParams;
-	explanationParams?: ExplanationParams;
+	exerciseParams: ExerciseParams;
+	explanationParams: ExplanationParams;
 	trueFalseParams?: TrueFalseParams;
 	multipleChoiceParams?: MultipleChoiceParams;
 	dragDropParams?: DragDropExerciseParams;

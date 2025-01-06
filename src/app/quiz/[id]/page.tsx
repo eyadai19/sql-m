@@ -4,16 +4,19 @@ import { ProfileNavbar } from "@/components/layout/ProfileNavbar";
 import SqlQuiz from "@/components/Quiz";
 import { getUser } from "@/lib/auth";
 import { db } from "@/lib/db";
-import { TB_quiz, TB_quiz_questions, TB_user } from "@/lib/schema";
 import {
-	userExcerciseAnswerError,
-	userQuizAnswerSchema,
-} from "@/lib/types/userSchema";
+	TB_quiz,
+	TB_quiz_drag_drop_options,
+	TB_quiz_multiple_choice_options,
+	TB_quiz_questions,
+	TB_user,
+} from "@/lib/schema";
+import { ExerciseTypes, QuizInput } from "@/lib/types/exerciseTypes";
+import { userExcerciseAnswerError } from "@/lib/types/userSchema";
 import { ngrok_url_compare } from "@/utils/apis";
 import axios from "axios";
 import { eq } from "drizzle-orm";
 import { nanoid } from "nanoid";
-import { z } from "zod";
 
 export default function quiz({ params }: { params: { id: string } }) {
 	return (
@@ -29,7 +32,18 @@ export default function quiz({ params }: { params: { id: string } }) {
 	);
 }
 
-async function quizQuestionAction(stageId: string) {
+async function quizQuestionAction(stageId: string): Promise<
+	| { field: string; message: string }
+	| undefined
+	| (
+			| { question: string; type: "NormalExercise" | "TrueFalseExercise" }
+			| {
+					question: string;
+					type: "DragDropExercise" | "MultipleChoiceExercise";
+					options: string[];
+			  }
+	  )[]
+> {
 	"use server";
 	try {
 		const levels = await db.query.TB_level.findMany({
@@ -40,8 +54,38 @@ async function quizQuestionAction(stageId: string) {
 		}
 		const levelIds = levels.map((level) => level.id);
 
-		const questions = await db.query.TB_question_bank.findMany({
+		const normalQuestions = await db.query.TB_question_bank.findMany({
 			where: (question, { inArray }) => inArray(question.levelId, levelIds),
+		});
+
+		const multipleChoiceQuestions =
+			await db.query.TB_MultipleChoice_bank.findMany({
+				where: (question, { inArray }) => inArray(question.levelId, levelIds),
+			});
+
+		const dragDropQuestions = await db.query.TB_DragDrop_bank.findMany({
+			where: (question, { inArray }) => inArray(question.levelId, levelIds),
+		});
+
+		const trueFalseQuestions = await db.query.TB_TrueFalse_bank.findMany({
+			where: (question, { inArray }) => inArray(question.levelId, levelIds),
+		});
+
+		const multipleChoiceOptions =
+			await db.query.TB_MultipleChoice_options.findMany({
+				where: (option, { inArray }) =>
+					inArray(
+						option.questionId,
+						multipleChoiceQuestions.map((q) => q.id),
+					),
+			});
+
+		const dragDropOptions = await db.query.TB_DragDrop_options.findMany({
+			where: (option, { inArray }) =>
+				inArray(
+					option.questionId,
+					dragDropQuestions.map((q) => q.id),
+				),
 		});
 
 		const user = await getUser();
@@ -77,38 +121,123 @@ async function quizQuestionAction(stageId: string) {
 		const levelQuestionsCount = levels.map((level) => {
 			const userLevelData = bestUserParams[level.id];
 			if (!userLevelData) {
-				return { levelId: level.id, questionCount: 5 };
+				return { levelId: level.id, questionCount: 8 };
 			}
 
 			const { score, time, trials, is_show_ans } = userLevelData;
 
-			const normalizedScore = Math.min(1, parseFloat(score!) / 100);
+			const normalizedScore =
+				score === null ? 0 : Math.min(1, parseFloat(score) / 100);
 			const normalizedTime = time! / maxTime;
 			const normalizedTrials = trials! / maxTrials;
 			const normalizedIsShowAns = is_show_ans ? 1 : 0;
 
-			// count
 			let questionCount =
 				w1 * normalizedScore +
 				w2 * normalizedTime +
 				w3 * normalizedTrials +
 				w4 * normalizedIsShowAns;
 
-			questionCount = Math.min(Math.max(questionCount, 0), 5);
+			questionCount = Math.min(Math.max(questionCount, 0), 8);
 
 			return { levelId: level.id, questionCount: Math.round(questionCount) };
 		});
 
-		const resultQuestions = levelQuestionsCount.flatMap(
-			({ levelId, questionCount }) => {
-				const questionsForLevel = questions.filter(
-					(q) => q.levelId === levelId,
+		const resultQuestions: (
+			| { question: string; type: "TrueFalseExercise" | "NormalExercise" }
+			| {
+					question: string;
+					type: "DragDropExercise" | "MultipleChoiceExercise";
+					options: string[];
+			  }
+		)[] = levelQuestionsCount.flatMap(({ levelId, questionCount }) => {
+			const selectedQuestions = [];
+
+			if (questionCount <= 4) {
+				if (normalQuestions.length > 0) {
+					selectedQuestions.push({
+						question: normalQuestions[0].question,
+						type: ExerciseTypes.Normal,
+					});
+				}
+				if (
+					multipleChoiceQuestions.length > 0 &&
+					selectedQuestions.length < questionCount
+				) {
+					const options = multipleChoiceOptions
+						.filter(
+							(option) => option.questionId === multipleChoiceQuestions[0].id,
+						)
+						.map((option) => option.option);
+					selectedQuestions.push({
+						question: multipleChoiceQuestions[0].question,
+						type: ExerciseTypes.MultipleChoice,
+						options: options,
+					});
+				}
+				if (
+					dragDropQuestions.length > 0 &&
+					selectedQuestions.length < questionCount
+				) {
+					const options = dragDropOptions
+						.filter((option) => option.questionId === dragDropQuestions[0].id)
+						.map((option) => option.option);
+					selectedQuestions.push({
+						question: dragDropQuestions[0].question,
+						type: ExerciseTypes.DragDrop,
+						options: options,
+					});
+				}
+				if (
+					trueFalseQuestions.length > 0 &&
+					selectedQuestions.length < questionCount
+				) {
+					selectedQuestions.push({
+						question: trueFalseQuestions[0].question,
+						type: ExerciseTypes.TrueFalse,
+					});
+				}
+			} else {
+				// توزيع الأسئلة بشكل متساوٍ إذا كان العدد كبيرًا
+				selectedQuestions.push(
+					...normalQuestions
+						.filter((q) => q.levelId === levelId)
+						.slice(0, Math.ceil(questionCount / 4))
+						.map((q) => ({
+							question: q.question,
+							type: ExerciseTypes.Normal,
+						})),
+					...multipleChoiceQuestions
+						.filter((q) => q.levelId === levelId)
+						.slice(0, Math.ceil(questionCount / 4))
+						.map((q) => ({
+							question: q.question,
+							type: ExerciseTypes.MultipleChoice,
+							options: multipleChoiceOptions
+								.filter((option) => option.questionId === q.id)
+								.map((option) => option.option),
+						})),
+					...dragDropQuestions
+						.filter((q) => q.levelId === levelId)
+						.slice(0, Math.ceil(questionCount / 4))
+						.map((q) => ({
+							question: q.question,
+							type: ExerciseTypes.DragDrop,
+							options: dragDropOptions
+								.filter((option) => option.questionId === q.id)
+								.map((option) => option.option),
+						})),
+					...trueFalseQuestions
+						.filter((q) => q.levelId === levelId)
+						.slice(0, Math.ceil(questionCount / 4))
+						.map((q) => ({
+							question: q.question,
+							type: ExerciseTypes.TrueFalse,
+						})),
 				);
-				return questionsForLevel
-					.slice(0, questionCount)
-					.map((q) => ({ question: q.question }));
-			},
-		);
+			}
+			return selectedQuestions.slice(0, questionCount);
+		});
 
 		return resultQuestions;
 	} catch (error) {
@@ -119,7 +248,7 @@ async function quizQuestionAction(stageId: string) {
 
 async function quizAction(
 	stageId: string,
-	input: z.infer<typeof userQuizAnswerSchema>,
+	data: QuizInput,
 ): Promise<
 	| { score: number; correctAnswers: string[] }
 	| userExcerciseAnswerError
@@ -128,55 +257,168 @@ async function quizAction(
 	"use server";
 
 	try {
-		const data = await userQuizAnswerSchema.parseAsync(input);
-
 		const correctAnswers: string[] = [];
-		const que = await db.query.TB_question_bank.findFirst({
-			where: (question, { eq }) => eq(question.question, data.question[0]),
-		});
-		if (!que) return;
-
-		const levelId = await db.query.TB_level.findFirst({
-			where: (level, { eq }) => eq(level.id, que.levelId),
-		});
-		if (!levelId) return;
-
-		let score = 0;
 		const quizQuestions = [];
+		let score = 0;
 
-		for (let index = 0; index < data.question.length; index++) {
-			const question = await db.query.TB_question_bank.findFirst({
-				where: (question, { eq }) =>
-					eq(question.question, data.question[index]),
-			});
-			if (!question) return;
+		for (let index = 0; index < data.length; index++) {
+			const currentQuestionData = data[index];
+			let questionScore = 0;
+			let newQuestion: any;
 
-			const answer = data.answer[index];
-			const realAnswer = question.answer;
-			const response = await axios.post(ngrok_url_compare, {
-				sentence1: answer,
-				sentence2: realAnswer,
-			});
-			const score = Math.abs(response.data.cosine_similarity) * 100;
+			// Handle the different question types
+			switch (currentQuestionData.type) {
+				case "NormalExercise":
+					const question = await db.query.TB_question_bank.findFirst({
+						where: (question, { eq }) =>
+							eq(question.question, currentQuestionData.question),
+					});
+					if (!question) return;
+					const answer = currentQuestionData.answer;
+					const realAnswer = question.answer;
+					const response = await axios.post(ngrok_url_compare, {
+						sentence1: answer,
+						sentence2: realAnswer,
+					});
+					questionScore = Math.abs(response.data.cosine_similarity) * 100;
 
-			correctAnswers.push(question.answer);
-			quizQuestions.push({
-				id: nanoid(),
-				quizId: "",
-				question: data.question[index],
-				answer: data.answer[index],
-				score: score,
-			});
+					correctAnswers.push(question.answer);
+					newQuestion = {
+						id: nanoid(),
+						quizId: "",
+						question: currentQuestionData.question,
+						answer: answer,
+						score: questionScore,
+						type: currentQuestionData.type,
+					};
+					score += questionScore;
+					break;
+
+				case "TrueFalseExercise":
+					const TrueFalsequestion = await db.query.TB_TrueFalse_bank.findFirst({
+						where: (question, { eq }) =>
+							eq(question.question, currentQuestionData.question),
+					});
+					if (!TrueFalsequestion) return;
+
+					const TrueFalseAnswer = currentQuestionData.answer;
+					const TrueFalseRealAnswer = TrueFalsequestion.answer;
+					questionScore = TrueFalseAnswer === TrueFalseRealAnswer ? 100 : 0;
+
+					correctAnswers.push(TrueFalsequestion.answer);
+					newQuestion = {
+						id: nanoid(),
+						quizId: "",
+						question: currentQuestionData.question,
+						answer: TrueFalseAnswer,
+						score: questionScore,
+						type: currentQuestionData.type,
+					};
+					score += questionScore;
+					break;
+
+				case "MultipleChoiceExercise":
+					const MultipleChoicequestion =
+						await db.query.TB_MultipleChoice_bank.findFirst({
+							where: (question, { eq }) =>
+								eq(question.question, currentQuestionData.question),
+						});
+					if (!MultipleChoicequestion) return;
+
+					const MultipleChoiceAnswer = currentQuestionData.answer;
+					const MultipleChoiceRealAnswer = MultipleChoicequestion.answer;
+					questionScore =
+						MultipleChoiceAnswer === MultipleChoiceRealAnswer ? 100 : 0;
+
+					correctAnswers.push(MultipleChoicequestion.answer);
+					newQuestion = {
+						id: nanoid(),
+						quizId: "",
+						question: currentQuestionData.question,
+						options: currentQuestionData.options,
+						answer: MultipleChoiceAnswer,
+						score: questionScore,
+						type: currentQuestionData.type,
+					};
+					score += questionScore;
+
+					const multipleChoiceOptions = currentQuestionData.options.map(
+						(option, idx) => ({
+							id: nanoid(),
+							questionId: newQuestion.id,
+							option,
+							order: idx + 1,
+						}),
+					);
+
+					await db
+						.insert(TB_quiz_multiple_choice_options)
+						.values(multipleChoiceOptions);
+					break;
+
+				case "DragDropExercise":
+					const DragDropquestion = await db.query.TB_DragDrop_bank.findFirst({
+						where: (question, { eq }) =>
+							eq(question.question, currentQuestionData.question),
+					});
+					if (!DragDropquestion) return;
+
+					const DragDropquestionOrder =
+						await db.query.TB_DragDrop_options.findMany({
+							where: (question, { eq }) =>
+								eq(question.questionId, DragDropquestion.id),
+						});
+					if (!DragDropquestionOrder) return;
+
+					const DragDropAnswer = currentQuestionData.order;
+					const correctOrder = DragDropquestionOrder.map(
+						(option) => option.option,
+					);
+
+					questionScore =
+						JSON.stringify(DragDropAnswer) === JSON.stringify(correctOrder)
+							? 100
+							: 0;
+
+					correctAnswers.push(correctOrder.join(", "));
+					newQuestion = {
+						id: nanoid(),
+						quizId: "",
+						question: currentQuestionData.question,
+						answer: DragDropAnswer.join(", "),
+						score: questionScore,
+						type: currentQuestionData.type,
+					};
+					score += questionScore;
+
+					const dragDropOptions = currentQuestionData.order.map(
+						(option, idx) => ({
+							id: nanoid(),
+							questionId: newQuestion.id,
+							option,
+							order: idx + 1,
+						}),
+					);
+
+					await db.insert(TB_quiz_drag_drop_options).values(dragDropOptions);
+					break;
+
+				default:
+					return;
+			}
+
+			quizQuestions.push(newQuestion);
 		}
-		quizQuestions.forEach((question) => (score += question.score));
-		score = score / data.question.length;
+
+		score = score / data.length;
+
 		const user = await getUser();
 		if (!user) return;
 		const newQuiz = {
 			id: nanoid(),
 			userId: user.id,
 			mark: score,
-			stageId: levelId.stageId,
+			stageId: stageId,
 		};
 
 		try {
@@ -185,13 +427,17 @@ async function quizAction(
 			console.error("Error inserting into TB_quiz:", error);
 			return { field: "root", message: "Error inserting quiz data" };
 		}
+
 		quizQuestions.forEach((question) => (question.quizId = newQuiz.id));
 
 		try {
 			await db.insert(TB_quiz_questions).values(quizQuestions);
 		} catch (error) {
 			console.error("Error inserting into TB_quiz_questions:", error);
-			return { field: "root", message: "Error inserting quiz questions data" };
+			return {
+				field: "root",
+				message: "Error inserting quiz questions data",
+			};
 		}
 
 		const stage = await db.query.TB_stage.findFirst({
@@ -222,6 +468,7 @@ async function quizAction(
 					.where(eq(TB_user.id, user.id));
 			}
 		}
+
 		return { score, correctAnswers };
 	} catch (e) {
 		console.error(e);

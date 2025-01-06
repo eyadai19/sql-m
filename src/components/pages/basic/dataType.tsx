@@ -53,19 +53,37 @@ export default function DataType({
 
 	if (hasAccess === undefined) {
 		return (
-		<div className="flex h-screen items-center justify-center">
-			<div className="animate-spin rounded-full h-16 w-16 border-t-4 border-b-4 border-[#ADF0D1]"></div>
-		</div>
-	);
+			<div className="flex h-screen items-center justify-center">
+				<div className="h-16 w-16 animate-spin rounded-full border-b-4 border-t-4 border-[#ADF0D1]"></div>
+			</div>
+		);
 	}
 
 	return (
 		<div>
 			<Explanation {...explanationParams} />
 
-			<DragDropExercise {...dragDropParams} />
-			<MultipleChoiceExercise {...multipleChoiceParams} />
-			<TrueFalseExercise {...trueFalseParams} />
+			<DragDropExercise
+				{...dragDropParams!}
+				UserExcerciseAnswerAction={UserExcerciseAnswerAction.bind(
+					null,
+					pageName.dataType,
+				)}
+			/>
+			<MultipleChoiceExercise
+				{...multipleChoiceParams!}
+				UserExcerciseAnswerAction={UserExcerciseAnswerAction.bind(
+					null,
+					pageName.dataType,
+				)}
+			/>
+			<TrueFalseExercise
+				{...trueFalseParams!}
+				UserExcerciseAnswerAction={UserExcerciseAnswerAction.bind(
+					null,
+					pageName.dataType,
+				)}
+			/>
 			<Exercise
 				{...exerciseParams}
 				UserExcerciseAnswerAction={UserExcerciseAnswerAction.bind(

@@ -96,7 +96,48 @@ export const TB_quiz_questions = pgTable("quiz_questions", {
 	question: text("question").notNull(),
 	answer: text("answer").notNull(),
 	score: real("score").notNull(),
+	type: text("type").notNull(),
 });
+
+export const TB_quiz_multiple_choice_options = pgTable(
+	"quiz_multiple_choice_options",
+	{
+		id: text("id").primaryKey(),
+		questionId: text("question_id")
+			.notNull()
+			.references(() => TB_quiz_questions.id, { onDelete: "cascade" }),
+		option: text("option").notNull(),
+		order: integer("order").notNull(), // ترتيب الخيار
+	},
+);
+export const TB_quiz_drag_drop_options = pgTable("quiz_drag_drop_options", {
+	id: text("id").primaryKey(),
+	questionId: text("question_id")
+		.notNull()
+		.references(() => TB_quiz_questions.id, { onDelete: "cascade" }),
+	option: text("option").notNull(),
+	order: integer("order").notNull(), // ترتيب الخيار
+});
+
+export const RE_QuizMultipleChoiceOptions = relations(
+	TB_quiz_multiple_choice_options,
+	({ one }) => ({
+		question: one(TB_quiz_questions, {
+			fields: [TB_quiz_multiple_choice_options.questionId],
+			references: [TB_quiz_questions.id],
+		}),
+	}),
+);
+
+export const RE_QuizDragDropOptions = relations(
+	TB_quiz_drag_drop_options,
+	({ one }) => ({
+		question: one(TB_quiz_questions, {
+			fields: [TB_quiz_drag_drop_options.questionId],
+			references: [TB_quiz_questions.id],
+		}),
+	}),
+);
 
 export const TB_user_excercise_summary = pgTable("user_excercise_summary", {
 	id: text("id").primaryKey(),
@@ -110,6 +151,7 @@ export const TB_user_excercise_summary = pgTable("user_excercise_summary", {
 	trials: integer("trials"),
 	is_show_ans: boolean("is_show_ans").notNull(),
 	score: numeric("score"),
+	type: text("type").notNull(),
 });
 
 export const TB_question_bank = pgTable("question_bank", {
@@ -120,6 +162,66 @@ export const TB_question_bank = pgTable("question_bank", {
 	question: text("question").notNull(),
 	answer: text("answer").notNull(),
 });
+
+export const TB_MultipleChoice_bank = pgTable("multiple_choice_bank", {
+	id: text("id").primaryKey(),
+	levelId: text("level_id")
+		.notNull()
+		.references(() => TB_level.id, { onDelete: "cascade" }),
+	question: text("question").notNull(),
+	answer: text("answer").notNull(),
+});
+
+export const TB_MultipleChoice_options = pgTable("multiple_choice_options", {
+	id: text("id").primaryKey(),
+	questionId: text("question_id")
+		.notNull()
+		.references(() => TB_MultipleChoice_bank.id, { onDelete: "cascade" }),
+	option: text("option").notNull(),
+});
+
+export const TB_TrueFalse_bank = pgTable("true_false_bank", {
+	id: text("id").primaryKey(),
+	levelId: text("level_id")
+		.notNull()
+		.references(() => TB_level.id, { onDelete: "cascade" }),
+	question: text("question").notNull(),
+	answer: text("answer").notNull(), // True/False answer
+});
+
+export const TB_DragDrop_bank = pgTable("drag_drop_bank", {
+	id: text("id").primaryKey(),
+	levelId: text("level_id")
+		.notNull()
+		.references(() => TB_level.id, { onDelete: "cascade" }),
+	question: text("question").notNull(),
+});
+
+export const TB_DragDrop_options = pgTable("drag_drop_options", {
+	id: text("id").primaryKey(),
+	questionId: text("question_id")
+		.notNull()
+		.references(() => TB_DragDrop_bank.id, { onDelete: "cascade" }),
+	option: text("option").notNull(),
+	order: integer("order").notNull(), // ترتيب الخيار
+});
+
+export const RE_MultipleChoiceOptions = relations(
+	TB_MultipleChoice_options,
+	({ one }) => ({
+		question: one(TB_MultipleChoice_bank, {
+			fields: [TB_MultipleChoice_options.questionId],
+			references: [TB_MultipleChoice_bank.id],
+		}),
+	}),
+);
+
+export const RE_DragDropOptions = relations(TB_DragDrop_options, ({ one }) => ({
+	question: one(TB_DragDrop_bank, {
+		fields: [TB_DragDrop_options.questionId],
+		references: [TB_DragDrop_bank.id],
+	}),
+}));
 
 export const TB_posts = pgTable("posts", {
 	id: text("id").primaryKey(),
@@ -305,5 +407,29 @@ export const RE_quiz_questions = relations(TB_quiz_questions, ({ one }) => ({
 	quiz: one(TB_quiz, {
 		fields: [TB_quiz_questions.quizId],
 		references: [TB_quiz.id],
+	}),
+}));
+
+export const RE_MultipleChoiceBank = relations(
+	TB_MultipleChoice_bank,
+	({ one }) => ({
+		level: one(TB_level, {
+			fields: [TB_MultipleChoice_bank.levelId],
+			references: [TB_level.id],
+		}),
+	}),
+);
+
+export const RE_TrueFalseBank = relations(TB_TrueFalse_bank, ({ one }) => ({
+	level: one(TB_level, {
+		fields: [TB_TrueFalse_bank.levelId],
+		references: [TB_level.id],
+	}),
+}));
+
+export const RE_DragDropBank = relations(TB_DragDrop_bank, ({ one }) => ({
+	level: one(TB_level, {
+		fields: [TB_DragDrop_bank.levelId],
+		references: [TB_level.id],
 	}),
 }));
