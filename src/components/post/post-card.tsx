@@ -36,7 +36,6 @@ export default function PostCard({
 	postCommentAction,
 	postCommentLikeAction,
 	editPostAction,
-
 	deletePostAction,
 }: {
 	post: Post;
