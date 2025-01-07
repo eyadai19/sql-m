@@ -1,8 +1,8 @@
 import QuizDetalisPage from "@/components/QuizDetalisPage";
 import { db } from "@/lib/db";
+import { ExerciseTypes, QuizView } from "@/lib/types/exerciseTypes";
 
 export default function QuizDetalis({ params }: { params: { id: string } }) {
-
 	return (
 		<QuizDetalisPage
 			QuizDetailsAction={QuizDetailsAction.bind(null, params.id)}
@@ -12,30 +12,95 @@ export default function QuizDetalis({ params }: { params: { id: string } }) {
 
 async function QuizDetailsAction(
 	quizId: string,
-): Promise<
-	| { question: string; answer: string; score: number }[]
-	| { field: string; message: string }
-	| undefined
-> {
+): Promise<QuizView | { field: string; message: string } | undefined> {
 	"use server";
 
 	try {
-		const quizDetails = await db.query.TB_quiz_questions.findMany({
-			where: (question, { eq }) => eq(question.quizId, quizId),
+		// Fetch Normal questions
+		const quizNormalDetails = await db.query.TB_quiz_questions.findMany({
+			where: (question, { eq }) =>
+				eq(question.quizId, quizId) && eq(question.type, ExerciseTypes.Normal),
 		});
 
-		if (!quizDetails || quizDetails.length === 0) {
-			return { field: "root", message: "No questions found for this quiz" };
-		}
+		// Fetch True/False questions
+		const quizTrueAndFalseDetails = await db.query.TB_quiz_questions.findMany({
+			where: (question, { eq }) =>
+				eq(question.quizId, quizId) &&
+				eq(question.type, ExerciseTypes.TrueFalse),
+		});
 
-		const result = quizDetails.map(({ question, answer, score }) => ({
-			question,
-			answer,
-			score,
-		}));
+		// Fetch Multiple Choice questions with options
+		const quizMcqDetails = await db.query.TB_quiz_questions.findMany({
+			where: (question, { eq }) =>
+				eq(question.quizId, quizId) &&
+				eq(question.type, ExerciseTypes.MultipleChoice),
+			with: {
+				options: true,
+			},
+		});
+
+		// Fetch Drag and Drop questions with options
+		const quizDragDropDetails = await db.query.TB_quiz_questions.findMany({
+			where: (question, { eq }) =>
+				eq(question.quizId, quizId) &&
+				eq(question.type, ExerciseTypes.DragDrop),
+			with: {
+				options: true,
+			},
+		});
+
+		const normalQuestions = quizNormalDetails.map(
+			({ question, answer, score }) => ({
+				question,
+				answer,
+				score,
+				type: "NormalExercise",
+			}),
+		);
+
+		const trueFalseQuestions = quizTrueAndFalseDetails.map(
+			({ question, answer, score }) => ({
+				question,
+				answer,
+				score,
+				type: "TrueFalseExercise",
+			}),
+		);
+
+		const mcqQuestions = quizMcqDetails.map(
+			({ question, answer, score, options }) => ({
+				question,
+				answer,
+				score,
+				type: "MultipleChoiceExercise",
+				options: options.map((opt) => opt.option),
+			}),
+		);
+
+		const dragDropQuestions = quizDragDropDetails.map(
+			({ question, score, options }) => ({
+				question,
+				score,
+				type: "DragDropExercise",
+				options: options.map((opt) => opt.option),
+				order: options.map((opt) => opt.order.toString()),
+			}),
+		);
+
+		// Combine all results
+		const result = [
+			...normalQuestions,
+			...trueFalseQuestions,
+			...mcqQuestions,
+			...dragDropQuestions,
+		];
 
 		return result;
-	} catch {
-		return { field: "root", message: "error" };
+	} catch (error) {
+		console.error("Error fetching quiz details:", error);
+		return {
+			field: "root",
+			message: "An error occurred while fetching the quiz details.",
+		};
 	}
 }

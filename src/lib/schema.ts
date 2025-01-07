@@ -107,7 +107,7 @@ export const TB_quiz_multiple_choice_options = pgTable(
 			.notNull()
 			.references(() => TB_quiz_questions.id, { onDelete: "cascade" }),
 		option: text("option").notNull(),
-		order: integer("order").notNull(), // ترتيب الخيار
+		order: integer("order").notNull(), 
 	},
 );
 export const TB_quiz_drag_drop_options = pgTable("quiz_drag_drop_options", {
@@ -116,7 +116,7 @@ export const TB_quiz_drag_drop_options = pgTable("quiz_drag_drop_options", {
 		.notNull()
 		.references(() => TB_quiz_questions.id, { onDelete: "cascade" }),
 	option: text("option").notNull(),
-	order: integer("order").notNull(), // ترتيب الخيار
+	order: integer("order").notNull(), 
 });
 
 export const RE_QuizMultipleChoiceOptions = relations(
@@ -138,6 +138,7 @@ export const RE_QuizDragDropOptions = relations(
 		}),
 	}),
 );
+
 
 export const TB_user_excercise_summary = pgTable("user_excercise_summary", {
 	id: text("id").primaryKey(),

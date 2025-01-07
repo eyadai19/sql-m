@@ -1,4 +1,5 @@
 "use client";
+import { QuizView } from "@/lib/types/exerciseTypes";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { IoArrowForward } from "react-icons/io5"; // استيراد أيقونة السهم
@@ -7,14 +8,12 @@ export default function QuizDetalisPage({
 	QuizDetailsAction,
 }: {
 	QuizDetailsAction: () => Promise<
-		| { question: string; answer: string; score: number }[]
-		| { field: string; message: string }
-		| undefined
+		QuizView | { field: string; message: string } | undefined
 	>;
 }) {
 	const [quizData, setQuizData] = useState<
 		{ question: string; answer: string; accuracy: number }[] | null
-	>(null); // تعديل النوع ليشمل null
+	>(null); 
 	const [error, setError] = useState<string | null>(null);
 	const router = useRouter();
 
@@ -61,7 +60,7 @@ export default function QuizDetalisPage({
 		// عرض شاشة التحميل إذا لم تكن البيانات موجودة ولم يكن هناك خطأ
 		return (
 			<div className="flex h-screen items-center justify-center">
-				<div className="animate-spin rounded-full h-16 w-16 border-t-4 border-b-4 border-[#ADF0D1]"></div>
+				<div className="h-16 w-16 animate-spin rounded-full border-b-4 border-t-4 border-[#ADF0D1]"></div>
 			</div>
 		);
 	}
@@ -91,12 +90,10 @@ export default function QuizDetalisPage({
 					<IoArrowForward className="text-2xl text-[#00203F]" />
 				</button>
 			</div>
-
 			{/* عنوان الصفحة */}
 			<h1 className="mb-6 text-center text-3xl font-bold text-white">
 				Quiz Results
 			</h1>
-
 			{/* صندوق عرض الأسئلة */}
 			<div className="mx-auto max-w-4xl rounded-lg bg-white p-6 shadow-lg">
 				{quizData.map((item, index) => (

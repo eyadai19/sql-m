@@ -136,3 +136,32 @@ export type QuizInput = (
 			order: string[];
 	  }
 )[];
+
+export type QuizView = (
+	| {
+			question: string;
+			answer: string;
+			score: number;
+			type: "NormalExercise";
+	  }
+	| {
+			question: string;
+			answer: string;
+			score: number;
+			type: "TrueFalseExercise";
+	  }
+	| {
+			question: string;
+			answer: string;
+			score: number;
+			type: "MultipleChoiceExercise";
+			options: string[];
+	  }
+	| {
+			question: string;
+			score: number;
+			type: "DragDropExercise";
+			options: string[];
+			order: string[];
+	  }
+)[];
