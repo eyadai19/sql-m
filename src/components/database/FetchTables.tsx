@@ -15,9 +15,19 @@ import Mermaid from "react-mermaid2";
 interface Table {
 	tableName: string;
 	columns: { columnName: string; columnType: string }[]; 
-	data: Record<string, any>[]; // البيانات في الجدول
+	data: Record<string, any>[];
+}
+interface Relation {
+	table: string;
+	from: string;
+	to: string;
 }
 
+interface ApiResponse {
+	tableName: string;
+	columns: { columnName: string; columnType: string }[]; // الأعمدة وأنواعها
+	relations: Relation[]; // العلاقات بين الجداول
+}
 export default function FetchTablesWithERD() {
 	const [tables, setTables] = useState<Table[]>([]);
 	const [erdDiagram, setErdDiagram] = useState<string>("");
@@ -35,7 +45,18 @@ export default function FetchTablesWithERD() {
 
 			setTables(data);
 
-			const erd = generateERD(data);
+			const erdResponse = await fetch(
+				"http://localhost:3000/api/dbRelationships",
+			);
+			const erdData = await erdResponse.json();
+
+			if (!response.ok) {
+				alert(data.error || "خطأ أثناء جلب الجداول.");
+				return;
+			}
+
+
+			const erd = generateERD(erdData);
 			setErdDiagram(erd);
 			setHasAccess(true); // تغيير حالة الوصول بعد نجاح جلب البيانات
 		} catch (error) {
@@ -45,9 +66,40 @@ export default function FetchTablesWithERD() {
 		}
 	};
 
-	const generateERD = (tables: Table[]) => {
+	// const generateERD = (tables: Table[]) => {
+	// 	let diagram = "erDiagram\n";
+
+	// 	tables.forEach((table) => {
+	// 		diagram += `${table.tableName} {\n`;
+	// 		table.columns.forEach((col) => {
+	// 			diagram += `  ${col.columnType} ${col.columnName}\n`;
+	// 		});
+	// 		diagram += "}\n";
+	// 	});
+
+	// 	// التعرف التلقائي على العلاقات
+	// 	tables.forEach((table) => {
+	// 		table.columns.forEach((col) => {
+	// 			// التحقق إذا كان العمود يبدو كأنه مفتاح أجنبي
+	// 			tables.forEach((relatedTable) => {
+	// 				if (
+	// 					col.columnName
+	// 						.toLowerCase()
+	// 						.includes(relatedTable.tableName.toLowerCase()) &&
+	// 					col.columnName.toLowerCase().includes("id")
+	// 				) {
+	// 					diagram += `\n  ${table.tableName} ||--o{ ${relatedTable.tableName} : "Foreign Key"\n`;
+	// 				}
+	// 			});
+	// 		});
+	// 	});
+
+	// 	return diagram;
+	// };
+	const generateERD = (tables: ApiResponse[]) => {
 		let diagram = "erDiagram\n";
 
+		// إضافة الجداول مع الأعمدة
 		tables.forEach((table) => {
 			diagram += `${table.tableName} {\n`;
 			table.columns.forEach((col) => {
@@ -56,25 +108,16 @@ export default function FetchTablesWithERD() {
 			diagram += "}\n";
 		});
 
-		// التعرف التلقائي على العلاقات
+		// إضافة العلاقات
 		tables.forEach((table) => {
-			table.columns.forEach((col) => {
-				// التحقق إذا كان العمود يبدو كأنه مفتاح أجنبي
-				tables.forEach((relatedTable) => {
-					if (
-						col.columnName
-							.toLowerCase()
-							.includes(relatedTable.tableName.toLowerCase()) &&
-						col.columnName.toLowerCase().includes("id")
-					) {
-						diagram += `\n  ${table.tableName} ||--o{ ${relatedTable.tableName} : "Foreign Key"\n`;
-					}
-				});
+			table.relations.forEach((relation) => {
+				diagram += `${table.tableName} ||--o{ ${relation.table} : "${relation.from} -> ${relation.to}"\n`;
 			});
 		});
 
 		return diagram;
 	};
+
 
 	useEffect(() => {
 		fetchTables();
@@ -104,7 +147,7 @@ export default function FetchTablesWithERD() {
 					{erdDiagram && (
 						<div className="mb-8 rounded-lg border bg-white p-6 shadow-md">
 							<h2 className="mb-4 text-2xl font-bold text-[#00203F]">
-								مخطط ERD
+								ERD
 							</h2>
 							<Mermaid chart={erdDiagram} />
 						</div>

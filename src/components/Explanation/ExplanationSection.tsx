@@ -52,7 +52,7 @@ export default function ExplanationSection({
 								<img
 									src={section.image.url}
 									alt={section.image.alt}
-									className="w-full object-cover transition-transform hover:scale-105"
+									className="h-auto max-h-[400px] w-full object-contain transition-transform hover:scale-105"
 									loading="lazy"
 								/>
 								{section.image.caption && (
