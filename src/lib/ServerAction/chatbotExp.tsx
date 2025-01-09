@@ -87,7 +87,6 @@ export async function ChatbotExpAction(
 			return { field: "root", message: "Failed to fetch table" };
 		}
 	}
-
 	async function getTablesWithColumns() {
 		function extractTablesWithColumns(
 			context: string,
@@ -210,7 +209,7 @@ export async function ChatbotExpAction(
 			if (answer === "yes") {
 				return {
 					// add text field to ui to write table name and column name and drag drop list to chose the type - if click on + then the user can add new column
-					answer: "CREATE TABLE table_name {[column_name datatype]};",
+					answer: "CREATE TABLE [table_name] {[column_name datatype]};",
 				};
 			}
 			if (answer === "no") {
@@ -306,6 +305,8 @@ export async function ChatbotExpAction(
 			"does the data you want have to be in one line? (use agregation function)"
 		) {
 			if (answer === "yes") {
+				useAgFun = true;
+				updateSession();
 				// حالة خاصة
 				return {
 					question: "select the name of the process?",
@@ -373,26 +374,34 @@ export async function ChatbotExpAction(
 
 		if (question === "do you want to arrange the data?") {
 			if (answer === "yes") {
+				const message = `chose the ${isMoreThanTable ? "tables" : "table"} then chose the columns`;
+				const fun = getTablesWithColumns();
+				const answer = `SELECT ${useAgFun ? "|agg| " : " "}{[column_name]} FROM ${isMoreThanTable ? "|table_name|" : "{table_name}"}${selectCondition ? " where (|condition|)" : ""}${useGroupBy ? " GROUP BY {column_name_GROUP_BY}" : ""} ORDER BY {column_name_ORDER_BY} {ASC|DESC};`;
+				isMoreThanTable = false;
+				selectCondition = false;
+				useAgFun = false;
+				useGroupBy = false;
+				updateSession();
+				console.log(answer);
+				return {
+					message: message,
+					fun: fun,
+					answer: answer,
+				};
+			}
+			if (answer === "no") {
+				const message = `chose the ${isMoreThanTable ? "tables" : "table"} then chose the columns`;
+				const fun = getTablesWithColumns();
+				const answer = `SELECT ${useAgFun ? "|agg| " : " "}{[column_name]} FROM ${isMoreThanTable ? "|table_name|" : "{table_name}"}${selectCondition ? " where (|condition|)" : ""}${useGroupBy ? " GROUP BY {column_name_GROUP_BY}" : ""};`;
 				isMoreThanTable = false;
 				selectCondition = false;
 				useAgFun = false;
 				useGroupBy = false;
 				updateSession();
 				return {
-					message: `chose the ${isMoreThanTable ? "tables" : "table"} then chose the columns`,
-					fun: getTablesWithColumns(),
-					answer: `SELECT ${useAgFun ? "|agg| " : " "}{[column_name]} FROM ${isMoreThanTable ? "|table_name|" : "{table_name}"}${selectCondition ? " where (|condition|)" : ""}${useGroupBy ? " GROUP BY {column_name_GROUP_BY}" : ""} ORDER BY {column_name_ORDER_BY} {ASC|DESC};`,
-				};
-			}
-			if (answer === "no") {
-				isMoreThanTable = false;
-				selectCondition = false;
-				useAgFun = false;
-				useGroupBy = false;
-				return {
-					message: `chose the ${isMoreThanTable ? "tables" : "table"} then chose the columns`,
-					fun: getTablesWithColumns(),
-					answer: `SELECT {[column_name]} FROM ${isMoreThanTable ? "|table_name|" : "{table_name}"}${selectCondition ? " where (|condition|)" : ""}${useGroupBy ? " GROUP BY {column_name_GROUP_BY}" : ""};`,
+					message: message,
+					fun: fun,
+					answer: answer,
 				};
 			}
 		}

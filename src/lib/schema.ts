@@ -107,7 +107,7 @@ export const TB_quiz_multiple_choice_options = pgTable(
 			.notNull()
 			.references(() => TB_quiz_questions.id, { onDelete: "cascade" }),
 		option: text("option").notNull(),
-		order: integer("order").notNull(), 
+		// order: integer("order").notNull(), 
 	},
 );
 export const TB_quiz_drag_drop_options = pgTable("quiz_drag_drop_options", {
@@ -404,11 +404,13 @@ export const RE_question_bank = relations(TB_question_bank, ({ one }) => ({
 	}),
 }));
 
-export const RE_quiz_questions = relations(TB_quiz_questions, ({ one }) => ({
+export const RE_quiz_questions = relations(TB_quiz_questions, ({ one, many }) => ({
 	quiz: one(TB_quiz, {
 		fields: [TB_quiz_questions.quizId],
 		references: [TB_quiz.id],
 	}),
+	multipleChoiceOptions: many(TB_quiz_multiple_choice_options),
+	dragDropOptions: many(TB_quiz_drag_drop_options),
 }));
 
 export const RE_MultipleChoiceBank = relations(

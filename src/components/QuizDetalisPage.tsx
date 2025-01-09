@@ -12,7 +12,7 @@ export default function QuizDetalisPage({
 	>;
 }) {
 	const [quizData, setQuizData] = useState<
-		{ question: string; answer: string; accuracy: number }[] | null
+		QuizView| null
 	>(null); 
 	const [error, setError] = useState<string | null>(null);
 	const router = useRouter();
@@ -57,7 +57,6 @@ export default function QuizDetalisPage({
 	};
 
 	if (!quizData) {
-		// عرض شاشة التحميل إذا لم تكن البيانات موجودة ولم يكن هناك خطأ
 		return (
 			<div className="flex h-screen items-center justify-center">
 				<div className="h-16 w-16 animate-spin rounded-full border-b-4 border-t-4 border-[#ADF0D1]"></div>

@@ -213,73 +213,76 @@ export default function SqlQuiz({
 				<Form {...form}>
 					<form onSubmit={form.handleSubmit(handleSubmit)}>
 						<div className="space-y-6">
-							{questions!.map((q, index) => (
-								<div
-									key={index}
-									className="rounded-lg border bg-gray-50 p-4 shadow-sm"
-								>
-									<FormField
-										name={`answer.${index}`}
-										render={({ field }) => (
-											<FormItem>
-												<FormLabel className="text-lg font-medium text-gray-700">
-													{q.question}
-												</FormLabel>
-												<FormControl>
-													{q.type === "NormalExercise" ? (
-														<Input
-															{...field}
-															placeholder="Type your answer here..."
-															className="text-lg"
-															disabled={isDisabled}
-														/>
-													) : q.type === "TrueFalseExercise" ? (
-														<Input
-															{...field}
-															placeholder="Type your answer..."
-														/>
-													) : q.type === "MultipleChoiceExercise" ? (
-														<div>
-															{q.options.map(
-																(option: string, optIndex: number) => (
-																	<label key={optIndex} className="block">
-																		<input
-																			type="radio"
-																			value={option}
-																			checked={field.value === option}
-																			onChange={() => field.onChange(option)}
-																		/>
-																		<span>{option}</span>
-																	</label>
-																),
-															)}
-														</div>
-													) : q.type === "DragDropExercise" ? (
-														<div>
-															{/* Drag and drop implementation */}
-															<p>Drag and drop question interface here</p>
-														</div>
-													) : (
-														<div></div>
+							{questions &&
+								questions.map((q, index) => (
+									<div
+										key={index}
+										className="rounded-lg border bg-gray-50 p-4 shadow-sm"
+									>
+										<FormField
+											name={`answer.${index}`}
+											render={({ field }) => (
+												<FormItem>
+													<FormLabel className="text-lg font-medium text-gray-700">
+														{q.question}
+													</FormLabel>
+													<FormControl>
+														{q.type === "NormalExercise" ? (
+															<Input
+																{...field}
+																placeholder="Type your answer here..."
+																className="text-lg"
+																disabled={isDisabled}
+															/>
+														) : q.type === "TrueFalseExercise" ? (
+															<Input
+																{...field}
+																placeholder="Type your answer..."
+															/>
+														) : q.type === "MultipleChoiceExercise" ? (
+															<div>
+																{q.options.map(
+																	(option: string, optIndex: number) => (
+																		<label key={optIndex} className="block">
+																			<input
+																				type="radio"
+																				value={option}
+																				checked={field.value === option}
+																				onChange={() => field.onChange(option)}
+																			/>
+																			<span>{option}</span>
+																		</label>
+																	),
+																)}
+															</div>
+														) : q.type === "DragDropExercise" ? (
+															<div>
+																{/* Drag and drop implementation */}
+																<p>Drag and drop question interface here</p>
+															</div>
+														) : (
+															<div></div>
+														)}
+													</FormControl>
+													<FormMessage />
+													{results[index] != null && (
+														<p
+															className={`mt-2 ${
+																results[index]
+																	? "text-green-600"
+																	: "text-red-600"
+															}`}
+														>
+															{results[index]
+																? "Correct!"
+																: `Incorrect. Correct answer: ${correctAnswers[index]}`}
+														</p>
 													)}
-												</FormControl>
-												<FormMessage />
-												{results[index] !== null && (
-													<p
-														className={`mt-2 ${
-															results[index] ? "text-green-600" : "text-red-600"
-														}`}
-													>
-														{results[index]
-															? "Correct!"
-															: `Incorrect. Correct answer: ${correctAnswers[index]}`}
-													</p>
-												)}
-											</FormItem>
-										)}
-									/>
-								</div>
-							))}
+												</FormItem>
+											)}
+										/>
+									</div>
+								))}
 						</div>
 
 						<div className="mt-4 flex space-x-4">
