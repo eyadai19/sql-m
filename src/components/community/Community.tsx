@@ -124,7 +124,7 @@ export default function CommunityPage({
 
 				<div className="mb-8 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
 					<h2 className="text-2xl font-bold text-gray-900">Community Posts</h2>
-					<CreatePostButton />
+					<CreatePostButton addPostAction={addPostAction} />
 				</div>
 
 				<div className="space-y-6">
