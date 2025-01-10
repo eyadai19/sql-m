@@ -3,6 +3,7 @@ import {
 	userChatBotInputSchema,
 	userExcerciseAnswerError,
 } from "@/lib/types/userSchema";
+import { userDbApi } from "@/utils/apis";
 import React, { useEffect, useRef, useState } from "react";
 import {
 	AiOutlineArrowDown,
@@ -185,15 +186,43 @@ export default function ChatBot({
 		fetchInitialQuestion();
 	};
 
-	const handleCompile = () => {
+	const handleCompile = async () => {
 		// Generate table data when the button is clicked
 		const data = [
 			{ id: 1, name: "John Doe", age: 28, action: "selected option 1" },
 			{ id: 2, name: "Jane Smith", age: 34, action: "selected option 2" },
 			{ id: 3, name: "Sam Brown", age: 22, action: "selected option 3" },
 		];
+		queryResult;
+		try {
+			const response = await fetch(userDbApi, {
+				method: "POST",
+				headers: { "Content-Type": "application/json" },
+				body: JSON.stringify({
+					query: queryResult,
+				}),
+			});
 
-		setCompiledData(data);
+			if (!response.ok) {
+				// const errorData = await response.json();
+				// setErrorMessage(
+				// 	`${errorData.error} \n ${errorData.originalError}` ||
+				// 		"Error executing query.",
+				// );
+				return;
+			}
+			const data = await response.json();
+			setCompiledData(data);
+			console.log(compiledData);
+		} catch (error) {
+			console.error("Error executing query:", error);
+			// setErrorMessage("An error occurred while executing the query.");
+		}
+		// const data = [
+		// 	{ id: 1, name: "John Doe", age: 28, action: "selected option 1" },
+		// 	{ id: 2, name: "Jane Smith", age: 34, action: "selected option 2" },
+		// 	{ id: 3, name: "Sam Brown", age: 22, action: "selected option 3" },
+		// ];
 	};
 
 	const autoResize = (element: HTMLTextAreaElement) => {
