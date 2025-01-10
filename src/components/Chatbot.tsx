@@ -522,81 +522,76 @@ export default function ChatBot({
 	};
 	return (
 		<div className="fixed bottom-4 right-4 z-50 flex flex-col items-end">
-			<div
-				className={`h-[80vh] w-80 bg-[#00203F] p-4 text-white transition-all duration-300 ease-in-out ${
-					isOpen
-						? "translate-y-0 opacity-100"
-						: "pointer-events-none translate-y-full opacity-0"
-				} custom-scrollbar mb-2 flex flex-col justify-between overflow-y-auto rounded-t-lg shadow-lg`}
-			>
-				{/* Sticky top bar in the chat */}
-				<div className="sticky top-0 z-10 flex items-center justify-between bg-[#00203F] p-2">
-					{language && (
+			{isOpen && (
+				<div className="mb-2 h-[80vh] w-80 rounded-t-lg bg-[#00203F] p-4 text-white shadow-lg">
+					{/* Sticky top bar in the chat */}
+					<div className="sticky top-0 z-10 flex items-center justify-between bg-[#00203F] p-2">
+						{language && (
+							<button
+								onClick={goBack}
+								className="text-[#ADF0D1] focus:outline-none"
+							>
+								<AiOutlineArrowLeft />
+							</button>
+						)}
+
+						<h2 className="flex-1 text-center text-lg font-semibold">Mentor</h2>
+
 						<button
-							onClick={goBack}
+							onClick={toggleChat}
 							className="text-[#ADF0D1] focus:outline-none"
 						>
-							<AiOutlineArrowLeft />
+							<AiOutlineClose />
 						</button>
-					)}
+					</div>
 
-					<h2 className="flex-1 text-center text-lg font-semibold">Mentor</h2>
+					{/* Chat content */}
+					<div className="mt-2 flex-1 overflow-y-auto">
+						{!language && !inChatMode && (
+							<div className="flex h-full flex-col items-center justify-center">
+								<h3 className="text-md mb-4 text-center font-semibold">
+									Choose Language
+								</h3>
 
-					<button
-						onClick={toggleChat}
-						className="text-[#ADF0D1] focus:outline-none"
-					>
-						<AiOutlineClose />
-					</button>
-				</div>
-
-				{/* Chat content */}
-				<div className="mt-2 flex-1 overflow-y-auto">
-					{!language && !inChatMode && (
-						<div className="flex h-full flex-col items-center justify-center">
-							<h3 className="text-md mb-4 text-center font-semibold">
-								Choose Language
-							</h3>
-
-							<div className="flex flex-col space-y-4">
-								<button
-									onClick={() => handleLanguageSelect("AR")}
-									className="w-40 rounded-md bg-[#ADF0D1] p-2 font-semibold text-[#00203F]"
-								>
-									العربية (AR)
-								</button>
-								<button
-									onClick={() => handleLanguageSelect("EN")}
-									className="w-40 rounded-md bg-[#ADF0D1] p-2 font-semibold text-[#00203F]"
-								>
-									English (EN)
-								</button>
+								<div className="flex flex-col space-y-4">
+									<button
+										onClick={() => handleLanguageSelect("AR")}
+										className="w-40 rounded-md bg-[#ADF0D1] p-2 font-semibold text-[#00203F]"
+									>
+										العربية (AR)
+									</button>
+									<button
+										onClick={() => handleLanguageSelect("EN")}
+										className="w-40 rounded-md bg-[#ADF0D1] p-2 font-semibold text-[#00203F]"
+									>
+										English (EN)
+									</button>
+								</div>
 							</div>
-						</div>
-					)}
+						)}
 
-					{language && !inChatMode && (
-						<div className="flex h-full flex-col items-center justify-center">
-							<h3 className="text-md mb-4 mt-4 text-center font-semibold">
-								{language === "AR" ? "اختر الخدمة" : "Choose Service"}
-							</h3>
+						{language && !inChatMode && (
+							<div className="flex h-full flex-col items-center justify-center">
+								<h3 className="text-md mb-4 mt-4 text-center font-semibold">
+									{language === "AR" ? "اختر الخدمة" : "Choose Service"}
+								</h3>
 
-							<div className="flex flex-col space-y-4">
-								<button
-									onClick={() => handleOptionSelect("Syntax")}
-									className="w-40 rounded-md bg-[#ADF0D1] p-2 font-semibold text-[#00203F]"
-								>
-									{language === "AR" ? "بناء الجملة" : "Syntax"}
-								</button>
-								<button
-									onClick={() => handleOptionSelect("Query")}
-									className="w-40 rounded-md bg-[#ADF0D1] p-2 font-semibold text-[#00203F]"
-								>
-									{language === "AR" ? "الاستعلام" : "Query"}
-								</button>
+								<div className="flex flex-col space-y-4">
+									<button
+										onClick={() => handleOptionSelect("Syntax")}
+										className="w-40 rounded-md bg-[#ADF0D1] p-2 font-semibold text-[#00203F]"
+									>
+										{language === "AR" ? "بناء الجملة" : "Syntax"}
+									</button>
+									<button
+										onClick={() => handleOptionSelect("Query")}
+										className="w-40 rounded-md bg-[#ADF0D1] p-2 font-semibold text-[#00203F]"
+									>
+										{language === "AR" ? "الاستعلام" : "Query"}
+									</button>
+								</div>
 							</div>
-						</div>
-					)}
+						)}
 
 					{/* بداية كود الاكسبيرت */}
 					{inChatMode == "Syntax" && questionData && (
@@ -617,134 +612,152 @@ export default function ChatBot({
 									</div>
 								))}
 							</div>
-
-							<div className="mb-4 flex justify-center">
-								<p className="mt-2 text-sm">{questionData?.question}</p>
-							</div>
-
-							{finalAnswer === "" ? (
-								<div className="mb-4 flex justify-center">
-									<div className="flex flex-col items-center space-y-4">
-										{questionData?.options.map((option: string) => (
-											<button
-												key={option}
-												onClick={() => handleButtonClick(option)}
-												className="w-40 rounded-md bg-[#ADF0D1] p-2 text-center font-semibold text-[#00203F]"
-											>
-												{option}
-											</button>
-										))}
-									</div>
+						{inChatMode == "Syntax" && questionData && (
+							<>
+								<div className="mb-4">
+									{chatHistory.map((entry, index) => (
+										<div key={index} className="mb-2">
+											<div className="flex justify-start">
+												<p className="inline-block max-w-xs rounded-md bg-[#D3D3D3] p-2 text-[#00203F]">
+													{entry.question}
+												</p>
+											</div>
+											<div className="mt-1 flex justify-end">
+												<p className="inline-block max-w-xs rounded-md bg-[#ADF0D1] p-2 text-[#00203F]">
+													{entry.answer}
+												</p>
+											</div>
+										</div>
+									))}
 								</div>
-							) : (
-								<div className="mt-4 flex flex-col items-center justify-center">
-									<p className="mt-4 w-3/4 rounded-md bg-[#D3D3D3] p-2 text-center text-[#00203F]">
-										{finalAnswer}
-									</p>
+
+								<div className="mb-4 flex justify-center">
+									<p className="mt-2 text-sm">{questionData?.question}</p>
+								</div>
+
+								{finalAnswer === "" ? (
+									<div className="mb-4 flex justify-center">
+										<div className="flex flex-col items-center space-y-4">
+											{questionData?.options.map((option: string) => (
+												<button
+													key={option}
+													onClick={() => handleButtonClick(option)}
+													className="w-40 rounded-md bg-[#ADF0D1] p-2 text-center font-semibold text-[#00203F]"
+												>
+													{option}
+												</button>
+											))}
+										</div>
+									</div>
+								) : (
+									<div className="mt-4 flex flex-col items-center justify-center">
+										<p className="mt-4 w-3/4 rounded-md bg-[#D3D3D3] p-2 text-center text-[#00203F]">
+											{finalAnswer}
+										</p>
+										<button
+											onClick={handleCompile}
+											className="mt-4 w-40 rounded-md bg-[#ADF0D1] p-2 font-semibold text-[#00203F]"
+										>
+											{language === "AR" ? "تجميع" : "Compile"}
+										</button>
+									</div>
+								)}
+							</>
+						)}
+						{/* When query */}
+						{inChatMode === "Query" && (
+							<div className="mt-4 flex flex-col items-center justify-center">
+								<div className="mb-4 flex">
 									<button
-										onClick={handleCompile}
-										className="mt-4 w-40 rounded-md bg-[#ADF0D1] p-2 font-semibold text-[#00203F]"
+										onClick={() => handleContextChange("use my context")}
+										className={`mr-2 rounded-md p-1.5 text-sm font-semibold transition-all ${contextOption === "use my context" ? "bg-[#ADF0D1] text-[#00203F]" : "bg-gray-300 text-[#00203F] hover:bg-[#A1E7D8]"}`}
 									>
-										{language === "AR" ? "تجميع" : "Compile"}
+										{language === "AR" ? "استخدام سياقي" : "Use My Context"}
+									</button>
+									<button
+										onClick={() => handleContextChange("use new context")}
+										className={`rounded-md p-1.5 text-sm font-semibold transition-all ${contextOption === "use new context" ? "bg-[#ADF0D1] text-[#00203F]" : "bg-gray-300 text-[#00203F] hover:bg-[#A1E7D8]"}`}
+									>
+										{language === "AR"
+											? "استخدام سياق جديد"
+											: "Use New Context"}
 									</button>
 								</div>
-							)}
-						</>
-					)}
-					{/* نهاية كود الاكسبيرت */}
-
-					{/* When query */}
-					{inChatMode === "Query" && (
-						<div className="mt-4 flex flex-col items-center justify-center">
-							<div className="mb-4 flex">
-								<button
-									onClick={() => handleContextChange("use my context")}
-									className={`mr-2 rounded-md p-1.5 text-sm font-semibold transition-all ${contextOption === "use my context" ? "bg-[#ADF0D1] text-[#00203F]" : "bg-gray-300 text-[#00203F] hover:bg-[#A1E7D8]"}`}
-								>
-									{language === "AR" ? "استخدام سياقي" : "Use My Context"}
-								</button>
-								<button
-									onClick={() => handleContextChange("use new context")}
-									className={`rounded-md p-1.5 text-sm font-semibold transition-all ${contextOption === "use new context" ? "bg-[#ADF0D1] text-[#00203F]" : "bg-gray-300 text-[#00203F] hover:bg-[#A1E7D8]"}`}
-								>
-									{language === "AR" ? "استخدام سياق جديد" : "Use New Context"}
-								</button>
-							</div>
-							{contextOption === "use new context" && (
+								{contextOption === "use new context" && (
+									<div className="m-3 mt-4 flex w-3/4 flex-col">
+										<textarea
+											placeholder={
+												language === "AR"
+													? "أدخل السياق الجديد هنا"
+													: "Enter your new context"
+											}
+											className="resize-none overflow-hidden rounded-md bg-[#D3D3D3] p-2 text-sm text-[#00203F]"
+											value={newContext}
+											onChange={(e) => {
+												setNewContext(e.target.value);
+												autoResize(e.target);
+											}}
+											rows={3}
+										/>
+									</div>
+								)}
+								{/* Input Field */}
 								<div className="m-3 mt-4 flex w-3/4 flex-col">
 									<textarea
 										placeholder={
 											language === "AR"
-												? "أدخل السياق الجديد هنا"
-												: "Enter your new context"
+												? "أدخل سؤالك هنا"
+												: "Enter your query here"
 										}
 										className="resize-none overflow-hidden rounded-md bg-[#D3D3D3] p-2 text-sm text-[#00203F]"
-										value={newContext}
+										value={userQuery}
 										onChange={(e) => {
-											setNewContext(e.target.value);
+											setUserQuery(e.target.value);
 											autoResize(e.target);
-										}}
-										rows={3}
-									/>
-								</div>
-							)}
-							{/* Input Field */}
-							<div className="m-3 mt-4 flex w-3/4 flex-col">
-								<textarea
-									placeholder={
-										language === "AR"
-											? "أدخل سؤالك هنا"
-											: "Enter your query here"
-									}
-									className="resize-none overflow-hidden rounded-md bg-[#D3D3D3] p-2 text-sm text-[#00203F]"
-									value={userQuery}
-									onChange={(e) => {
-										setUserQuery(e.target.value);
-										autoResize(e.target);
-									}}
-									rows={1}
-								/>
-							</div>
-							{/* Submit Button */}
-							<button
-								onClick={handleQuerySubmit}
-								className="mt-4 w-32 rounded-md bg-[#ADF0D1] p-2 text-sm font-semibold text-[#00203F] transition-all hover:bg-[#A1E7D8]"
-							>
-								{language === "AR" ? "إرسال الاستعلام" : "Submit Query"}
-							</button>
-
-							{loading && <div className="loader"></div>}
-							{queryResult && (
-								<div className="mt-4 flex w-3/4 flex-col">
-									<textarea
-										className="resize-none overflow-hidden rounded-md bg-[#D3D3D3] p-2 text-sm text-[#00203F]"
-										value={queryResult}
-										onChange={(e) => {
-											setQueryResult(e.target.value);
-											autoResize(e.target);
-										}}
-										ref={(textarea) => {
-											if (textarea) {
-												textarea.style.height = "auto";
-												textarea.style.height = `${textarea.scrollHeight}px`;
-											}
 										}}
 										rows={1}
 									/>
 								</div>
-							)}
-							{queryResult && contextOption === "use my context" && (
-								<div className="mt-4 flex flex-col items-center justify-center">
-									<button
-										onClick={handleCompile}
-										className="mt-4 w-32 rounded-md bg-[#ADF0D1] p-2 text-sm font-semibold text-[#00203F] transition-all hover:bg-[#A1E7D8]"
-									>
-										{language === "AR" ? "تجميع" : "Compile"}{" "}
-									</button>
-								</div>
-							)}
-						</div>
-					)}
+								{/* Submit Button */}
+								<button
+									onClick={handleQuerySubmit}
+									className="mt-4 w-32 rounded-md bg-[#ADF0D1] p-2 text-sm font-semibold text-[#00203F] transition-all hover:bg-[#A1E7D8]"
+								>
+									{language === "AR" ? "إرسال الاستعلام" : "Submit Query"}
+								</button>
+
+								{loading && <div className="loader"></div>}
+								{queryResult && (
+									<div className="mt-4 flex w-3/4 flex-col">
+										<textarea
+											className="resize-none overflow-hidden rounded-md bg-[#D3D3D3] p-2 text-sm text-[#00203F]"
+											value={queryResult}
+											onChange={(e) => {
+												setQueryResult(e.target.value);
+												autoResize(e.target);
+											}}
+											ref={(textarea) => {
+												if (textarea) {
+													textarea.style.height = "auto";
+													textarea.style.height = `${textarea.scrollHeight}px`;
+												}
+											}}
+											rows={1}
+										/>
+									</div>
+								)}
+								{queryResult && contextOption === "use my context" && (
+									<div className="mt-4 flex flex-col items-center justify-center">
+										<button
+											onClick={handleCompile}
+											className="mt-4 w-32 rounded-md bg-[#ADF0D1] p-2 text-sm font-semibold text-[#00203F] transition-all hover:bg-[#A1E7D8]"
+										>
+											{language === "AR" ? "تجميع" : "Compile"}{" "}
+										</button>
+									</div>
+								)}
+							</div>
+						)}
 
 					{/* {run query} */}
 					{compiledData.length > 0 && (
@@ -788,27 +801,24 @@ export default function ChatBot({
 						</div>
 					)}
 
-					{/* Reset chat button inside the ChatBot */}
-					{inChatMode && (
-						<button
-							onClick={resetChat}
-							className="absolute bottom-4 left-4 rounded-full bg-[#ADF0D1] p-2 text-[#00203F]"
-						>
-							<AiOutlineReload />
-						</button>
-					)}
+						{/* Reset chat button inside the ChatBot */}
+						{inChatMode && (
+							<button
+								onClick={resetChat}
+								className="absolute bottom-4 left-4 rounded-full bg-[#ADF0D1] p-2 text-[#00203F]"
+							>
+								<AiOutlineReload />
+							</button>
+						)}
 
-					<div ref={chatEndRef} />
+						<div ref={chatEndRef} />
+					</div>
 				</div>
-			</div>
+			)}
 
 			<button
 				onClick={toggleChat}
-				className={`rounded-full bg-[#ADF0D1] p-3 text-[#00203F] transition-all duration-300 focus:outline-none ${
-					isOpen
-						? "pointer-events-none opacity-0"
-						: "pointer-events-auto opacity-100"
-				}`}
+				className="rounded-full bg-[#ADF0D1] p-3 text-[#00203F] transition-transform duration-300 hover:bg-[#9CE0C1] focus:outline-none"
 			>
 				{isOpen ? <AiOutlineArrowDown /> : <AiOutlineArrowUp />}
 			</button>

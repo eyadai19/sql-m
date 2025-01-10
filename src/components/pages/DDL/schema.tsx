@@ -1,6 +1,9 @@
 "use client";
 
+import DragDropExercise from "@/components/Exercise/DragDropExercise/DragDropExercise";
 import Exercise from "@/components/Exercise/Exercise";
+import MultipleChoiceExercise from "@/components/Exercise/MultipleChoiceExercise/MultipleChoiceExercise";
+import TrueFalseExercise from "@/components/Exercise/TrueFalseExercise/TrueFalseExercise";
 import Explanation from "@/components/Explanation/Explanation";
 import { Button } from "@/components/ui/button";
 import { UserExcerciseAnswerAction } from "@/lib/ServerAction/userExcerciseAnswerAction";
@@ -13,7 +16,13 @@ export default function Schema({
 }: {
 	getAuthorizedPage: (levelName: string) => Promise<boolean | undefined>;
 }) {
-	const { explanationParams, exerciseParams } = PAGE_DATA.schema;
+	const {
+		explanationParams,
+		exerciseParams,
+		dragDropParams,
+		multipleChoiceParams,
+		trueFalseParams,
+	} = PAGE_DATA.schema;
 	const [hasAccess, setHasAccess] = useState<boolean | undefined>(undefined);
 	const [showMessage, setShowMessage] = useState(false);
 
@@ -43,13 +52,17 @@ export default function Schema({
 
 	if (hasAccess === undefined) {
 		return (
-				<div className="flex h-screen items-center justify-center">
-					<div className="animate-spin rounded-full h-16 w-16 border-t-4 border-b-4 border-[#ADF0D1]"></div>
-				</div>
-			);}
+			<div className="flex h-screen items-center justify-center">
+				<div className="h-16 w-16 animate-spin rounded-full border-b-4 border-t-4 border-[#ADF0D1]"></div>
+			</div>
+		);
+	}
 	return (
 		<div>
 			<Explanation {...explanationParams} />
+			<DragDropExercise {...dragDropParams} />
+			<MultipleChoiceExercise {...multipleChoiceParams} />
+			<TrueFalseExercise {...trueFalseParams} />
 			<Exercise
 				{...exerciseParams}
 				UserExcerciseAnswerAction={UserExcerciseAnswerAction.bind(

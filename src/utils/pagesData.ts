@@ -451,7 +451,6 @@ AND DATE_HIRED < CURRENT_DATE - INTERVAL '90 days';`,
 					id: "q1",
 					question:
 						"Which data type is most appropriate for storing currency values?",
-					imageUrl: "/images/data-types/numeric-types.png",
 					choices: [
 						{ id: "c1", text: "FLOAT" },
 						{ id: "c2", text: "DECIMAL(10,2)" },
@@ -807,7 +806,6 @@ CREATE TABLE LogEntries (
 					id: "q1",
 					question:
 						"Which referential action should be used when deleting a user should also delete all their orders?",
-					imageUrl: "/images/references/referential-actions.png",
 					choices: [
 						{ id: "c1", text: "ON DELETE RESTRICT" },
 						{ id: "c2", text: "ON DELETE CASCADE" },
@@ -1485,6 +1483,120 @@ CREATE INDEX idx_emp_dept ON company.employees(department_id);
 CREATE INDEX idx_emp_status ON company.employees(status);`,
 			seed: "schema-def-1",
 			expectedRowCount: 0,
+		},
+		trueFalseParams: {
+			title: "True or False: Understanding Database Schemas",
+			prompt:
+				"Evaluate these statements about database schemas. Mark each statement as True or False.",
+			difficulty: "Medium",
+			questions: [
+				{
+					id: "schema-1",
+					statement:
+						"A schema defines the structure of a database, including tables, columns, and relationships.",
+					isCorrect: true,
+					explanation:
+						"True. A schema provides a blueprint for the database, outlining its structure and relationships.",
+				},
+				{
+					id: "schema-2",
+					statement: "Schemas can only have one table.",
+					isCorrect: false,
+					explanation:
+						"False. A schema can contain multiple tables, along with views, indexes, and other database objects.",
+				},
+				{
+					id: "schema-3",
+					statement: "Schemas and databases are interchangeable terms.",
+					isCorrect: false,
+					explanation:
+						"False. While related, a schema refers to the structure within a database, not the database itself.",
+				},
+			],
+			hints: [
+				"Focus on the definition of a schema in database design",
+				"Think about the difference between schema and database",
+			],
+			tips: [
+				"Understand the role of schemas in organizing database structures",
+				"Differentiate between structural components and the database as a whole",
+			],
+			onComplete: (data) => {
+				console.log("Exercise completed:", data);
+			},
+		},
+		dragDropParams: {
+			title: "Sort: Designing a Database Schema",
+			prompt:
+				"Arrange the following steps in the correct order for designing a database schema.",
+			items: [
+				{
+					id: "1",
+					content: "Identify the entities and their attributes",
+				},
+				{
+					id: "2",
+					content: "Determine relationships between entities",
+				},
+				{
+					id: "3",
+					content: "Normalize the schema to remove redundancy",
+				},
+				{
+					id: "4",
+					content: "Define primary keys and foreign keys",
+				},
+				{
+					id: "5",
+					content: "Document the schema design for implementation",
+				},
+			],
+			mode: "simple" as const,
+			correctOrder: ["1", "2", "4", "3", "5"],
+			difficulty: "Medium" as const,
+			hints: [
+				"Start with understanding the entities and their attributes",
+				"Think about minimizing redundancy during normalization",
+			],
+			tips: [
+				"Follow logical steps for schema design",
+				"Focus on establishing clear relationships and keys",
+			],
+			onComplete: (data) => {
+				console.log("Exercise completed:", data);
+			},
+		},
+		multipleChoiceParams: {
+			title: "Multiple Choice: Database Schema Design",
+			prompt: "Choose the correct option for each schema design scenario.",
+			questions: [
+				{
+					id: "q1",
+					question: "Which step should come first in database schema design?",
+					choices: [
+						{ id: "c1", text: "Define primary keys" },
+						{ id: "c2", text: "Identify entities and attributes" },
+						{ id: "c3", text: "Normalize the schema" },
+					],
+					correctChoiceId: "c2",
+					explanation:
+						"Identifying entities and attributes is the first step to understand what data the database will store.",
+				},
+				{
+					id: "q2",
+					question: "What is the purpose of normalization in schema design?",
+					choices: [
+						{ id: "c1", text: "To speed up query performance" },
+						{ id: "c2", text: "To eliminate data redundancy" },
+						{ id: "c3", text: "To create indexes on tables" },
+					],
+					correctChoiceId: "c2",
+					explanation:
+						"Normalization is primarily used to eliminate data redundancy and ensure data integrity.",
+				},
+			],
+			difficulty: "Medium",
+			onComplete: (data) => console.log(data),
 		},
 		explanationParams: {
 			title: "Understanding Database Schema Definition",

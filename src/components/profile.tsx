@@ -2,12 +2,10 @@
 import { ProfileData } from "@/lib/types/authSchemas";
 import { Post } from "@/lib/types/post";
 import { UploadButton } from "@/utils/uploadthing";
-import { faEdit, faMedal } from "@fortawesome/free-solid-svg-icons";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { useRouter } from "next/navigation";
-import { useEffect, useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import Confetti from "react-confetti";
-import { FiEye } from "react-icons/fi";
+import { FiAward, FiEdit3, FiEye } from "react-icons/fi";
 import "swiper/css";
 import "swiper/css/navigation";
 import { Autoplay, Navigation } from "swiper/modules";
@@ -54,37 +52,32 @@ export default function ProfilePage({
 	) => Promise<{ field: string; message: string } | undefined>;
 }) {
 	const [isSaving, setIsSaving] = useState(false);
-
 	const [info, setInfo] = useState<ProfileData | null>(null);
 	const [error, setError] = useState<string | null>(null);
 	const [isEditing, setIsEditing] = useState(false);
 	const [newPhoto, setNewPhoto] = useState<string | null>(null);
 	const [uploadedPhotoUrl, setUploadedPhotoUrl] = useState<string | null>(null);
-
-	const [formData, setFormData] = useState({
-		firstName: "",
-		lastName: "",
-	});
+	const [formData, setFormData] = useState({ firstName: "", lastName: "" });
 	const [showAchievementsModal, setShowAchievementsModal] = useState(false);
 	const [achievements, setAchievements] = useState<string[]>([]);
+	const [posts, setPosts] = useState<Post[] | null>(null);
+	const [postsError, setPostError] = useState<string | null>(null);
 
 	const router = useRouter();
 	const swiperRef = useRef<any>(null);
 	let maxStage: number;
+
 	useEffect(() => {
 		const fetchProfileData = async () => {
 			const result = await ProfileAction();
-
 			if (!result) {
 				setError("Failed to fetch profile data.");
 				return;
 			}
-
 			if ("field" in result) {
 				setError(result.message);
 			} else {
-				await setInfo(result as ProfileData);
-
+				setInfo(result as ProfileData);
 				maxStage = result.stage.index;
 				setFormData({
 					firstName: result.firstName,
@@ -95,9 +88,6 @@ export default function ProfilePage({
 		fetchProfileData();
 	}, [ProfileAction]);
 
-	const [posts, setPosts] = useState<Post[] | null>(null);
-	const [postsError, setPostError] = useState<string | null>(null);
-
 	useEffect(() => {
 		async function fetchPosts() {
 			const result = await userPostAction();
@@ -107,7 +97,6 @@ export default function ProfilePage({
 				setPosts(result);
 			}
 		}
-
 		fetchPosts();
 	}, []);
 
@@ -115,10 +104,7 @@ export default function ProfilePage({
 		router.push(`/QuizDetalis/${quizId}`);
 	};
 
-	const handleEditClick = () => {
-		setIsEditing(true);
-	};
-
+	const handleEditClick = () => setIsEditing(true);
 	const handleCancelEdit = () => {
 		setIsEditing(false);
 		setNewPhoto(null);
@@ -126,19 +112,6 @@ export default function ProfilePage({
 			firstName: info?.firstName || "",
 			lastName: info?.lastName || "",
 		});
-	};
-
-	const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-		if (e.target.files && e.target.files[0]) {
-			const file = e.target.files[0];
-			const reader = new FileReader();
-
-			reader.onload = () => {
-				setNewPhoto(reader.result as string);
-			};
-
-			reader.readAsDataURL(file);
-		}
 	};
 
 	const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -151,7 +124,6 @@ export default function ProfilePage({
 		const updatedData = new FormData();
 		updatedData.append("firstName", formData.firstName);
 		updatedData.append("lastName", formData.lastName);
-
 		if (uploadedPhotoUrl) {
 			updatedData.append("photo", uploadedPhotoUrl);
 		}
@@ -178,7 +150,6 @@ export default function ProfilePage({
 	};
 
 	const handleAchievementsClick = () => {
-		// قائمة العبارات والأيقونات
 		const stagesAchievements = [
 			{ message: "Welcome to the journey!", icon: "🎉" },
 			{ message: "Bronze Medal: Congrats on completing Stage 1!", icon: "🥉" },
@@ -190,24 +161,20 @@ export default function ProfilePage({
 			},
 		];
 
-		// تحديد المراحل التي سيتم عرضها بناءً على المتغير
 		const achievementsToShow = stagesAchievements
 			.slice(0, maxStage)
 			.map((stage) => `${stage.icon} ${stage.message}`);
 
-		// تحديث الحالة للعرض
 		setAchievements(achievementsToShow);
 		setShowAchievementsModal(true);
-	};
-
-	const closeAchievementsModal = () => {
-		setShowAchievementsModal(false);
 	};
 
 	if (error) {
 		return (
 			<div className="flex h-screen items-center justify-center">
-				<p className="text-red-500">{error}</p>
+				<div className="rounded-lg bg-red-50 p-4 text-red-500 shadow-md">
+					{error}
+				</div>
 			</div>
 		);
 	}
@@ -215,69 +182,57 @@ export default function ProfilePage({
 	if (!info) {
 		return (
 			<div className="flex h-screen items-center justify-center">
-				<div className="h-16 w-16 animate-spin rounded-full border-b-4 border-t-4 border-[#ADF0D1]"></div>
+				<div className="h-16 w-16 animate-spin rounded-full border-4 border-t-[#ADF0D1]"></div>
 			</div>
 		);
 	}
 
 	return (
-		<div
-			className="flex min-h-screen items-center justify-center px-8"
-			style={{
-				background: "linear-gradient(to bottom, #00203F, #ADF0D1)",
-			}}
-		>
-			<Tabs defaultValue="profile" className="w-full">
-				<TabsList className="mb-8 grid w-full grid-cols-2">
-					<TabsTrigger value="profile">Profile</TabsTrigger>
-					<TabsTrigger value="posts">Posts</TabsTrigger>
-				</TabsList>
-				<TabsContent value="profile" className="space-y-4">
-					<div
-						className="m-8 w-full max-w-6xl rounded-lg p-12 shadow-md"
-						style={{ background: "#ffffff" }}
+		<div className="min-h-screen bg-gradient-to-b from-[#00203F] to-[#ADF0D1] px-4 py-8 md:px-8">
+			<Tabs defaultValue="profile" className="mx-auto max-w-7xl">
+				<TabsList className="mb-8 grid w-full grid-cols-2 rounded-xl bg-white/20">
+					<TabsTrigger
+						value="profile"
+						className="rounded-lg text-sm font-medium text-white transition-all data-[state=active]:bg-white data-[state=active]:text-[#00203F]"
 					>
-						<div className="flex flex-col items-start gap-12 md:flex-row">
-							{/* القسم الأيسر */}
-							<div
-								className="flex w-full flex-col gap-8 md:w-1/2"
-								style={{ background: "#f1f5f9" }}
-							>
-								<div
-									className="relative rounded-lg p-6 shadow-sm"
-									style={{ background: "#f9fafb" }}
-								>
+						Profile
+					</TabsTrigger>
+					<TabsTrigger
+						value="posts"
+						className="rounded-lg text-sm font-medium text-white transition-all data-[state=active]:bg-white data-[state=active]:text-[#00203F]"
+					>
+						Posts
+					</TabsTrigger>
+				</TabsList>
+
+				<TabsContent value="profile" className="space-y-6">
+					<div className="rounded-2xl bg-white p-6 shadow-xl md:p-8">
+						<div className="flex flex-col gap-8 lg:flex-row">
+							{/* Left Section */}
+							<div className="w-full lg:w-1/2">
+								<div className="relative rounded-xl bg-gradient-to-br from-gray-50 to-gray-100 p-6 shadow-md">
 									<div className="-mt-16 flex justify-center">
 										<label
 											htmlFor="photo"
 											className={`relative cursor-pointer ${isEditing ? "" : "pointer-events-none"}`}
 										>
-											<div className="relative flex h-32 w-32 items-center justify-center overflow-hidden rounded-full border-4 border-gray-300 bg-gray-200">
-												{newPhoto ? (
+											<div className="group relative h-32 w-32 overflow-hidden rounded-full border-4 border-white bg-gray-200 shadow-lg transition-all hover:border-[#ADF0D1]">
+												{newPhoto || info?.photo ? (
 													<img
-														src={newPhoto}
-														alt="New Profile"
-														className="h-full w-full object-cover"
-													/>
-												) : info?.photo ? (
-													<img
-														src={info.photo}
-														alt="User Profile"
-														className="h-full w-full object-cover"
+														src={newPhoto || info.photo}
+														alt="Profile"
+														className="h-full w-full object-cover transition-transform group-hover:scale-110"
 													/>
 												) : (
-													<span className="flex h-full items-center justify-center text-gray-500">
-														No Image
-													</span>
+													<div className="flex h-full items-center justify-center text-gray-400">
+														<FiEdit3 size={24} />
+													</div>
 												)}
-												{/* UploadButton - يغطي كامل الدائرة */}
 												{isEditing && (
 													<UploadButton
 														endpoint="imageUploader"
-														className={`absolute inset-0 h-full w-full cursor-pointer opacity-0`}
-														onUploadProgress={() => {
-															setIsSaving(true);
-														}}
+														className="absolute inset-0 opacity-0"
+														onUploadProgress={() => setIsSaving(true)}
 														onClientUploadComplete={(res) => {
 															const uploadedFile = res[0];
 															setNewPhoto(uploadedFile.url);
@@ -294,13 +249,13 @@ export default function ProfilePage({
 									</div>
 
 									{isEditing ? (
-										<div className="mt-4 text-center">
+										<div className="mt-6 space-y-4">
 											<input
 												type="text"
 												name="firstName"
 												value={formData.firstName}
 												onChange={handleInputChange}
-												className="mb-2 w-full rounded border px-4 py-2 text-gray-800"
+												className="w-full rounded-lg border border-gray-200 px-4 py-2 focus:border-[#ADF0D1] focus:outline-none focus:ring-2 focus:ring-[#ADF0D1]/50"
 												placeholder="First Name"
 											/>
 											<input
@@ -308,72 +263,69 @@ export default function ProfilePage({
 												name="lastName"
 												value={formData.lastName}
 												onChange={handleInputChange}
-												className="mb-4 w-full rounded border px-4 py-2 text-gray-800"
+												className="w-full rounded-lg border border-gray-200 px-4 py-2 focus:border-[#ADF0D1] focus:outline-none focus:ring-2 focus:ring-[#ADF0D1]/50"
 												placeholder="Last Name"
 											/>
-											<div className="flex justify-center gap-4">
-												<button
-													onClick={handleSave}
-													className="relative rounded bg-gray-700 px-6 py-2 text-white shadow-sm transition duration-300 hover:bg-gray-800"
-												>
-													{isSaving ? (
-														<span className="absolute inset-0 flex cursor-wait items-center justify-center">
-															<div className="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent"></div>
-														</span>
-													) : (
-														<span>Save</span>
-													)}
-												</button>
+											<div className="flex justify-end gap-3">
 												<button
 													onClick={handleCancelEdit}
-													className="rounded bg-red-500 px-6 py-2 text-white shadow-sm transition duration-300 hover:bg-red-600"
+													className="rounded-lg bg-gray-100 px-4 py-2 text-sm font-medium text-gray-600 transition-colors hover:bg-gray-200"
 												>
 													Cancel
+												</button>
+												<button
+													onClick={handleSave}
+													disabled={isSaving}
+													className="flex items-center rounded-lg bg-[#00203F] px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-[#001529]"
+												>
+													{isSaving ? (
+														<>
+															<div className="mr-2 h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent"></div>
+															Saving...
+														</>
+													) : (
+														"Save Changes"
+													)}
 												</button>
 											</div>
 										</div>
 									) : (
-										<div className="mt-8 text-center">
+										<div className="mt-6 text-center">
 											<h1 className="text-2xl font-bold text-gray-800">
 												{info.firstName} {info.lastName}
 											</h1>
-											<p className="text-sm text-gray-500">@{info.username}</p>
-											<p className="mt-4 text-lg font-medium text-gray-700">
-												Stage: {info.stage.stage}
+											<p className="mt-1 text-sm text-gray-500">
+												@{info.username}
 											</p>
-										</div>
-									)}
-									<div className="mt-6 flex items-center justify-between px-4">
-										<div
-											onClick={handleAchievementsClick}
-											className="flex cursor-pointer items-center text-gray-700 hover:text-gray-900 md:justify-start md:text-sm lg:text-base"
-										>
-											<FontAwesomeIcon
-												icon={faMedal}
-												className="text-lg md:mr-2 md:text-sm"
-											/>
-											<span className="hidden font-medium md:block">
-												Achievements
-											</span>
-										</div>
-										{!isEditing && (
-											<div
-												className="flex cursor-pointer items-center text-gray-700 hover:text-gray-900 md:justify-start md:text-sm lg:text-base"
-												onClick={handleEditClick}
-											>
-												<FontAwesomeIcon
-													icon={faEdit}
-													className="text-lg md:mr-2 md:text-sm"
-												/>
-												<span className="hidden font-medium md:block">
-													Edit
+											<div className="mt-4 inline-flex items-center rounded-full bg-[#00203F]/10 px-4 py-2">
+												<FiAward className="mr-2 text-[#00203F]" />
+												<span className="font-medium text-[#00203F]">
+													Stage {info.stage.stage}
 												</span>
 											</div>
+										</div>
+									)}
+
+									<div className="mt-6 flex items-center justify-between">
+										<button
+											onClick={handleAchievementsClick}
+											className="flex items-center rounded-lg bg-gradient-to-r from-[#00203F] to-[#001529] px-4 py-2 text-sm font-medium text-white transition-all hover:from-[#001529] hover:to-[#00203F]"
+										>
+											<FiAward className="mr-2" />
+											Achievements
+										</button>
+										{!isEditing && (
+											<button
+												onClick={handleEditClick}
+												className="flex items-center rounded-lg bg-gray-100 px-4 py-2 text-sm font-medium text-gray-600 transition-colors hover:bg-gray-200"
+											>
+												<FiEdit3 className="mr-2" />
+												Edit Profile
+											</button>
 										)}
 									</div>
 								</div>
 
-								{/* الشاشة المتحركة */}
 								<Swiper
 									onSwiper={(swiper) => (swiperRef.current = swiper)}
 									loop={true}
@@ -382,191 +334,123 @@ export default function ProfilePage({
 									autoplay={{ delay: 3000 }}
 									navigation
 									modules={[Autoplay, Navigation]}
-									className="w-full rounded-lg shadow-sm"
+									className="mt-6 rounded-xl"
 								>
 									<SwiperSlide>
-										<div className="p-6 text-center">
-											<h2 className="text-xl font-bold text-gray-700">
-												Learn With AI
-											</h2>
-											<p className="mt-2 text-gray-600">
-												Improve your knowledge in SQL.
+										<div className="rounded-xl bg-gradient-to-br from-[#00203F] to-[#001529] p-8 text-center text-white">
+											<h2 className="text-xl font-bold">Learn With AI</h2>
+											<p className="mt-2 text-gray-300">
+												Enhance your SQL knowledge with our AI-powered learning
+												system
 											</p>
-											<button className="mt-4 rounded bg-gray-700 px-6 py-2 text-white shadow-sm transition duration-300 hover:bg-gray-800">
-												Chat!
+											<button className="mt-4 rounded-lg bg-white px-6 py-2 font-medium text-[#00203F] transition-colors hover:bg-gray-100">
+												Start Learning
 											</button>
 										</div>
 									</SwiperSlide>
 								</Swiper>
 							</div>
 
-							{/* القسم الأيمن */}
-							<div
-								className="mt-10 w-full md:w-1/2"
-								style={{ background: "#f1f5f9" }}
-							>
-								<div
-									className="rounded-lg p-6 shadow-sm"
-									style={{ background: "#f9fafb" }}
-								>
-									<h2 className="mb-6 text-xl font-bold text-gray-700">
-										Quizzes Overview
-									</h2>
-									<div
-										className="overflow-y-auto"
-										style={{ maxHeight: "300px" }}
-									>
-										{/* عرض الجدول في الشاشات الكبيرة */}
-										<div className="hidden md:block">
-											<table className="w-full border-collapse rounded-md text-left text-sm">
-												<thead className="bg-gray-200">
-													<tr>
-														<th className="border px-6 py-4 text-left text-xs uppercase tracking-wider text-gray-600">
-															No.
-														</th>
-														<th className="border px-6 py-4 text-left text-xs uppercase tracking-wider text-gray-600">
-															Stage
-														</th>
-														<th className="border px-6 py-4 text-left text-xs uppercase tracking-wider text-gray-600">
-															Mark %
-														</th>
-														<th className="border px-6 py-4 text-center"></th>
-													</tr>
-												</thead>
-												<tbody>
-													{info.quizzes.map((quiz, index) => (
-														<tr
-															key={quiz.id}
-															className="odd:bg-white even:bg-gray-100 hover:bg-gray-200"
-														>
-															<td className="border px-6 py-4 text-gray-700">
-																{index + 1}
-															</td>
-															<td className="border px-6 py-4 text-gray-700">
-																{info.stage.stage}
-															</td>
-															<td className="border px-6 py-4 text-gray-700">
-																{quiz.mark!.toFixed(2)}%
-															</td>
-															<td className="border px-6 py-4 text-center">
-																<button
-																	onClick={() => handleReviewClick(quiz.id)}
-																	className="flex h-8 w-8 items-center justify-center rounded-full bg-gray-700 text-white shadow-md transition duration-300 hover:bg-gray-800"
-																>
-																	<FiEye className="text-sm" />
-																</button>
-															</td>
-														</tr>
-													))}
-												</tbody>
-											</table>
-										</div>
-
-										{/* عرض البطاقة في الشاشات الصغيرة */}
-										<div className="block md:hidden">
-											{info.quizzes.map((quiz, index) => (
-												<div
-													key={quiz.id}
-													className="mb-4 rounded-lg border bg-white p-4 shadow-md hover:bg-gray-50"
-												>
-													<div className="mb-2 flex justify-between text-gray-700">
-														<span className="font-bold">No.:</span>
-														<span>{index + 1}</span>
-													</div>
-													<div className="mb-2 flex justify-between text-gray-700">
-														<span className="font-bold">Stage:</span>
-														<span>{info.stage.stage}</span>
-													</div>
-													<div className="mb-4 flex justify-between text-gray-700">
-														<span className="font-bold">Mark:</span>
-														<span>{quiz.mark!.toFixed(2)}%</span>
-													</div>
-													<div className="flex justify-center">
-														<button
-															onClick={() => handleReviewClick(quiz.id)}
-															className="flex h-8 w-8 items-center justify-center rounded-full bg-gray-700 text-white shadow-md transition duration-300 hover:bg-gray-800"
-														>
-															<FiEye className="text-sm" />
-														</button>
-													</div>
-												</div>
-											))}
-										</div>
-									</div>
-								</div>
-								{/* </div> */}
-								{/* </div> */}
-								{/* نافذة Achievements */}
-								{showAchievementsModal && (
-									<div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
-										<div className="w-11/12 rounded-lg bg-white p-6 shadow-lg md:w-1/3">
-											<h2 className="text-xl font-bold text-gray-700">
-												Achievements
-											</h2>
-											<ul className="mt-4">
-												{achievements.map((achievement, index) => (
-													<li key={index} className="text-gray-600">
-														{achievement}
-													</li>
-												))}
-											</ul>
-											<div className="mt-4 flex justify-end">
-												<button
-													onClick={closeAchievementsModal}
-													className="rounded-lg bg-red-500 px-6 py-2 text-white"
-												>
-													Close
-												</button>
-											</div>
-										</div>
-									</div>
-								)}
-							</div>
-
-							{/* نافذة Achievements */}
-							{showAchievementsModal && (
-								<div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
-									{/* تأثير الاحتفال */}
-									<Confetti
-										width={window.innerWidth}
-										height={window.innerHeight}
-										numberOfPieces={200}
-										recycle={false}
-									/>
-									{/* الشاشة المنبثقة */}
-									<div className="relative z-50 w-11/12 rounded-lg bg-white p-6 shadow-lg md:w-1/3">
-										<h2 className="text-xl font-bold text-gray-700">
-											Achievements
+							{/* Right Section */}
+							<div className="w-full lg:w-1/2">
+								<div className="rounded-xl bg-white p-6 shadow-lg">
+									<div className="mb-6 flex items-center justify-between">
+										<h2 className="text-xl font-bold text-gray-800">
+											Quiz Performance
 										</h2>
-										<ul className="mt-4">
-											{achievements.map((achievement, index) => (
-												<li key={index} className="text-gray-600">
-													{achievement}
-												</li>
-											))}
-										</ul>
-										<div className="mt-4 flex justify-end">
-											<button
-												onClick={closeAchievementsModal}
-												className="rounded-lg bg-red-500 px-6 py-2 text-white"
+										<span className="rounded-full bg-[#00203F]/10 px-3 py-1 text-sm font-medium text-[#00203F]">
+											{info.quizzes.length} Quizzes
+										</span>
+									</div>
+
+									{/* Desktop Table View */}
+									<div className="hidden overflow-x-auto md:block">
+										<table className="w-full border-collapse">
+											<thead className="bg-gray-50">
+												<tr>
+													<th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">
+														Quiz
+													</th>
+													<th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">
+														Stage
+													</th>
+													<th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">
+														Mark
+													</th>
+													<th className="px-6 py-3 text-right text-xs font-medium uppercase tracking-wider text-gray-500">
+														Action
+													</th>
+												</tr>
+											</thead>
+											<tbody className="divide-y divide-gray-200 bg-white">
+												{info.quizzes.map((quiz, index) => (
+													<tr key={quiz.id} className="hover:bg-gray-50">
+														<td className="whitespace-nowrap px-6 py-4 text-sm text-gray-900">
+															Quiz {index + 1}
+														</td>
+														<td className="whitespace-nowrap px-6 py-4 text-sm text-gray-500">
+															Stage {info.stage.stage}
+														</td>
+														<td className="whitespace-nowrap px-6 py-4 text-sm font-medium text-[#00203F]">
+															{quiz.mark!.toFixed(1)}%
+														</td>
+														<td className="whitespace-nowrap px-6 py-4 text-right">
+															<button
+																onClick={() => handleReviewClick(quiz.id)}
+																className="inline-flex items-center rounded-lg bg-[#00203F] px-3 py-1 text-sm text-white transition-colors hover:bg-[#001529]"
+															>
+																<FiEye className="mr-1" />
+																Review
+															</button>
+														</td>
+													</tr>
+												))}
+											</tbody>
+										</table>
+									</div>
+
+									{/* Mobile Card View */}
+									<div className="space-y-4 md:hidden">
+										{info.quizzes.map((quiz, index) => (
+											<div
+												key={quiz.id}
+												className="rounded-lg border bg-white p-4"
 											>
-												Close
-											</button>
-										</div>
+												<div className="mb-2 flex items-center justify-between">
+													<span className="font-medium">Quiz {index + 1}</span>
+													<span className="font-bold text-[#00203F]">
+														{quiz.mark!.toFixed(1)}%
+													</span>
+												</div>
+												<div className="flex items-center justify-between">
+													<span className="text-sm text-gray-500">
+														Stage {info.stage.stage}
+													</span>
+													<button
+														onClick={() => handleReviewClick(quiz.id)}
+														className="inline-flex items-center rounded-lg bg-[#00203F] px-3 py-1 text-sm text-white transition-colors hover:bg-[#001529]"
+													>
+														<FiEye className="mr-1" />
+														Review
+													</button>
+												</div>
+											</div>
+										))}
 									</div>
 								</div>
-							)}
+							</div>
 						</div>
 					</div>
 				</TabsContent>
-				<TabsContent value="posts">
-					<div className="w-fit rounded-lg bg-white p-4 shadow-lg md:p-8">
-						{/* <h2 className="mb-6 text-2xl font-bold">Posts</h2> */}
-						{/* <PostsView posts={posts} /> */}
-						{posts &&
-							posts.map((post) => (
+
+				<TabsContent value="posts" className="w-full">
+					<div className="grid max-w-full grid-cols-1 gap-6">
+						{posts?.map((post) => (
+							<div
+								key={post.id}
+								className="w-full overflow-hidden rounded-xl bg-white shadow-lg transition-all hover:shadow-xl"
+							>
 								<PostCard
-									key={post.id}
 									post={post}
 									postLikeAction={postLikeAction}
 									postCommentAction={postCommentAction}
@@ -574,10 +458,44 @@ export default function ProfilePage({
 									deletePostAction={deletePostAction}
 									editPostAction={editPostAction}
 								/>
-							))}
+							</div>
+						))}
 					</div>
 				</TabsContent>
 			</Tabs>
+
+			{/* Achievements Modal */}
+			{showAchievementsModal && (
+				<div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm">
+					<Confetti
+						width={window.innerWidth}
+						height={window.innerHeight}
+						numberOfPieces={200}
+						recycle={false}
+					/>
+					<div className="w-11/12 max-w-md rounded-2xl bg-white p-6 shadow-2xl md:p-8">
+						<h2 className="text-2xl font-bold text-gray-800">
+							Your Achievements
+						</h2>
+						<div className="mt-6 space-y-4">
+							{achievements.map((achievement, index) => (
+								<div
+									key={index}
+									className="rounded-lg bg-gradient-to-r from-gray-50 to-white p-4 shadow-md"
+								>
+									<p className="text-lg text-gray-700">{achievement}</p>
+								</div>
+							))}
+						</div>
+						<button
+							onClick={() => setShowAchievementsModal(false)}
+							className="mt-6 w-full rounded-lg bg-[#00203F] py-3 font-medium text-white transition-colors hover:bg-[#001529]"
+						>
+							Close
+						</button>
+					</div>
+				</div>
+			)}
 		</div>
 	);
 }

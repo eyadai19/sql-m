@@ -1,12 +1,10 @@
 "use client";
 
 import DragDropExercise from "@/components/Exercise/DragDropExercise/DragDropExercise";
-import Exercise from "@/components/Exercise/Exercise";
 import MultipleChoiceExercise from "@/components/Exercise/MultipleChoiceExercise/MultipleChoiceExercise";
 import TrueFalseExercise from "@/components/Exercise/TrueFalseExercise/TrueFalseExercise";
 import Explanation from "@/components/Explanation/Explanation";
 import { Button } from "@/components/ui/button";
-import { UserExcerciseAnswerAction } from "@/lib/ServerAction/userExcerciseAnswerAction";
 import PAGE_DATA from "@/utils/pagesData";
 import { pageName } from "@/utils/path";
 import Link from "next/link";
@@ -58,6 +56,11 @@ export default function Reference({
 			</div>
 		);
 	}
+			<div className="flex h-screen items-center justify-center">
+				<div className="h-16 w-16 animate-spin rounded-full border-b-4 border-t-4 border-[#ADF0D1]"></div>
+			</div>
+		);
+	}
 
 	return (
 		<div>
@@ -90,7 +93,7 @@ export default function Reference({
 					null,
 					pageName.reference,
 				)}
-			/>
+			/>{*/}
 		</div>
 	);
 }
