@@ -1,10 +1,12 @@
 "use client";
 
 import DragDropExercise from "@/components/Exercise/DragDropExercise/DragDropExercise";
+import Exercise from "@/components/Exercise/Exercise";
 import MultipleChoiceExercise from "@/components/Exercise/MultipleChoiceExercise/MultipleChoiceExercise";
 import TrueFalseExercise from "@/components/Exercise/TrueFalseExercise/TrueFalseExercise";
 import Explanation from "@/components/Explanation/Explanation";
 import { Button } from "@/components/ui/button";
+import { UserExcerciseAnswerAction } from "@/lib/ServerAction/userExcerciseAnswerAction";
 import PAGE_DATA from "@/utils/pagesData";
 import { pageName } from "@/utils/path";
 import Link from "next/link";
@@ -82,13 +84,13 @@ export default function ERDPage({
 					pageName.dataType,
 				)}
 			/>
-			<Exercise
+			{/* <Exercise
 				{...exerciseParams}
 				UserExcerciseAnswerAction={UserExcerciseAnswerAction.bind(
 					null,
 					pageName.ERD,
 				)}
-				/>{*/}
+				/> */}
 		</div>
 	);
 }

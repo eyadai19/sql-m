@@ -60,9 +60,27 @@ export default function Schema({
 	return (
 		<div>
 			<Explanation {...explanationParams} />
-			<DragDropExercise {...dragDropParams} />
-			<MultipleChoiceExercise {...multipleChoiceParams} />
-			<TrueFalseExercise {...trueFalseParams} />
+			<DragDropExercise
+				{...dragDropParams!}
+				UserExcerciseAnswerAction={UserExcerciseAnswerAction.bind(
+					null,
+					pageName.schema,
+				)}
+			/>
+			<MultipleChoiceExercise
+				{...multipleChoiceParams!}
+				UserExcerciseAnswerAction={UserExcerciseAnswerAction.bind(
+					null,
+					pageName.schema,
+				)}
+			/>
+			<TrueFalseExercise
+				{...trueFalseParams!}
+				UserExcerciseAnswerAction={UserExcerciseAnswerAction.bind(
+					null,
+					pageName.schema,
+				)}
+			/>
 			<Exercise
 				{...exerciseParams}
 				UserExcerciseAnswerAction={UserExcerciseAnswerAction.bind(

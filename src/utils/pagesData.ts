@@ -1521,9 +1521,6 @@ CREATE INDEX idx_emp_status ON company.employees(status);`,
 				"Understand the role of schemas in organizing database structures",
 				"Differentiate between structural components and the database as a whole",
 			],
-			onComplete: (data) => {
-				console.log("Exercise completed:", data);
-			},
 		},
 		dragDropParams: {
 			title: "Sort: Designing a Database Schema",
@@ -1562,15 +1559,13 @@ CREATE INDEX idx_emp_status ON company.employees(status);`,
 				"Follow logical steps for schema design",
 				"Focus on establishing clear relationships and keys",
 			],
-			onComplete: (data) => {
-				console.log("Exercise completed:", data);
-			},
 		},
 		multipleChoiceParams: {
 			title: "Multiple Choice: Database Schema Design",
 			prompt: "Choose the correct option for each schema design scenario.",
 			questions: [
 				{
+					type: ExerciseTypes.MultipleChoice,
 					id: "q1",
 					question: "Which step should come first in database schema design?",
 					choices: [
@@ -1583,6 +1578,8 @@ CREATE INDEX idx_emp_status ON company.employees(status);`,
 						"Identifying entities and attributes is the first step to understand what data the database will store.",
 				},
 				{
+					type: ExerciseTypes.MultipleChoice,
+
 					id: "q2",
 					question: "What is the purpose of normalization in schema design?",
 					choices: [
@@ -1596,7 +1593,6 @@ CREATE INDEX idx_emp_status ON company.employees(status);`,
 				},
 			],
 			difficulty: "Medium",
-			onComplete: (data) => console.log(data),
 		},
 		explanationParams: {
 			title: "Understanding Database Schema Definition",

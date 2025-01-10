@@ -56,7 +56,6 @@ export default function PostCard({
 		postId: string,
 		title: string | null,
 		content: string | null,
-		photo: string | null,
 	) => Promise<{ field: string; message: string } | undefined>;
 	deletePostAction: (
 		postId: string,
@@ -73,7 +72,6 @@ export default function PostCard({
 	const [isEditing, setIsEditing] = useState(false);
 	const [editTitle, setEditTitle] = useState(post.title);
 	const [editContent, setEditContent] = useState(post.content);
-	const [editPhoto, setEditPhoto] = useState(post.photo || "");
 	const [isSaving, setIsSaving] = useState(false);
 
 	// Update local state when initial post changes
@@ -86,7 +84,6 @@ export default function PostCard({
 		if (isEditing) {
 			setEditTitle(post.title);
 			setEditContent(post.content);
-			setEditPhoto(post.photo || "");
 		}
 	}, [isEditing, post]);
 
@@ -137,7 +134,6 @@ export default function PostCard({
 				post.id,
 				editTitle !== post.title ? editTitle : null,
 				editContent !== post.content ? editContent : null,
-				editPhoto !== post.photo ? editPhoto : null,
 			);
 
 			if (error) {
@@ -148,7 +144,6 @@ export default function PostCard({
 					...prev,
 					title: editTitle,
 					content: editContent,
-					photo: editPhoto || null,
 				}));
 				setIsEditing(false);
 			}
@@ -164,7 +159,6 @@ export default function PostCard({
 		// Reset form values
 		setEditTitle(post.title);
 		setEditContent(post.content);
-		setEditPhoto(post.photo || "");
 	};
 
 	return (
@@ -240,49 +234,6 @@ export default function PostCard({
 										placeholder="Post content"
 										rows={4}
 									/>
-								</div>
-								<div className="space-y-2">
-									<label className="text-sm font-medium">Image</label>
-									{editPhoto ? (
-										<div className="space-y-2">
-											<div className="relative aspect-video w-full overflow-hidden rounded-lg bg-muted">
-												<img
-													src={editPhoto}
-													alt="Post preview"
-													className="h-full w-full object-cover"
-												/>
-												<Button
-													variant="destructive"
-													size="icon"
-													className="absolute right-2 top-2"
-													onClick={() => setEditPhoto("")}
-												>
-													<X className="h-4 w-4" />
-												</Button>
-											</div>
-											<Input
-												value={editPhoto}
-												onChange={(e) => setEditPhoto(e.target.value)}
-												placeholder="Image URL"
-											/>
-										</div>
-									) : (
-										<div className="flex gap-2">
-											<Input
-												value={editPhoto}
-												onChange={(e) => setEditPhoto(e.target.value)}
-												placeholder="Image URL"
-											/>
-											<Button
-												variant="outline"
-												size="icon"
-												onClick={() => setEditPhoto("")}
-												type="button"
-											>
-												<ImageIcon className="h-4 w-4" />
-											</Button>
-										</div>
-									)}
 								</div>
 							</div>
 							<DialogFooter>

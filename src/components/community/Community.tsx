@@ -59,7 +59,7 @@ export default function CommunityPage({
 }) {
 	const [posts, setPosts] = useState<Post[] | null>(null);
 	const [error, setError] = useState<string | null>(null);
-	const [filter, setFilter] = useState<string>("all");
+	const [filter, setFilter] = useState<string>("all"); // الافتراضي هو "all"
 	const [sort, setSort] = useState<string>("latest");
 
 	useEffect(() => {
@@ -139,6 +139,14 @@ export default function CommunityPage({
 				<div className="space-y-6">
 					<div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
 						<div className="flex flex-wrap gap-2">
+							<Button
+								variant="outline"
+								size="sm"
+								onClick={() => setFilter("all")}
+								className={filter === "all" ? "bg-gray-200" : ""}
+							>
+								All Posts
+							</Button>
 							<Button
 								variant="outline"
 								size="sm"

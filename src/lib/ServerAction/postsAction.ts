@@ -189,7 +189,6 @@ export async function editPostAction(
 	postId: string,
 	title: string | null,
 	content: string | null,
-	photo: string | null,
 ): Promise<{ field: string; message: string } | undefined> {
 	try {
 		const user = await getUser();
@@ -209,7 +208,6 @@ export async function editPostAction(
 		const updatedPost = {
 			title: title || existingPost.title,
 			content: content || existingPost.content,
-			photo: photo !== null ? photo : existingPost.photo,
 			lastUpdateTime: new Date(),
 		};
 

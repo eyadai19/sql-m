@@ -217,13 +217,21 @@ export default function ProfilePage({
 											className={`relative cursor-pointer ${isEditing ? "" : "pointer-events-none"}`}
 										>
 											<div className="group relative h-32 w-32 overflow-hidden rounded-full border-4 border-white bg-gray-200 shadow-lg transition-all hover:border-[#ADF0D1]">
-												{newPhoto || info?.photo ? (
+												{newPhoto && (
 													<img
-														src={newPhoto || info.photo}
+														src={newPhoto}
 														alt="Profile"
 														className="h-full w-full object-cover transition-transform group-hover:scale-110"
 													/>
-												) : (
+												)}
+												{info.photo && !newPhoto && (
+													<img
+														src={info.photo}
+														alt="Profile"
+														className="h-full w-full object-cover transition-transform group-hover:scale-110"
+													/>
+												)}
+												{!info.photo && !newPhoto && (
 													<div className="flex h-full items-center justify-center text-gray-400">
 														<FiEdit3 size={24} />
 													</div>

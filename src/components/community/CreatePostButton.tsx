@@ -14,6 +14,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { ImagePlus, Loader2, PenSquare, X } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
+import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
 
 export function CreatePostButton({
 	infoAddPostAction, // return name and photo
@@ -35,6 +36,35 @@ export function CreatePostButton({
 	const [content, setContent] = useState("");
 	const [photo, setPhoto] = useState<string | null>(null);
 	const [isSubmitting, setIsSubmitting] = useState(false);
+	const [userInfo, setUserInfo] = useState<{
+		name: string;
+		photo: string | null;
+	}>({
+		name: "",
+		photo: null,
+	});
+
+	const fetchUserInfo = async () => {
+		try {
+			const result = await infoAddPostAction();
+			if (result && "name" in result && "photo" in result) {
+				setUserInfo(result);
+			} else {
+				toast.error("Failed to fetch user info");
+			}
+		} catch (error) {
+			toast.error("An error occurred while fetching user info");
+		}
+	};
+
+	const handleDialogOpen = (isOpen: boolean) => {
+		setOpen(isOpen);
+		if (isOpen) {
+			fetchUserInfo();
+		} else {
+			resetForm();
+		}
+	};
 
 	const handleSubmit = async (e: React.FormEvent) => {
 		e.preventDefault();
@@ -83,7 +113,7 @@ export function CreatePostButton({
 	};
 
 	return (
-		<Dialog open={open} onOpenChange={setOpen}>
+		<Dialog open={open} onOpenChange={handleDialogOpen}>
 			<DialogTrigger asChild>
 				<Button className="gap-2 bg-[#00203F] hover:bg-[#00203F]/90">
 					<PenSquare className="h-4 w-4" />
@@ -97,6 +127,19 @@ export function CreatePostButton({
 						Share your thoughts with the community.
 					</DialogDescription>
 				</DialogHeader>
+				<div className="flex items-center gap-4">
+					<Avatar className="h-12 w-12">
+						{userInfo.photo && (
+							<AvatarImage src={userInfo.photo} alt={userInfo.name} />
+						)}
+						<AvatarFallback>
+							{userInfo.name.slice(0, 2).toUpperCase()}
+						</AvatarFallback>
+					</Avatar>
+					<div>
+						<h2 className="font-semibold">{userInfo.name}</h2>
+					</div>
+				</div>
 				<form onSubmit={handleSubmit} className="mt-4 space-y-4">
 					<div>
 						<Label htmlFor="title" className="mb-1.5 block">
