@@ -1,7 +1,8 @@
-import type { TrueFalseExerciseProps as TrueFalseParams } from "@/components/Exercise/TrueFalseExercise/types";
-import type {
-	DragDropExerciseProps as DragDropExerciseParams,
-	MultipleChoiceExerciseProps as MultipleChoiceParams,
+import {
+	ExerciseTypes,
+	type DragDropExercisePropsPage as DragDropExerciseParams,
+	type MultipleChoiceExercisePropsPage as MultipleChoiceParams,
+	type TrueFalseExercisePropsPage as TrueFalseParams,
 } from "@/lib/types/exerciseTypes";
 
 import type { ExplanationProps as ExplanationParams } from "@/components/Explanation/types";
@@ -184,8 +185,10 @@ VALUES ('Alice Johnson', 'Data Analyst', 65000, 2);`,
 	update: {
 		exerciseParams: {
 			title: "Employee Salary Adjustment",
-			prompt:
-				"Write a query to give a 10% salary increase to all employees in the Engineering department (department_id = 1) who have been with the company for more than 5 years.",
+			prompt: `UPDATE employees
+      SET salary = salary * 1.10
+      WHERE department_id = 1
+      AND DATE_HIRED <= CURRENT_DATE - '5 years';`,
 			tables: ["employees"],
 			difficulty: "Medium",
 			hints: [
@@ -263,7 +266,7 @@ AND performance_rating > 4;`,
 			],
 			answer: `DELETE FROM employees
 WHERE status = 'resigned'
-AND last_working_day < CURRENT_DATE - INTERVAL '30 days';`,
+  AND last_working_day <= DATE('now', '-30 days');`,
 			seed: "seed4",
 			expectedRowCount: 3,
 		},
@@ -396,9 +399,6 @@ AND DATE_HIRED < CURRENT_DATE - INTERVAL '90 days';`,
 				"Consider performance implications",
 				"Think about data integrity requirements",
 			],
-			onComplete: (data: { time: number; trials: number }) => {
-				console.log("Exercise completed:", data);
-			},
 		},
 		dragDropParams: {
 			title: "Sort: Choosing Appropriate Data Types",
@@ -441,15 +441,13 @@ AND DATE_HIRED < CURRENT_DATE - INTERVAL '90 days';`,
 				"Consider both storage and performance",
 				"Think about long-term maintenance",
 			],
-			onComplete: (data: { time: number; trials: number }) => {
-				console.log("Exercise completed:", data);
-			},
 		},
 		multipleChoiceParams: {
 			title: "Multiple Choice: Data Type Selection",
 			prompt: "Choose the most appropriate data type for each scenario.",
 			questions: [
 				{
+					type: ExerciseTypes.MultipleChoice,
 					id: "q1",
 					question:
 						"Which data type is most appropriate for storing currency values?",
@@ -465,7 +463,6 @@ AND DATE_HIRED < CURRENT_DATE - INTERVAL '90 days';`,
 				},
 			],
 			difficulty: "Medium",
-			onComplete: (data) => console.log(data),
 		},
 		explanationParams: {
 			title: "Understanding Database Data Types",
@@ -656,7 +653,6 @@ CREATE TABLE LogEntries (
 			],
 		},
 	},
-
 	references: {
 		exerciseParams: {
 			title: "Query: Primary and Foreign Key Implementation",
@@ -760,9 +756,6 @@ CREATE TABLE LogEntries (
 				"Consider practical database scenarios",
 				"Think about data integrity requirements",
 			],
-			onComplete: (data: { time: number; trials: number }) => {
-				console.log("Exercise completed:", data);
-			},
 		},
 		dragDropParams: {
 			title: "Sort: Implementing Database References",
@@ -804,15 +797,13 @@ CREATE TABLE LogEntries (
 				"Consider maintenance implications",
 				"Think about query performance",
 			],
-			onComplete: (data: { time: number; trials: number }) => {
-				console.log("Exercise completed:", data);
-			},
 		},
 		multipleChoiceParams: {
 			title: "Multiple Choice: Database References",
 			prompt: "Choose the correct option for each database reference scenario.",
 			questions: [
 				{
+					type: ExerciseTypes.MultipleChoice,
 					id: "q1",
 					question:
 						"Which referential action should be used when deleting a user should also delete all their orders?",
@@ -828,7 +819,6 @@ CREATE TABLE LogEntries (
 				},
 			],
 			difficulty: "Medium",
-			onComplete: (data) => console.log(data),
 		},
 		explanationParams: {
 			title: "Understanding Database References",
@@ -1011,7 +1001,6 @@ CREATE TABLE Enrollment (
 			],
 		},
 	},
-
 	ERD: {
 		exerciseParams: {
 			title: "Query: Entity Relationship Diagram Analysis",
@@ -1105,9 +1094,6 @@ ORDER BY d.name, e.name;`,
 				"Focus on the practical implications of each statement",
 				"Consider both logical design and physical implementation",
 			],
-			onComplete: (data: { time: number; trials: number }) => {
-				console.log("Exercise completed:", data);
-			},
 		},
 		dragDropParams: {
 			title: "Sort: Creating an ERD Diagram",
@@ -1153,15 +1139,13 @@ ORDER BY d.name, e.name;`,
 				"Attributes help define what data each entity will store",
 				"Relationships and cardinality work together to show how entities interact",
 			],
-			onComplete: (data: { time: number; trials: number }) => {
-				console.log("Exercise completed:", data);
-			},
 		},
 		multipleChoiceParams: {
 			title: "Multiple Choice: ERD Relationships",
 			prompt: "Choose the correct relationship type for each scenario.",
 			questions: [
 				{
+					type: ExerciseTypes.MultipleChoice,
 					id: "q1",
 					question: "What type of relationship is shown in this ERD?",
 					imageUrl: "/image/Education/basic/erd/one-to-many-example.png",
@@ -1176,7 +1160,6 @@ ORDER BY d.name, e.name;`,
 				},
 			],
 			difficulty: "Medium",
-			onComplete: (data) => console.log(data),
 		},
 		explanationParams: {
 			title: "Understanding Entity Relationship Diagrams (ERD)",
@@ -1755,9 +1738,9 @@ DROP SCHEMA IF EXISTS company CASCADE;`,
 		exerciseParams: {
 			title: "Advanced Employee Query",
 			prompt:
-				"Write a query to find all employees who earn more than the average salary in their department.",
+				"Write a query to find the employees whose salary is higher than the average salary of all employees.",
 			tables: ["employees"],
-			difficulty: "Hard",
+			difficulty: "Medium",
 			hints: [
 				"Use a correlated subquery for department average",
 				"Consider using aliases",
@@ -1768,13 +1751,12 @@ DROP SCHEMA IF EXISTS company CASCADE;`,
 				"Test subquery independently",
 				"Consider performance implications",
 			],
-			answer: `SELECT e1.name, e1.position, e1.salary
-	FROM employees e1
-	WHERE salary > (
-	  SELECT AVG(salary)
-	  FROM employees e2
-	  WHERE e2.department_id = e1.department_id
-	);`,
+			answer: `SELECT * 
+FROM employees
+WHERE salary > (
+    SELECT AVG(salary) 
+    FROM employees
+);`,
 			seed: "subquery-1",
 			expectedRowCount: 6,
 		},
@@ -1903,10 +1885,10 @@ DROP SCHEMA IF EXISTS company CASCADE;`,
 				"% matches any sequence of characters",
 				"_ matches any single character",
 			],
-			answer: `SELECT name, position
-	FROM employees
-	WHERE name ILIKE 'J%'
-	   OR name ILIKE '%son%';`,
+			answer: `SELECT * 
+			FROM employees
+			WHERE name LIKE 'J%' 
+   			OR name LIKE '%son%';`,
 			seed: "like-1",
 			expectedRowCount: 3,
 		},
@@ -1957,7 +1939,7 @@ DROP SCHEMA IF EXISTS company CASCADE;`,
 		exerciseParams: {
 			title: "Department Statistics",
 			prompt:
-				"Write a query to show the number of employees and average salary for each department, but only for departments with more than 5 employees.",
+				"Write a query to display the name of each department (department_name) and the number of employees (employee_count) in that department.",
 			tables: ["employees", "departments"],
 			difficulty: "Medium",
 			hints: [
@@ -1970,14 +1952,11 @@ DROP SCHEMA IF EXISTS company CASCADE;`,
 				"Round average values for readability",
 				"Include department names for context",
 			],
-			answer: `SELECT 
-	  d.name,
-	  COUNT(*) as employee_count,
-	  ROUND(AVG(salary), 2) as avg_salary
-	FROM employees e
-	JOIN departments d ON e.department_id = d.id
-	GROUP BY d.id, d.name
-	HAVING COUNT(*) > 5;`,
+			answer: `SELECT d.name AS department_name, 
+       COUNT(e.id) AS employee_count
+FROM departments d
+LEFT JOIN employees e ON d.id = e.department_id
+GROUP BY d.id, d.name;`,
 			seed: "group-by-1",
 			expectedRowCount: 2,
 		},
@@ -2245,10 +2224,10 @@ DROP SCHEMA IF EXISTS company CASCADE;`,
 				"Select only necessary columns",
 				"Consider query performance",
 			],
-			answer: `SELECT e.name, e.position, e.salary, d.name as department_name, d.location
-FROM employees e
-INNER JOIN departments d ON e.department_id = d.id
-WHERE d.name = 'Engineering' AND e.status = 'active';`,
+			answer: `SELECT e.name AS employee_name, d.name AS department_name
+			FROM employees e
+			INNER JOIN departments d
+			ON e.department_id = d.id;`,
 			seed: "seed_inner_join",
 			expectedRowCount: 2,
 		},
@@ -2370,12 +2349,10 @@ WHERE e.salary > 70000;`,
 				"Consider default values",
 				"Plan result ordering",
 			],
-			answer: `SELECT e.name, e.position, e.salary,
-       COALESCE(d.name, 'Unassigned') as department_name,
-       e.status
-FROM employees e
-LEFT JOIN departments d ON e.department_id = d.id
-ORDER BY e.salary DESC;`,
+			answer: `SELECT e.name AS employee_name, d.name AS department_name
+			FROM employees e
+			LEFT JOIN departments d
+			ON e.department_id = d.id;`,
 			seed: "seed_left_join",
 			expectedRowCount: 10,
 		},
@@ -2461,12 +2438,11 @@ WHERE e.status = 'active';`,
 				"Consider column ordering",
 				"Think about meaningful defaults",
 			],
-			answer: `SELECT d.name as department_name, d.manager,
-       COUNT(e.id) as employee_count,
-       COALESCE(AVG(e.salary), 0) as avg_salary
-FROM departments d
-RIGHT JOIN employees e ON e.department_id = d.id
-GROUP BY d.name, d.manager;`,
+			answer: `SELECT e.name AS employee_name, d.name AS department_name
+FROM employees e
+RIGHT JOIN departments d
+ON e.department_id = d.id;
+`,
 			seed: "seed_right_join",
 			expectedRowCount: 9,
 		},
@@ -2547,12 +2523,10 @@ GROUP BY d.name;`,
 				"Consider meaningful defaults",
 				"Think about result ordering",
 			],
-			answer: `SELECT COALESCE(e.name, 'No Employee') as employee_name,
-       COALESCE(d.name, 'Unassigned') as department_name,
-       e.salary, d.budget
-FROM employees e
-FULL OUTER JOIN departments d ON e.department_id = d.id
-ORDER BY e.salary DESC NULLS LAST;`,
+			answer: `SELECT e.name AS employee_name, e.department_id, d.name AS department_name
+			FROM employees e
+			FULL OUTER JOIN departments d
+			ON e.department_id = d.id;`,
 			seed: "seed_outer_join",
 			expectedRowCount: 12,
 		},
@@ -2624,7 +2598,7 @@ FULL OUTER JOIN departments d ON e.department_id = d.id;`,
 		exerciseParams: {
 			title: "Self-Referential Relationships",
 			prompt:
-				"Create a query that joins a table with itself to explore hierarchical or self-referential relationships.",
+				"Write a query using a self-join to find employees and their previous positions before their current one.",
 			tables: ["employees"],
 			difficulty: "Hard",
 			hints: [
@@ -2637,14 +2611,11 @@ FULL OUTER JOIN departments d ON e.department_id = d.id;`,
 				"Consider relationship direction",
 				"Handle circular references",
 			],
-			answer: `SELECT e1.name as employee_name,
-       e1.position as employee_position,
-       e2.name as manager_name,
-       e2.position as manager_position
+			answer: `SELECT e1.name AS current_employee, 
+       e2.name AS previous_position
 FROM employees e1
-LEFT JOIN employees e2 ON e1.manager_id = e2.id
-WHERE e1.status = 'active'
-ORDER BY e2.name;`,
+LEFT JOIN employees e2
+ON e1.id != e2.id AND e1.id = e2.id;`,
 			seed: "seed_self_join",
 			expectedRowCount: 8,
 		},

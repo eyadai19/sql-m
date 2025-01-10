@@ -17,7 +17,13 @@ export interface BaseExerciseProps {
 		type: string,
 	) => Promise<userExcerciseAnswerError | undefined>;
 }
-
+export interface BaseExercisePropsPage {
+	title: string;
+	prompt: string;
+	difficulty: "Easy" | "Medium" | "Hard";
+	hints?: string[];
+	tips?: string[];
+}
 // Common Types
 export interface ExerciseState {
 	attempts: number;
@@ -48,6 +54,12 @@ export interface DragDropExerciseProps extends BaseExerciseProps {
 	headings?: DragDropHeading[];
 	correctOrder: string[];
 }
+export interface DragDropExercisePropsPage extends BaseExercisePropsPage {
+	items: DragDropItem[];
+	mode: "simple" | "categorized";
+	headings?: DragDropHeading[];
+	correctOrder: string[];
+}
 
 export interface DragDropContainerProps {
 	items: DragDropItem[];
@@ -63,6 +75,9 @@ export interface TrueFalseQuestion {
 }
 
 export interface TrueFalseExerciseProps extends BaseExerciseProps {
+	questions: TrueFalseQuestion[];
+}
+export interface TrueFalseExercisePropsPage extends BaseExercisePropsPage {
 	questions: TrueFalseQuestion[];
 }
 
@@ -83,6 +98,9 @@ export interface Question {
 }
 
 export interface MultipleChoiceExerciseProps extends BaseExerciseProps {
+	questions: Question[];
+}
+export interface MultipleChoiceExercisePropsPage extends BaseExercisePropsPage {
 	questions: Question[];
 }
 
