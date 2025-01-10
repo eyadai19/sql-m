@@ -376,7 +376,7 @@ export async function ChatbotExpAction(
 			if (answer === "yes") {
 				const message = `chose the ${isMoreThanTable ? "tables" : "table"} then chose the columns`;
 				const fun = getTablesWithColumns();
-				const answer = `SELECT ${useAgFun ? "|agg| " : " "}{[column_name]} FROM ${isMoreThanTable ? "|table_name|" : "{table_name}"}${selectCondition ? " where (|condition|)" : ""}${useGroupBy ? " GROUP BY {column_name_GROUP_BY}" : ""} ORDER BY {column_name_ORDER_BY} {ASC|DESC};`;
+				const answer = `SELECT${useAgFun ? "|agg| " : " "}{[column_name]} FROM ${isMoreThanTable ? "|table_name|" : "{table_name}"}${selectCondition ? " where (|condition|)" : ""}${useGroupBy ? " GROUP BY {column_name_GROUP_BY}" : ""} ORDER BY {column_name_ORDER_BY} {ASC|DESC};`;
 				isMoreThanTable = false;
 				selectCondition = false;
 				useAgFun = false;
@@ -392,7 +392,7 @@ export async function ChatbotExpAction(
 			if (answer === "no") {
 				const message = `chose the ${isMoreThanTable ? "tables" : "table"} then chose the columns`;
 				const fun = getTablesWithColumns();
-				const answer = `SELECT ${useAgFun ? "|agg| " : " "}{[column_name]} FROM ${isMoreThanTable ? "|table_name|" : "{table_name}"}${selectCondition ? " where (|condition|)" : ""}${useGroupBy ? " GROUP BY {column_name_GROUP_BY}" : ""};`;
+				const answer = `SELECT${useAgFun ? "|agg| " : " "}{[column_name]} FROM ${isMoreThanTable ? "|table_name|" : "{table_name}"}${selectCondition ? " where (|condition|)" : ""}${useGroupBy ? " GROUP BY {column_name_GROUP_BY}" : ""};`;
 				isMoreThanTable = false;
 				selectCondition = false;
 				useAgFun = false;

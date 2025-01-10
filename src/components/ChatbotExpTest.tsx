@@ -348,6 +348,7 @@ export default function ChatbotExpTest({
 					{question}
 				</h1>
 
+				{/* عرض الاسئلة */}
 				<ul className="space-y-4">
 					{options.map((option, index) => (
 						<li key={index}>
