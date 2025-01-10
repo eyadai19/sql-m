@@ -317,8 +317,7 @@ export default function ChatBot({
 										onClick={handleCompile}
 										className="mt-4 w-40 rounded-md bg-[#ADF0D1] p-2 font-semibold text-[#00203F]"
 									>
-{										                    language === "AR" ? "تجميع" : "Compile"
-}
+										{language === "AR" ? "تجميع" : "Compile"}
 									</button>
 								</div>
 							)}
@@ -326,92 +325,96 @@ export default function ChatBot({
 					)}
 					{/* When query */}
 					{inChatMode === "Query" && (
-    <div className="mt-4 flex flex-col items-center justify-center">
-        <div className="mb-4 flex">
-            <button
-                onClick={() => handleContextChange("use my context")}
-                className={`mr-2 p-1.5 text-sm rounded-md font-semibold transition-all ${contextOption === "use my context" ? "bg-[#ADF0D1] text-[#00203F]" : "bg-gray-300 text-[#00203F] hover:bg-[#A1E7D8]"}`}
-            >
-    {language === "AR" ? "استخدام سياقي" : "Use My Context"}
-	</button>
-            <button
-                onClick={() => handleContextChange("use new context")}
-                className={`p-1.5 text-sm rounded-md font-semibold transition-all ${contextOption === "use new context" ? "bg-[#ADF0D1] text-[#00203F]" : "bg-gray-300 text-[#00203F] hover:bg-[#A1E7D8]"}`}
-            >
-    {language === "AR" ? "استخدام سياق جديد" : "Use New Context"}
-	</button>
-        </div>
-        {contextOption === "use new context" && (
-            <div className="m-3 mt-4 flex w-3/4 flex-col">
-                <textarea
-                    placeholder={
-                        language === "AR" ? "أدخل السياق الجديد هنا" : "Enter your new context"
-                    }
-                    className="resize-none overflow-hidden rounded-md bg-[#D3D3D3] p-2 text-[#00203F] text-sm"
-                    value={newContext}
-                    onChange={(e) => {
-                        setNewContext(e.target.value);
-                        autoResize(e.target);
-                    }}
-                    rows={3}
-                />
-            </div>
-        )}
-        {/* Input Field */}
-        <div className="m-3 mt-4 flex w-3/4 flex-col">
-            <textarea
-                placeholder={
-                    language === "AR" ? "أدخل سؤالك هنا" : "Enter your query here"
-                }
-                className="resize-none overflow-hidden rounded-md bg-[#D3D3D3] p-2 text-[#00203F] text-sm"
-                value={userQuery}
-                onChange={(e) => {
-                    setUserQuery(e.target.value);
-                    autoResize(e.target);
-                }}
-                rows={1}
-            />
-        </div>
-        {/* Submit Button */}
-        <button
-                onClick={handleQuerySubmit}
-                className="mt-4 w-32 rounded-md bg-[#ADF0D1] p-2 text-sm font-semibold text-[#00203F] transition-all hover:bg-[#A1E7D8]"
-            >
-                {language === "AR" ? "إرسال الاستعلام" : "Submit Query"}
-            </button>
-            
-        {loading && <div className="loader"></div>}
-        {queryResult && (
-            <div className="mt-4 flex w-3/4 flex-col">
-                <textarea
-                    className="resize-none overflow-hidden rounded-md bg-[#D3D3D3] p-2 text-[#00203F] text-sm"
-                    value={queryResult}
-                    onChange={(e) => {
-                        setQueryResult(e.target.value);
-                        autoResize(e.target);
-                    }}
-                    ref={(textarea) => {
-                        if (textarea) {
-                            textarea.style.height = "auto";
-                            textarea.style.height = `${textarea.scrollHeight}px`;
-                        }
-                    }}
-                    rows={1}
-                />
-            </div>
-        )}
-        {queryResult && contextOption === "use my context" && (
-            <div className="mt-4 flex flex-col items-center justify-center">
-                <button
-                    onClick={handleCompile}
-                    className="mt-4 w-32 rounded-md bg-[#ADF0D1] p-2 text-sm font-semibold text-[#00203F] transition-all hover:bg-[#A1E7D8]"
-                >
-{                    language === "AR" ? "تجميع" : "Compile"
-}                </button>
-            </div>
-        )}
-    </div>
-)}
+						<div className="mt-4 flex flex-col items-center justify-center">
+							<div className="mb-4 flex">
+								<button
+									onClick={() => handleContextChange("use my context")}
+									className={`mr-2 rounded-md p-1.5 text-sm font-semibold transition-all ${contextOption === "use my context" ? "bg-[#ADF0D1] text-[#00203F]" : "bg-gray-300 text-[#00203F] hover:bg-[#A1E7D8]"}`}
+								>
+									{language === "AR" ? "استخدام سياقي" : "Use My Context"}
+								</button>
+								<button
+									onClick={() => handleContextChange("use new context")}
+									className={`rounded-md p-1.5 text-sm font-semibold transition-all ${contextOption === "use new context" ? "bg-[#ADF0D1] text-[#00203F]" : "bg-gray-300 text-[#00203F] hover:bg-[#A1E7D8]"}`}
+								>
+									{language === "AR" ? "استخدام سياق جديد" : "Use New Context"}
+								</button>
+							</div>
+							{contextOption === "use new context" && (
+								<div className="m-3 mt-4 flex w-3/4 flex-col">
+									<textarea
+										placeholder={
+											language === "AR"
+												? "أدخل السياق الجديد هنا"
+												: "Enter your new context"
+										}
+										className="resize-none overflow-hidden rounded-md bg-[#D3D3D3] p-2 text-sm text-[#00203F]"
+										value={newContext}
+										onChange={(e) => {
+											setNewContext(e.target.value);
+											autoResize(e.target);
+										}}
+										rows={3}
+									/>
+								</div>
+							)}
+							{/* Input Field */}
+							<div className="m-3 mt-4 flex w-3/4 flex-col">
+								<textarea
+									placeholder={
+										language === "AR"
+											? "أدخل سؤالك هنا"
+											: "Enter your query here"
+									}
+									className="resize-none overflow-hidden rounded-md bg-[#D3D3D3] p-2 text-sm text-[#00203F]"
+									value={userQuery}
+									onChange={(e) => {
+										setUserQuery(e.target.value);
+										autoResize(e.target);
+									}}
+									rows={1}
+								/>
+							</div>
+							{/* Submit Button */}
+							<button
+								onClick={handleQuerySubmit}
+								className="mt-4 w-32 rounded-md bg-[#ADF0D1] p-2 text-sm font-semibold text-[#00203F] transition-all hover:bg-[#A1E7D8]"
+							>
+								{language === "AR" ? "إرسال الاستعلام" : "Submit Query"}
+							</button>
+
+							{loading && <div className="loader"></div>}
+							{queryResult && (
+								<div className="mt-4 flex w-3/4 flex-col">
+									<textarea
+										className="resize-none overflow-hidden rounded-md bg-[#D3D3D3] p-2 text-sm text-[#00203F]"
+										value={queryResult}
+										onChange={(e) => {
+											setQueryResult(e.target.value);
+											autoResize(e.target);
+										}}
+										ref={(textarea) => {
+											if (textarea) {
+												textarea.style.height = "auto";
+												textarea.style.height = `${textarea.scrollHeight}px`;
+											}
+										}}
+										rows={1}
+									/>
+								</div>
+							)}
+							{queryResult && contextOption === "use my context" && (
+								<div className="mt-4 flex flex-col items-center justify-center">
+									<button
+										onClick={handleCompile}
+										className="mt-4 w-32 rounded-md bg-[#ADF0D1] p-2 text-sm font-semibold text-[#00203F] transition-all hover:bg-[#A1E7D8]"
+									>
+										{language === "AR" ? "تجميع" : "Compile"}{" "}
+									</button>
+								</div>
+							)}
+						</div>
+					)}
 
 					{/* {run query} */}
 					{compiledData.length > 0 && (

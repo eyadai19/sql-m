@@ -33,15 +33,6 @@ export default function ChatbotExpTest({
 	const [endMessage, setEndMessage] = useState<string>("");
 	const [syntax, setSyntax] = useState<string>("");
 	const [extraOptions, setExtraOptions] = useState<string[]>([]);
-	const [extraOptionsColumns, setExtraOptionsColumns] = useState<
-		| string[]
-		| Record<string, string[]>
-		| {
-				field: string;
-				message: string;
-		  }
-		| undefined
-	>();
 	const [selectedTables, setSelectedTables] = useState<string[]>([]);
 	const [selectedTable, setSelectedTable] = useState<string | null>(null);
 	const [tableColumns, setTableColumns] = useState<string[]>([]);
@@ -58,12 +49,10 @@ export default function ChatbotExpTest({
 	const [orderByColumnName, setOrderByColumnName] = useState<string>("");
 	const [groupBy, setGroupBy] = useState<boolean>(false);
 	const [groupByColumnName, setGroupByColumnName] = useState<string>("");
-	const [updateColumnAndData, setUpdateColumnAndData] = useState<string[]>([]);
 	const [columnValues, setColumnValues] = useState<Record<string, string>>({});
 	const [condition, setCondition] = useState<boolean>(false);
+	const [isDelete, setIsDelete] = useState<boolean>(false);
 	const [createTable, setCreateTable] = useState<boolean>(false);
-	const [conditionOperatorsBettweenRows, setConditionOperatorsBettweenRows] =
-		useState<boolean>(false);
 	const [conditions, setConditions] = useState([
 		{ column: "", operator: "", value: "" },
 	]);
@@ -121,11 +110,11 @@ export default function ChatbotExpTest({
 			if (result.answer.includes("ORDER BY")) setOrderBy(true);
 			if (result.answer.includes("GROUP BY")) setGroupBy(true);
 			if (result.answer.includes("where")) setCondition(true);
+			if (result.answer.includes("DELETE FROM")) setIsDelete(true);
 			const resolvedFun = await result.fun;
 			if (typeof resolvedFun === "object" && !Array.isArray(resolvedFun)) {
 				const tableNames = Object.keys(resolvedFun);
 				setExtraOptions(tableNames);
-				setExtraOptionsColumns(resolvedFun);
 				setSyntax(result.answer);
 				setEndMessage("");
 			} else if (Array.isArray(resolvedFun)) {
@@ -137,7 +126,7 @@ export default function ChatbotExpTest({
 		} else if ("answer" in result) {
 			if (result.answer.includes("CREATE")) setCreateTable(true);
 			setSyntax("Generated Syntax: " + result.answer);
-			setEndMessage("End of questions");
+			setEndMessage("");
 		} else if ("question" in result && "answers" in result) {
 			setQuestion(result.question);
 			setOptions(result.answers);
@@ -146,7 +135,6 @@ export default function ChatbotExpTest({
 			setEndMessage(result.message || "Failed to process the answer.");
 		}
 	};
-
 	const handleTableSelection = async (table: string) => {
 		setSelectedTable(table);
 
@@ -187,7 +175,6 @@ export default function ChatbotExpTest({
 		setSelectedColumns([]);
 		setSelectedColumn("");
 	};
-
 	const handleTablesSelection = async (table: string) => {
 		setSelectedTables((prev) =>
 			prev.includes(table) ? prev.filter((t) => t !== table) : [...prev, table],
@@ -232,7 +219,6 @@ export default function ChatbotExpTest({
 		setSelectedColumns([]);
 		setSelectedColumn("");
 	};
-
 	const toggleColumnSelection = (column: string) => {
 		setSelectedColumns((prev) =>
 			prev.includes(column)
@@ -240,11 +226,9 @@ export default function ChatbotExpTest({
 				: [...prev, column],
 		);
 	};
-
 	const handleColumnSelection = (column: string) => {
 		setSelectedColumn(column);
 	};
-
 	const generateSQL = () => {
 		if (
 			!(selectedTable || selectedTables) ||
@@ -302,12 +286,60 @@ export default function ChatbotExpTest({
 		setSyntax(sqlQuery);
 		setEndMessage("SQL query generated successfully.");
 	};
-
+	const generateCreateTableSQL = () => {
+		const sqlQuery = syntax
+			.replace("[table_name]", tableName)
+			.replace(
+				"{[column_name datatype]}",
+				columns.map((col) => `${col.name} ${col.type}`).join(", "),
+			);
+		setSyntax(sqlQuery);
+		setEndMessage("SQL query generated successfully.");
+	};
+	const generateDeleteSQL = () => {
+		const finalCondition = conditions
+			.map((cond) => `${cond.column} ${cond.operator} '${cond.value}'`)
+			.join(` ${conditionLogic} `);
+		const sqlQuery = syntax
+			.replace("{table_name}", selectedTable ? selectedTable.split(":")[0] : "")
+			.replace("|condition|", finalCondition);
+		setSyntax(sqlQuery);
+		setEndMessage("SQL query generated successfully.");
+	};
 	const handleColumnChange = (column: string, value: string) => {
 		setColumnValues((prev) => ({
 			...prev,
 			[column]: value,
 		}));
+	};
+	const resetAll = () => {
+		setQuestion("What kind of instructions do you want?");
+		setOptions(["dml", "ddl"]);
+		setEndMessage("");
+		setSyntax("");
+		setExtraOptions([]);
+		setSelectedTables([]);
+		setSelectedTable(null);
+		setTableColumns([]);
+		setSelectedColumns([]);
+		setSelectedColumn("");
+		setDatatype("");
+		setAggregateFunction("");
+		setAggregateFunctionColumnName("");
+		setDatatypes([]);
+		setX(false);
+		setOrderBy(false);
+		setIsDESC(false);
+		setOrderByColumnName("");
+		setGroupBy(false);
+		setGroupByColumnName("");
+		setColumnValues({});
+		setCondition(false);
+		setCreateTable(false);
+		setConditions([{ column: "", operator: "", value: "" }]);
+		setConditionLogic("AND");
+		setTableName("my_table");
+		setColumns([{ name: "", type: "" }]);
 	};
 	return (
 		<div className="flex min-h-screen items-center justify-center bg-gray-100">
@@ -451,7 +483,7 @@ export default function ChatbotExpTest({
 					)}
 
 				{/* واجهة لإنشاء شروط */}
-				{condition && (selectedTable || x) && (
+				{!endMessage && condition && (selectedTable || x) && (
 					<div className="mt-4 space-y-4">
 						<p className="mb-2 font-medium text-gray-700">Define conditions:</p>
 
@@ -544,133 +576,169 @@ export default function ChatbotExpTest({
 				)}
 
 				{/* عرض الأعمدة كـ Checkboxes أو RadioButtons */}
-				{!endMessage && (selectedTable || x) && tableColumns.length > 0 && (
-					<div className="mt-4">
-						<p className="mb-2 font-medium text-gray-700">
-							{/* Select columns from {selectedTable.split(":")[0]}: */}s
-						</p>
-						<div className="space-y-2">
-							{syntax.includes("[")
-								? // إذا كان الجواب يحتوي على "[" استخدم Checkboxes
-									tableColumns.map((column, index) => (
-										<label
-											key={index}
-											className="flex items-center space-x-2 text-gray-800"
-										>
-											<input
-												type="checkbox"
-												value={column}
-												onChange={() => toggleColumnSelection(column)}
-												className="rounded border-gray-300 text-blue-500 focus:ring-blue-400"
-											/>
-											<span>{column}</span>
-											{(syntax.startsWith("UPDATE") ||
-												syntax.startsWith("INSERT")) && (
+				{!endMessage &&
+					(selectedTable || x) &&
+					tableColumns.length > 0 &&
+					!isDelete && (
+						<div className="mt-4">
+							<p className="mb-2 font-medium text-gray-700">
+								{/* Select columns from {selectedTable.split(":")[0]}: */}s
+							</p>
+							<div className="space-y-2">
+								{syntax.includes("[")
+									? // إذا كان الجواب يحتوي على "[" استخدم Checkboxes
+										tableColumns.map((column, index) => (
+											<label
+												key={index}
+												className="flex items-center space-x-2 text-gray-800"
+											>
 												<input
-													type="text"
-													placeholder="Enter value"
-													value={columnValues[column] || ""}
-													onChange={(e) =>
-														handleColumnChange(column, e.target.value)
-													}
-													className="ml-2 w-32 rounded-md border-gray-300 p-1 text-gray-800 focus:ring-blue-400"
+													type="checkbox"
+													value={column}
+													onChange={() => toggleColumnSelection(column)}
+													className="rounded border-gray-300 text-blue-500 focus:ring-blue-400"
 												/>
-											)}
-										</label>
-									))
-								: // إذا لم يحتوي الجواب على "[" استخدم RadioButtons
-									tableColumns.map((column, index) => (
-										<label
-											key={index}
-											className="flex items-center space-x-2 text-gray-800"
-										>
-											<input
-												type="radio"
-												name="column"
-												value={column}
-												onChange={() => handleColumnSelection(column)}
-												className="rounded border-gray-300 text-blue-500 focus:ring-blue-400"
-											/>
-											<span>{column}</span>
-											{(syntax.startsWith("UPDATE") ||
-												syntax.startsWith("INSERT")) && (
+												<span>{column}</span>
+												{(syntax.startsWith("UPDATE") ||
+													syntax.startsWith("INSERT")) && (
+													<input
+														type="text"
+														placeholder="Enter value"
+														value={columnValues[column] || ""}
+														onChange={(e) =>
+															handleColumnChange(column, e.target.value)
+														}
+														className="ml-2 w-32 rounded-md border-gray-300 p-1 text-gray-800 focus:ring-blue-400"
+													/>
+												)}
+											</label>
+										))
+									: // إذا لم يحتوي الجواب على "[" استخدم RadioButtons
+										tableColumns.map((column, index) => (
+											<label
+												key={index}
+												className="flex items-center space-x-2 text-gray-800"
+											>
 												<input
-													type="text"
-													placeholder="Enter value"
-													value={columnValues[column] || ""}
-													onChange={(e) =>
-														handleColumnChange(column, e.target.value)
-													}
-													className="ml-2 w-32 rounded-md border-gray-300 p-1 text-gray-800 focus:ring-blue-400"
+													type="radio"
+													name="column"
+													value={column}
+													onChange={() => handleColumnSelection(column)}
+													className="rounded border-gray-300 text-blue-500 focus:ring-blue-400"
 												/>
-											)}
-										</label>
-									))}
+												<span>{column}</span>
+												{(syntax.startsWith("UPDATE") ||
+													syntax.startsWith("INSERT")) && (
+													<input
+														type="text"
+														placeholder="Enter value"
+														value={columnValues[column] || ""}
+														onChange={(e) =>
+															handleColumnChange(column, e.target.value)
+														}
+														className="ml-2 w-32 rounded-md border-gray-300 p-1 text-gray-800 focus:ring-blue-400"
+													/>
+												)}
+											</label>
+										))}
+							</div>
+							<button
+								className="mt-4 w-full rounded-md bg-purple-500 py-2 text-white transition duration-200 hover:bg-purple-600"
+								onClick={generateSQL}
+							>
+								Generate SQL Query
+							</button>
 						</div>
-						<button
-							className="mt-4 w-full rounded-md bg-purple-500 py-2 text-white transition duration-200 hover:bg-purple-600"
-							onClick={generateSQL}
-						>
-							Generate SQL Query
-						</button>
-					</div>
+					)}
+
+				{!endMessage && selectedTable && isDelete && (
+					<button
+						className="mt-4 w-full rounded-md bg-purple-500 py-2 text-white transition duration-200 hover:bg-purple-600"
+						onClick={generateDeleteSQL}
+					>
+						Generate SQL Query
+					</button>
 				)}
+				{!endMessage && createTable && (
+					<div className="rounded-lg bg-gray-100 p-6 shadow-md">
+						<div className="mb-4">
+							<label
+								htmlFor="tableName"
+								className="mb-2 block text-sm font-medium text-gray-700"
+							>
+								Table Name:
+							</label>
+							<input
+								type="text"
+								id="tableName"
+								name="tableName"
+								placeholder="Enter the table name"
+								onChange={(e) => handleTableNameChange(e.target.value)}
+								className="w-full rounded-md border border-gray-300 p-2 focus:border-purple-500 focus:outline-none focus:ring-2 focus:ring-purple-500"
+							/>
+						</div>
 
-				{createTable && (
-					<div>
-						{createTable && (
-							<form>
-								<label htmlFor="tableName">اسم الجدول:</label>
-								<input
-									type="text"
-									id="tableName"
-									name="tableName"
-									placeholder="أدخل اسم الجدول"
-									onChange={(e) => handleTableNameChange(e.target.value)}
-								/>
+						{columns.map((col, index) => (
+							<div key={index} className="mb-4">
+								<div className="mb-2">
+									<label
+										htmlFor={`columnName${index}`}
+										className="block text-sm font-medium text-gray-700"
+									>
+										Column Name:
+									</label>
+									<input
+										type="text"
+										id={`columnName${index}`}
+										value={col.name}
+										onChange={(e) =>
+											handleCreateColumnChange(index, "name", e.target.value)
+										}
+										placeholder="Enter the column name"
+										className="w-full rounded-md border border-gray-300 p-2 focus:border-purple-500 focus:outline-none focus:ring-2 focus:ring-purple-500"
+									/>
+								</div>
+								<div>
+									<label
+										htmlFor={`columnType${index}`}
+										className="block text-sm font-medium text-gray-700"
+									>
+										Column Type:
+									</label>
+									<select
+										id={`columnType${index}`}
+										value={col.type}
+										onChange={(e) =>
+											handleCreateColumnChange(index, "type", e.target.value)
+										}
+										className="w-full rounded-md border border-gray-300 p-2 focus:border-purple-500 focus:outline-none focus:ring-2 focus:ring-purple-500"
+									>
+										<option value="">Select column type</option>
+										{columnTypes.map((type, i) => (
+											<option key={i} value={type}>
+												{type}
+											</option>
+										))}
+									</select>
+								</div>
+							</div>
+						))}
 
-								{columns.map((col, index) => (
-									<div key={index}>
-										<label htmlFor={`columnName${index}`}>اسم العمود:</label>
-										<input
-											type="text"
-											id={`columnName${index}`}
-											value={col.name}
-											onChange={(e) =>
-												handleCreateColumnChange(index, "name", e.target.value)
-											}
-											placeholder="أدخل اسم العمود"
-										/>
-
-										<label htmlFor={`columnType${index}`}>نوع العمود:</label>
-										<select
-											id={`columnType${index}`}
-											value={col.type}
-											onChange={(e) =>
-												handleCreateColumnChange(index, "type", e.target.value)
-											}
-										>
-											<option value="">اختر نوع العمود</option>
-											{columnTypes.map((type, i) => (
-												<option key={i} value={type}>
-													{type}
-												</option>
-											))}
-										</select>
-									</div>
-								))}
-
-								<button type="button" onClick={handleAddColumn}>
-									عامود آخر
-								</button>
-								<button
-									className="mt-4 w-full rounded-md bg-purple-500 py-2 text-white transition duration-200 hover:bg-purple-600"
-									onClick={generateSQL}
-								>
-									Generate SQL Query
-								</button>
-							</form>
-						)}
+						<div className="flex space-x-4">
+							<button
+								type="button"
+								onClick={handleAddColumn}
+								className="rounded-md bg-blue-500 px-4 py-2 text-white hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-400"
+							>
+								New Column
+							</button>
+							<button
+								className="rounded-md bg-purple-500 px-4 py-2 text-white hover:bg-purple-600 focus:outline-none focus:ring-2 focus:ring-purple-400"
+								onClick={generateCreateTableSQL}
+							>
+								Generate SQL Query
+							</button>
+						</div>
 					</div>
 				)}
 				{/* عرض الرسالة النهائية */}
@@ -681,6 +749,13 @@ export default function ChatbotExpTest({
 						{endMessage}
 					</p>
 				)}
+				<button
+					type="button"
+					onClick={resetAll}
+					className="my-3 rounded-md bg-red-500 px-4 py-2 text-white hover:bg-red-600 focus:outline-none focus:ring-2 focus:ring-red-400"
+				>
+					Reset
+				</button>
 			</div>
 		</div>
 	);

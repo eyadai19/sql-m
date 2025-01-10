@@ -209,7 +209,7 @@ export async function ChatbotExpAction(
 			if (answer === "yes") {
 				return {
 					// add text field to ui to write table name and column name and drag drop list to chose the type - if click on + then the user can add new column
-					answer: "CREATE TABLE [table_name] {[column_name datatype]};",
+					answer: "CREATE TABLE [table_name] ({[column_name datatype]});",
 				};
 			}
 			if (answer === "no") {
@@ -277,7 +277,7 @@ export async function ChatbotExpAction(
 					message: "chose the table to delete ",
 					fun: getTablesWithColumns(),
 					answer:
-						"UPDATE {table_name} SET {[column_name = value]} where |condition|;",
+						"UPDATE {table_name} SET {[column_name = value]} where (|condition|);",
 				};
 			}
 		}
