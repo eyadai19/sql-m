@@ -20,7 +20,7 @@ export function HomeComponent() {
 
 					{/* Buttons */}
 					<div className="mt-6 flex justify-center space-x-4 md:justify-start">
-						<Link href="/Profile">
+						<Link href="/basic/dataType">
 							<button className="rounded-lg bg-[#00203F] px-6 py-3 text-sm font-bold text-[#ADF0D1] transition-colors hover:bg-[#004466]">
 								Get Started
 							</button>

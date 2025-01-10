@@ -258,6 +258,7 @@ export default function SqlQuiz({
 														) : q.type === "DragDropExercise" ? (
 															<div>
 																{/* Drag and drop implementation */}
+																
 																<p>Drag and drop question interface here</p>
 															</div>
 														) : (
