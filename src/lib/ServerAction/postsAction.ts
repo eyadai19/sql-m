@@ -353,3 +353,31 @@ export async function deletePostAction(
 		};
 	}
 }
+
+export async function infoAddPostAction(): Promise<
+	| { field: string; message: string }
+	| undefined
+	| { name: string; photo: string | null }
+> {
+	"use server";
+
+	try {
+		const user = await getUser();
+		if (!user) return { field: "root", message: "User not authenticated" };
+		const userInfo = await db.query.TB_user.findFirst({
+			where: (searchUser, { eq }) => eq(searchUser.id, user.id),
+		});
+		if (!userInfo) return { field: "root", message: "User not found" };
+
+		return {
+			name: userInfo.firstName + " " + userInfo.lastName,
+			photo: userInfo.photo,
+		};
+	} catch (error) {
+		console.error("Unexpected error:", error);
+		return {
+			field: "root",
+			message: "An unexpected error occurred, please try again later",
+		};
+	}
+}

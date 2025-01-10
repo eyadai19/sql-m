@@ -22,6 +22,7 @@ export default function CommunityPage({
 	addPostAction,
 	editPostAction,
 	deletePostAction,
+	infoAddPostAction,
 }: {
 	fetchAllPostsAction: () => Promise<
 		Post[] | { field: string; message: string }
@@ -50,6 +51,11 @@ export default function CommunityPage({
 	deletePostAction: (
 		postId: string,
 	) => Promise<{ field: string; message: string } | undefined>;
+	infoAddPostAction: () => Promise<
+		| { field: string; message: string }
+		| undefined
+		| { name: string; photo: string | null }
+	>;
 }) {
 	const [posts, setPosts] = useState<Post[] | null>(null);
 	const [error, setError] = useState<string | null>(null);
@@ -124,7 +130,10 @@ export default function CommunityPage({
 
 				<div className="mb-8 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
 					<h2 className="text-2xl font-bold text-gray-900">Community Posts</h2>
-					<CreatePostButton />
+					<CreatePostButton
+						addPostAction={addPostAction}
+						infoAddPostAction={infoAddPostAction}
+					/>
 				</div>
 
 				<div className="space-y-6">

@@ -6,7 +6,9 @@ import React, { useEffect, useRef, useState } from "react";
 
 export default function SelectData() {
 	const [selectQuery, setSelectQuery] = useState<string>("");
-	const [selectResults, setSelectResults] = useState<Record<string, string>[]>([]);
+	const [selectResults, setSelectResults] = useState<Record<string, string>[]>(
+		[],
+	);
 	const [popupVisible, setPopupVisible] = useState<boolean>(false);
 	const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
@@ -105,69 +107,67 @@ export default function SelectData() {
 			</button>
 
 			{popupVisible && (
-  <>
-    {/* الخلفية المعتمة */}
-    <div
-      className="fixed left-0 top-0 h-full w-full bg-black opacity-25"
-      style={{ zIndex: 9 }}
-    ></div>
-    
-    {/* النافذة المنبثقة */}
-    <div
-      ref={popupRef}
-      className="absolute rounded-md bg-white p-6 shadow-lg"
-      style={{
-        position: "fixed",
-        top: "50%",
-        left: "50%",
-        transform: "translate(-50%, -50%)",
-        zIndex: 10,
-        maxWidth: "90%",  // الحد الأقصى للعرض ليكون 90% من عرض الشاشة
-        width: "auto",   // يسمح للنافذة بتغيير الحجم بشكل تلقائي
-      }}
-    >
-      <div className="mb-4">
-        <h3 className="text-xl font-semibold text-[#00203F]">
-          How to use SELECT
-        </h3>
-        <p className="mt-2 text-[#00203F]">
-          To execute a SELECT query, use the following syntax:
-        </p>
-        
-        {/* النص داخل <pre> مع التمرير الأفقي */}
-        <div className="mt-2 flex items-center justify-between rounded-md bg-[#f5f5f5] p-3 overflow-x-auto">
-          <pre className="text-[#00203F] flex-1 whitespace-nowrap">
-            SELECT column1, column2 FROM tableName;
-          </pre>
-          <button
-            onClick={() =>
-              copyToClipboard("SELECT column1, column2 FROM tableName;")
-            }
-            className="mt-2 sm:mt-0 ml-4 rounded-full bg-[#ADF0D1] px-2 py-1 text-[#00203F] shadow hover:bg-[#00203F] hover:text-[#ADF0D1]"
-            title="Copy to clipboard"
-          >
-            <FontAwesomeIcon icon={faCopy} className="text-[#00203F]" />
-          </button>
-        </div>
-        
-        <p className="mt-2 text-[#00203F]">
-          Replace <code>column1, column2</code> with the columns you want
-          to select, and <code>tableName</code> with the name of the
-          table.
-        </p>
-      </div>
-      
-      <button
-        onClick={closePopup}
-        className="w-full rounded-md bg-[#ADF0D1] py-2 text-[#00203F] hover:bg-[#00203F] hover:text-[#ADF0D1]"
-      >
-        Close
-      </button>
-    </div>
-  </>
-)}
+				<>
+					{/* الخلفية المعتمة */}
+					<div
+						className="fixed left-0 top-0 h-full w-full bg-black opacity-25"
+						style={{ zIndex: 9 }}
+					></div>
 
+					{/* النافذة المنبثقة */}
+					<div
+						ref={popupRef}
+						className="absolute rounded-md bg-white p-6 shadow-lg"
+						style={{
+							position: "fixed",
+							top: "50%",
+							left: "50%",
+							transform: "translate(-50%, -50%)",
+							zIndex: 10,
+							maxWidth: "90%", // الحد الأقصى للعرض ليكون 90% من عرض الشاشة
+							width: "auto", // يسمح للنافذة بتغيير الحجم بشكل تلقائي
+						}}
+					>
+						<div className="mb-4">
+							<h3 className="text-xl font-semibold text-[#00203F]">
+								How to use SELECT
+							</h3>
+							<p className="mt-2 text-[#00203F]">
+								To execute a SELECT query, use the following syntax:
+							</p>
 
+							{/* النص داخل <pre> مع التمرير الأفقي */}
+							<div className="mt-2 flex items-center justify-between overflow-x-auto rounded-md bg-[#f5f5f5] p-3">
+								<pre className="flex-1 whitespace-nowrap text-[#00203F]">
+									SELECT column1, column2 FROM tableName;
+								</pre>
+								<button
+									onClick={() =>
+										copyToClipboard("SELECT column1, column2 FROM tableName;")
+									}
+									className="ml-4 mt-2 rounded-full bg-[#ADF0D1] px-2 py-1 text-[#00203F] shadow hover:bg-[#00203F] hover:text-[#ADF0D1] sm:mt-0"
+									title="Copy to clipboard"
+								>
+									<FontAwesomeIcon icon={faCopy} className="text-[#00203F]" />
+								</button>
+							</div>
+
+							<p className="mt-2 text-[#00203F]">
+								Replace <code>column1, column2</code> with the columns you want
+								to select, and <code>tableName</code> with the name of the
+								table.
+							</p>
+						</div>
+
+						<button
+							onClick={closePopup}
+							className="w-full rounded-md bg-[#ADF0D1] py-2 text-[#00203F] hover:bg-[#00203F] hover:text-[#ADF0D1]"
+						>
+							Close
+						</button>
+					</div>
+				</>
+			)}
 
 			{selectResults.length > 0 && (
 				<div className="mt-6 rounded-lg bg-white p-6 shadow-md">
@@ -175,7 +175,7 @@ export default function SelectData() {
 						Query Results:
 					</h3>
 					<div className="overflow-x-auto">
-						<table className="min-w-max w-full table-auto border-collapse rounded-md border border-gray-300 text-[#00203F]">
+						<table className="w-full min-w-max table-auto border-collapse rounded-md border border-gray-300 text-[#00203F]">
 							<thead className="bg-[#00203F] text-white">
 								<tr>
 									{Object.keys(selectResults[0]).map((key) => (
@@ -190,7 +190,10 @@ export default function SelectData() {
 							</thead>
 							<tbody>
 								{selectResults.map((row, index) => (
-									<tr key={index} className="odd:bg-[#f5f5f5] hover:bg-[#e0f7fa]">
+									<tr
+										key={index}
+										className="odd:bg-[#f5f5f5] hover:bg-[#e0f7fa]"
+									>
 										{Object.values(row).map((value, idx) => (
 											<td
 												key={idx}

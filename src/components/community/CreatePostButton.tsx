@@ -10,7 +10,21 @@ import {
 } from "@/components/ui/dialog";
 import { PenSquare } from "lucide-react";
 
-export function CreatePostButton() {
+export function CreatePostButton({
+	infoAddPostAction, // return name and photo
+	addPostAction, 
+}: {
+	infoAddPostAction: () => Promise<
+		| { field: string; message: string }
+		| undefined
+		| { name: string; photo: string | null }
+	>;
+	addPostAction: (
+		title: string,
+		content: string,
+		photo: string | null,
+	) => Promise<{ field: string; message: string } | undefined>;
+}) {
 	return (
 		<Dialog>
 			<DialogTrigger asChild>

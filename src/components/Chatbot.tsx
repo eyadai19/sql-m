@@ -3,6 +3,7 @@ import {
 	userChatBotInputSchema,
 	userExcerciseAnswerError,
 } from "@/lib/types/userSchema";
+import { userDbApi } from "@/utils/apis";
 import React, { useEffect, useRef, useState } from "react";
 import {
 	AiOutlineArrowDown,
@@ -185,15 +186,40 @@ export default function ChatBot({
 		fetchInitialQuestion();
 	};
 
-	const handleCompile = () => {
+	const handleCompile = async () => {
 		// Generate table data when the button is clicked
-		const data = [
-			{ id: 1, name: "John Doe", age: 28, action: "selected option 1" },
-			{ id: 2, name: "Jane Smith", age: 34, action: "selected option 2" },
-			{ id: 3, name: "Sam Brown", age: 22, action: "selected option 3" },
-		];
+		queryResult;
+		try {
+			const response = await fetch(userDbApi, {
+				method: "POST",
+				headers: { "Content-Type": "application/json" },
+				body: JSON.stringify({
+					query: queryResult,
+				}),
+			});
 
-		setCompiledData(data);
+			if (!response.ok) {
+				// const errorData = await response.json();
+				// setErrorMessage(
+				// 	`${errorData.error} \n ${errorData.originalError}` ||
+				// 		"Error executing query.",
+				// );
+				return;
+			}
+
+			const data = await response.json();
+
+			setCompiledData(data);
+			console.log(compiledData);
+		} catch (error) {
+			console.error("Error executing query:", error);
+			// setErrorMessage("An error occurred while executing the query.");
+		}
+		// const data = [
+		// 	{ id: 1, name: "John Doe", age: 28, action: "selected option 1" },
+		// 	{ id: 2, name: "Jane Smith", age: 34, action: "selected option 2" },
+		// 	{ id: 3, name: "Sam Brown", age: 22, action: "selected option 3" },
+		// ];
 	};
 
 	const autoResize = (element: HTMLTextAreaElement) => {
@@ -722,32 +748,43 @@ export default function ChatBot({
 
 					{/* {run query} */}
 					{compiledData.length > 0 && (
-						<div className="mt-4">
-							<table className="w-full table-auto">
-								<thead>
-									<tr>
-										{/* Extract columns from the first object in compiledData */}
-										{Object.keys(compiledData[0]).map((key) => (
-											<th key={key} className="border p-2 text-left">
-												{key.charAt(0).toUpperCase() + key.slice(1)}{" "}
-												{/* Display column name properly */}
-											</th>
-										))}
-									</tr>
-								</thead>
-								<tbody>
-									{compiledData.map((row, index) => (
-										<tr key={index}>
-											{/* Display values based on columns */}
-											{Object.values(row).map((value, i) => (
-												<td key={i} className="border p-2">
-													{String(value)}
-												</td>
+						<div className="mt-6 rounded-lg bg-white p-6 shadow-md">
+							<h3 className="mb-4 text-lg font-medium text-[#00203F]">
+								Query Results:
+							</h3>
+							<div className="overflow-x-auto">
+								<table className="w-full min-w-max table-auto border-collapse rounded-md border border-gray-300 text-[#00203F]">
+									<thead className="bg-[#00203F] text-white">
+										<tr>
+											{Object.keys(compiledData[0]).map((key) => (
+												<th
+													key={key}
+													className="border px-6 py-4 text-left text-sm uppercase tracking-wider text-white"
+												>
+													{key}
+												</th>
 											))}
 										</tr>
-									))}
-								</tbody>
-							</table>
+									</thead>
+									<tbody>
+										{compiledData.map((row, index) => (
+											<tr
+												key={index}
+												className="odd:bg-[#f5f5f5] hover:bg-[#e0f7fa]"
+											>
+												{Object.values(row).map((value: any, idx) => (
+													<td
+														key={idx}
+														className="border px-6 py-4 text-sm text-[#00203F]"
+													>
+														{value}
+													</td>
+												))}
+											</tr>
+										))}
+									</tbody>
+								</table>
+							</div>
 						</div>
 					)}
 

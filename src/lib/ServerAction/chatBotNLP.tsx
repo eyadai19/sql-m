@@ -47,26 +47,26 @@ export async function ChatbotAction(
 	}
 }
 
-export async function ChatbotExpAction(
-	input: z.infer<typeof userChatBotInputSchema>,
-): Promise<
-	| { answer: String }
-	| { question: String; answers: String[] }
-	| userExcerciseAnswerError
-	| undefined
-> {
-	"use server";
-	try {
-		const choose = await userChatBotInputSchema.parseAsync({ input });
-		const response = await axios.post("chatBotApi", {
-			choose,
-		});
+// export async function ChatbotExpAction(
+// 	input: z.infer<typeof userChatBotInputSchema>,
+// ): Promise<
+// 	| { answer: String }
+// 	| { question: String; answers: String[] }
+// 	| userExcerciseAnswerError
+// 	| undefined
+// > {
+// 	"use server";
+// 	try {
+// 		const choose = await userChatBotInputSchema.parseAsync({ input });
+// 		const response = await axios.post("chatBotApi", {
+// 			choose,
+// 		});
 
-	} catch (error) {
-		console.error("Error sending question to API:", error);
-		return { field: "root", message: "Failed to retrieve answer" };
-	}
-}
+// 	} catch (error) {
+// 		console.error("Error sending question to API:", error);
+// 		return { field: "root", message: "Failed to retrieve answer" };
+// 	}
+// }
 
 export async function ChatbotTrEnToAr(
 	input: z.infer<typeof userChatBotInputSchema>,

@@ -6,6 +6,7 @@ import {
 	deletePostAction,
 	editPostAction,
 	fetchAllPostsAction,
+	infoAddPostAction,
 	postCommentAction,
 	postCommentLikeAction,
 	postLikeAction,
@@ -24,6 +25,7 @@ export default function Community() {
 				addPostAction={addPostAction}
 				deletePostAction={deletePostAction}
 				editPostAction={editPostAction}
+				infoAddPostAction={infoAddPostAction}
 			/>
 		</div>
 	);

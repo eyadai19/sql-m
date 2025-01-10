@@ -7,10 +7,10 @@ import Chatbot from "@/components/Chatbot";
 import { Footer } from "@/components/home/Footer";
 import {
   ChatbotAction,
-  ChatbotExpAction,
   ChatbotTrArToEn,
   ChatbotTrEnToAr,
 } from "@/lib/ServerAction/chatBotNLP";
+import { ChatbotExpAction } from "@/lib/ServerAction/chatbotExp";
 import Popup from "@/components/home/Popup";
 
 export default function HomePage() {
