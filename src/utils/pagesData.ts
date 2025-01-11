@@ -185,10 +185,7 @@ VALUES ('Alice Johnson', 'Data Analyst', 65000, 2);`,
 	update: {
 		exerciseParams: {
 			title: "Employee Salary Adjustment",
-			prompt: `UPDATE employees
-      SET salary = salary * 1.10
-      WHERE department_id = 1
-      AND DATE_HIRED <= CURRENT_DATE - '5 years';`,
+			prompt: `Update the salaries of employees in department department_id = 1 who were hired more than 5 years ago by 10%.`,
 			tables: ["employees"],
 			difficulty: "Medium",
 			hints: [
@@ -202,10 +199,9 @@ VALUES ('Alice Johnson', 'Data Analyst', 65000, 2);`,
 				"Use transactions for safety",
 				"Consider the impact on related tables",
 			],
-			answer: `UPDATE employees
-      SET salary = salary * 1.10
-      WHERE department_id = 1
-      AND DATE_HIRED <= CURRENT_DATE - INTERVAL '5 years';`,
+			answer: `UPDATE employees 
+SET salary = salary * 1.10 
+WHERE department_id = 1 AND DATE_HIRED <= DATE('now', '-5 years');`,
 			seed: "seed3",
 			expectedRowCount: 1,
 		},
@@ -1360,7 +1356,7 @@ const EmployeeProjects = {
 		exerciseParams: {
 			title: "Creating Employee Table",
 			prompt:
-				"Write a CREATE TABLE statement for the employees table with appropriate data types and constraints. Include columns for id (primary key), name, position, department_id (foreign key), salary, date_hired, and status.",
+				"Write a CREATE TABLE statement for the test_employees table with appropriate data types and constraints. Include columns for id (primary key), name, position, department_id (foreign key), salary, date_hired, and status.",
 			tables: [],
 			difficulty: "Medium",
 			hints: [
@@ -1376,7 +1372,7 @@ const EmployeeProjects = {
 				"DATE type works well for dates",
 				"Define foreign keys to maintain referential integrity",
 			],
-			answer: `CREATE TABLE employees (
+			answer: `CREATE TABLE test_employees (
   id INTEGER PRIMARY KEY,
   name VARCHAR(100) NOT NULL,
   position VARCHAR(100) NOT NULL,

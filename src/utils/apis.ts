@@ -1,4 +1,4 @@
-const ngrok_url = "https://1ca4-34-145-45-223.ngrok-free.app/";
+const ngrok_url = "https://6905-35-236-231-247.ngrok-free.app/";
 export const ngrok_url_generate_sql = `${ngrok_url}generate_sql`;
 export const ngrok_url_compare = `${ngrok_url}compare`;
 export const ngrok_url_en_to_ar = `${ngrok_url}translate_en_to_ar`;

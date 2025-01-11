@@ -4,6 +4,7 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Card, CardContent } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import type { QueryResult } from "@/lib/types/exerciseDatabase";
+import { ExerciseTypes } from "@/lib/types/exerciseTypes";
 import {
 	userExcerciseAnswerError,
 	userExcerciseAnswerSchema,
@@ -21,7 +22,6 @@ import ResultsView from "./common/ResultsView";
 import SQLEditor from "./common/SQLEditor";
 import TablesView from "./common/TablesView";
 import TaskPrompt from "./common/TaskPrompt";
-import { ExerciseTypes } from "@/lib/types/exerciseTypes";
 
 export type ResultType = QueryResult | null;
 export type ErrorType = string | null;
@@ -58,6 +58,8 @@ export default function Exercise({
 }: ExerciseProps) {
 	const [sqlQuery, setSqlQuery] = useState<string>("");
 	const [showAnswer, setShowAnswer] = useState(false);
+	const [isShowRealAnswer, setIsShowRealAnswer] = useState(false);
+	const [showRealAnswer, setShowRealAnswer] = useState("");
 	const [result, setResult] = useState<ResultType>(null);
 	const [error, setError] = useState<ErrorType>(null);
 	const [isCorrect, setIsCorrect] = useState(false);
@@ -142,7 +144,11 @@ export default function Exercise({
 					};
 
 					try {
-						await UserExcerciseAnswerAction(inputData, score, ExerciseTypes.Normal);
+						await UserExcerciseAnswerAction(
+							inputData,
+							score,
+							ExerciseTypes.Normal,
+						);
 					} catch (error) {
 						console.error("UserExcerciseAnswerAction error:", error);
 					}
@@ -151,9 +157,10 @@ export default function Exercise({
 						attempts === 1
 							? `🎉 Excellent! You nailed it on your first try! 🎯\nYour score: ${score.toFixed(2)}%`
 							: `👏 Great job! You solved it in ${attempts} attempts. 🏆\nYour score: ${score.toFixed(2)}%`;
-					// if (score != 100) {
-					// 	queryResult.successMessage += `\nthe answer: ${answer}`;
-					// }
+					if (score < 100) {
+						setShowRealAnswer(`${answer}`);
+						setIsShowRealAnswer(true);
+					}
 				} catch (error) {
 					console.log("error in response" + error);
 				}
@@ -173,6 +180,8 @@ export default function Exercise({
 		setIsCorrect(false);
 		setShowAnswer(false);
 		setAttempts(0);
+		setIsShowRealAnswer(false);
+		setShowRealAnswer("");
 		exerciseStartTime.current = null;
 	};
 
@@ -223,7 +232,12 @@ export default function Exercise({
 								</div>
 							</Alert>
 						)}
-
+						{isShowRealAnswer && (
+							<div className="rounded-md border-l-4 border-green-500 bg-green-50 p-4 text-green-800">
+								<p className="text-sm font-medium">Suggested Answer:</p>
+								<AlertDescription>{showRealAnswer}</AlertDescription>
+							</div>
+						)}
 						{result && <ResultsView result={result} />}
 					</TabsContent>
 

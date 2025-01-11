@@ -94,13 +94,52 @@ export class TempDatabase {
 
 	async executeQuery(query: string, realQuery: string): Promise<QueryResult> {
 		try {
+			// Get operation type
+			const operationType = this.getOperationType(query);
+
+			// Handle non-SELECT operations
+			if (operationType !== "SELECT") {
+				await this.db.run(query); // Execute user query
+				if (operationType == "CREATE" || operationType == "ALTER") {
+					const tables = await this.db.all(`
+						SELECT name 
+						FROM sqlite_master 
+						WHERE type = 'table' AND name NOT LIKE 'sqlite_%';
+					`);
+
+					for (const table of tables) {
+						await this.db.exec(`DROP TABLE IF EXISTS ${table.name}`);
+						console.log(`Dropped table: ${table.name}`);
+					}
+					if (operationType == "ALTER") {
+						await this.initialize();
+					}
+				}
+				await this.db.run(realQuery); // Execute real query for validation
+
+				const rowCount = await this.db.get("SELECT changes() AS count");
+
+				return {
+					columns: [],
+					rows: [],
+					operation: {
+						type: operationType,
+						rowCount: rowCount.count,
+					},
+				};
+			}
+
+			// Handle SELECT operations
 			const userResult: Record<string, any>[] = await this.db.all(query);
+
+			// Check if SELECT query returned results
 			if (userResult.length === 0) {
 				throw new Error("User query returned no results.");
 			}
 
 			const realResult: Record<string, any>[] = await this.db.all(realQuery);
 
+			// Check if results match
 			const allMatch = realResult.every((realRow: Record<string, any>) =>
 				userResult.some((userRow: Record<string, any>) =>
 					Object.keys(realRow).every((key) => realRow[key] === userRow[key]),
@@ -113,30 +152,14 @@ export class TempDatabase {
 				);
 			}
 
-			const operationType = this.getOperationType(query);
-
-			if (operationType === "SELECT") {
-				return {
-					columns: userResult.length > 0 ? Object.keys(userResult[0]) : [],
-					rows: userResult.map((row: Record<string, any>) =>
-						Object.values(row),
-					),
-					operation: {
-						type: operationType,
-						rowCount: userResult.length,
-					},
-				};
-			} else {
-				const rowCount = await this.db.get("SELECT changes() AS count");
-				return {
-					columns: [],
-					rows: [],
-					operation: {
-						type: operationType,
-						rowCount: rowCount.count,
-					},
-				};
-			}
+			return {
+				columns: userResult.length > 0 ? Object.keys(userResult[0]) : [],
+				rows: userResult.map((row: Record<string, any>) => Object.values(row)),
+				operation: {
+					type: operationType,
+					rowCount: userResult.length,
+				},
+			};
 		} catch (err) {
 			console.error("Error executing query:", err);
 			throw err;
@@ -149,18 +172,43 @@ export class TempDatabase {
 		if (normalizedQuery.startsWith("insert")) return "INSERT";
 		if (normalizedQuery.startsWith("update")) return "UPDATE";
 		if (normalizedQuery.startsWith("delete")) return "DELETE";
+		if (normalizedQuery.startsWith("drop")) return "DROP";
+		if (normalizedQuery.startsWith("alter")) return "ALTER";
+		if (normalizedQuery.startsWith("create")) return "CREATE";
+
 		return "SELECT";
 	}
 
 	async cleanup() {
 		try {
-			await this.db.exec(`
-				DROP TABLE IF EXISTS employees;
-				DROP TABLE IF EXISTS departments;
-			`);
-			await this.db.close();
+			// الحصول على أسماء جميع الجداول في قاعدة البيانات
+			const tables = await this.db.all(`
+			SELECT name 
+			FROM sqlite_master 
+			WHERE type = 'table' AND name NOT LIKE 'sqlite_%';
+		`);
+
+			// إذا لم تكن هناك جداول، فقط أغلق الاتصال
+			if (tables.length === 0) {
+				console.log("No tables to drop.");
+				await this.db.close();
+				return;
+			}
+
+			// حذف كل الجداول
+			for (const table of tables) {
+				await this.db.exec(`DROP TABLE IF EXISTS ${table.name}`);
+				console.log(`Dropped table: ${table.name}`);
+			}
 		} catch (err) {
 			console.error("Error cleaning up database:", err);
+		} finally {
+			// التأكد من إغلاق الاتصال بقاعدة البيانات
+			try {
+				await this.db.close();
+			} catch (closeErr) {
+				console.error("Error closing database connection:", closeErr);
+			}
 		}
 	}
 }

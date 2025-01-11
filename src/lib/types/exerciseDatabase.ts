@@ -13,7 +13,7 @@ export interface DatabaseRow {
     departments: TableSnapshot;
   }
   
-  export type OperationType = 'SELECT' | 'INSERT' | 'UPDATE' | 'DELETE';
+  export type OperationType = 'SELECT' | 'INSERT' | 'UPDATE' | 'DELETE' | "DROP" | "ALTER" | "CREATE";
   
   export interface QueryOperation {
     type: OperationType;
