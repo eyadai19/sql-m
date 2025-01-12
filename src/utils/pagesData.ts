@@ -185,7 +185,10 @@ VALUES ('Alice Johnson', 'Data Analyst', 65000, 2);`,
 	update: {
 		exerciseParams: {
 			title: "Employee Salary Adjustment",
-			prompt: `Update the salaries of employees in department department_id = 1 who were hired more than 5 years ago by 10%.`,
+			prompt: `UPDATE employees
+      SET salary = salary * 1.10
+      WHERE department_id = 1
+      AND DATE_HIRED <= CURRENT_DATE - '5 years';`,
 			tables: ["employees"],
 			difficulty: "Medium",
 			hints: [
@@ -199,9 +202,10 @@ VALUES ('Alice Johnson', 'Data Analyst', 65000, 2);`,
 				"Use transactions for safety",
 				"Consider the impact on related tables",
 			],
-			answer: `UPDATE employees 
-SET salary = salary * 1.10 
-WHERE department_id = 1 AND DATE_HIRED <= DATE('now', '-5 years');`,
+			answer: `UPDATE employees
+      SET salary = salary * 1.10
+      WHERE department_id = 1
+      AND DATE_HIRED <= CURRENT_DATE - INTERVAL '5 years';`,
 			seed: "seed3",
 			expectedRowCount: 1,
 		},
@@ -1356,7 +1360,7 @@ const EmployeeProjects = {
 		exerciseParams: {
 			title: "Creating Employee Table",
 			prompt:
-				"Write a CREATE TABLE statement for the test_employees table with appropriate data types and constraints. Include columns for id (primary key), name, position, department_id (foreign key), salary, date_hired, and status.",
+				"Write a CREATE TABLE statement for the employees table with appropriate data types and constraints. Include columns for id (primary key), name, position, department_id (foreign key), salary, date_hired, and status.",
 			tables: [],
 			difficulty: "Medium",
 			hints: [
@@ -1372,7 +1376,7 @@ const EmployeeProjects = {
 				"DATE type works well for dates",
 				"Define foreign keys to maintain referential integrity",
 			],
-			answer: `CREATE TABLE test_employees (
+			answer: `CREATE TABLE employees (
   id INTEGER PRIMARY KEY,
   name VARCHAR(100) NOT NULL,
   position VARCHAR(100) NOT NULL,
@@ -2778,73 +2782,69 @@ LEFT JOIN employees e2 ON e1.manager_id = e2.id;`,
 	},
 	join: {
 		exerciseParams: {
-			title: "General Join Operations",
+			title: "General Join Operations with Employees and Departments",
 			prompt:
-				"Write a query demonstrating the versatile use of JOIN with additional conditions and filtering.",
+				"Write a query demonstrating the use of JOIN to combine data from the employees and departments tables. Include filtering, sorting, and logical conditions.",
 			tables: ["employees", "departments"],
 			difficulty: "Medium",
 			hints: [
-				"Consider join conditions carefully",
-				"Think about additional filtering",
-				"Plan result presentation",
+				"Ensure the join condition matches the related columns in both tables.",
+				"Think about filtering rows based on conditions from both tables.",
+				"Sort the results meaningfully to make them easier to analyze.",
 			],
 			tips: [
-				"Use appropriate join type",
-				"Consider performance impact",
-				"Think about data quality",
+				"Use INNER JOIN for matching records in both tables.",
+				"Use LEFT JOIN if you want all records from the employees table, even if there's no matching department.",
+				"Test your query with small data sets for validation.",
 			],
-			answer: `SELECT e.name, e.position,
-       d.name as department_name,
-       d.location,
-       e.salary
+			answer: `
+SELECT e.name AS employee_name,
+		e.position AS job_title,
+		d.name AS department_name,
+		d.location AS department_location,
+		e.salary,
+		e.date_hired
 FROM employees e
 JOIN departments d ON e.department_id = d.id
 WHERE e.status = 'active'
-  AND d.budget > 500000
-ORDER BY e.salary DESC;`,
-			seed: "seed_general_join",
-			expectedRowCount: 5,
+	AND d.budget >= 1000000
+ORDER BY e.salary DESC, e.date_hired ASC;
+		  `,
+			seed: "seed_general_join_example",
+			expectedRowCount: 7,
 		},
 		explanationParams: {
-			title: "Flexible Data Combination with JOIN",
+			title: "How General Join Works Between Two Tables",
 			howItWorks:
-				"JOIN (without a specific type) defaults to INNER JOIN, providing a flexible way to combine related tables based on matching values in specified columns.",
-			syntax: `SELECT columns
-FROM table1 t1
-JOIN table2 t2 ON t1.column = t2.column
-WHERE conditions;`,
+				"A general join combines rows from two tables based on a shared column. Only rows where the values in the shared column match are included in the result.",
+			syntax:
+				"SELECT column_list FROM table1 JOIN table2 ON table1.column = table2.column;",
 			example: {
-				code: `SELECT e.name, d.name as department, e.salary
-FROM employees e
-JOIN departments d ON e.department_id = d.id
-WHERE d.budget > 300000;`,
+				code: `
+SELECT t1.name, t2.department_name
+FROM table1 t1
+JOIN table2 t2 ON t1.department_id = t2.id;
+			  `,
 				explanation:
-					"Shows basic JOIN usage with additional filtering conditions to combine related data from multiple tables.",
+					"This query retrieves names from table1 and their corresponding department names from table2 by matching the `department_id` in table1 with the `id` in table2.",
 			},
 			notes: [
-				"Defaults to INNER JOIN",
-				"Requires explicit join condition",
-				"Supports additional filtering",
-				"Basic building block of queries",
-				"Essential for data relationships",
+				"Use a JOIN when you need to combine data from two tables based on a common relationship.",
+				"The ON clause specifies the column(s) used for matching rows.",
+				"General joins are most effective when data integrity is maintained across tables.",
 			],
 			additionalResources: [
 				{
-					title: "W3Schools SQL JOIN",
+					title: "Basic SQL JOINs",
 					url: "https://www.w3schools.com/sql/sql_join.asp",
 				},
 				{
-					title: "PostgreSQL JOIN Types",
-					url: "https://www.postgresql.org/docs/current/tutorial-join.html",
+					title: "Relational Database Basics",
+					url: "https://www.khanacademy.org/computing/computer-programming/sql",
 				},
 			],
 			difficulty: "Intermediate",
-			tags: [
-				"JOIN",
-				"Data Relationships",
-				"SQL Fundamentals",
-				"Query Building",
-			],
+			tags: ["SQL", "JOIN", "Database Queries", "General Join"],
 		},
 	},
 };
