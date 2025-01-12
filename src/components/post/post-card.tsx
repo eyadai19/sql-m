@@ -19,12 +19,10 @@ import { cn } from "@/lib/utils";
 import { formatDistanceToNow } from "date-fns";
 import {
 	Heart,
-	ImageIcon,
 	MessageCircle,
 	MoreVertical,
 	Pencil,
 	Trash,
-	X,
 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { Button } from "../ui/button";
@@ -39,6 +37,7 @@ export default function PostCard({
 	postCommentLikeAction,
 	editPostAction,
 	deletePostAction,
+	useImage,
 }: {
 	post: Post;
 	postLikeAction: (
@@ -60,6 +59,7 @@ export default function PostCard({
 	deletePostAction: (
 		postId: string,
 	) => Promise<{ field: string; message: string } | undefined>;
+	useImage: string | null;
 }) {
 	// Use local state to manage the post data
 	const [post, setPost] = useState(initialPost);
@@ -297,7 +297,7 @@ export default function PostCard({
 					<CommentForm
 						postCommentAction={postCommentAction}
 						postId={post.id}
-						userPhoto={post.user.photo}
+						userPhoto={useImage}
 					/>
 					<CommentList
 						comments={post.comments}

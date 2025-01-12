@@ -61,7 +61,13 @@ export default function CommunityPage({
 	const [error, setError] = useState<string | null>(null);
 	const [filter, setFilter] = useState<string>("all"); // الافتراضي هو "all"
 	const [sort, setSort] = useState<string>("latest");
-
+	const [userInfo, setUserInfo] = useState<{
+		name: string;
+		photo: string | null;
+	}>({
+		name: "",
+		photo: null,
+	});
 	useEffect(() => {
 		const fetchData = async () => {
 			const result = await fetchAllPostsAction();
@@ -72,7 +78,19 @@ export default function CommunityPage({
 			}
 		};
 		fetchData();
-	}, [fetchAllPostsAction]);
+
+		const fetchUserInfo = async () => {
+			try {
+				const result = await infoAddPostAction();
+				if (result && "name" in result && "photo" in result) {
+					setUserInfo(result);
+				}
+			} catch (error) {
+				console.error("An error occurred while fetching user info");
+			}
+		};
+		fetchUserInfo();
+	}, [fetchAllPostsAction, infoAddPostAction]);
 
 	const filterAndSortPosts = (posts: Post[]) => {
 		let filteredPosts = posts;
@@ -195,6 +213,7 @@ export default function CommunityPage({
 								postCommentLikeAction={postCommentLikeAction}
 								deletePostAction={deletePostAction}
 								editPostAction={editPostAction}
+								useImage={userInfo.photo}
 							/>
 						))}
 

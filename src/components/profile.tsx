@@ -465,6 +465,7 @@ export default function ProfilePage({
 									postCommentLikeAction={postCommentLikeAction}
 									deletePostAction={deletePostAction}
 									editPostAction={editPostAction}
+									useImage={info.photo}
 								/>
 							</div>
 						))}
