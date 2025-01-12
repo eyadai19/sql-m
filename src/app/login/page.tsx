@@ -6,6 +6,14 @@ import hash from "@/lib/utils";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import { z } from "zod";
+import { Metadata } from "next";
+export const metadata: Metadata = {
+	title: "SQLMentor - Login",
+	icons: {
+		icon: "/logo.ico",
+		apple: "/logo.png",
+	},
+};
 
 export default function LoginPage() {
 	return <LoginForm loginAction={LoginAction} />;

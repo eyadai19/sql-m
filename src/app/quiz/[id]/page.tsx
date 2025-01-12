@@ -17,6 +17,14 @@ import { ngrok_url_compare } from "@/utils/apis";
 import axios from "axios";
 import { eq } from "drizzle-orm";
 import { nanoid } from "nanoid";
+import { Metadata } from "next";
+export const metadata: Metadata = {
+	title: "SQLMentor - Quiz",
+	icons: {
+		icon: "/logo.ico",
+		apple: "/logo.png",
+	},
+};
 
 export default function quiz({ params }: { params: { id: string } }) {
 	return (

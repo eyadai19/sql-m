@@ -16,6 +16,15 @@ import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import { deletePostAction } from "../../lib/ServerAction/postsAction";
 
+import { Metadata } from "next";
+export const metadata: Metadata = {
+	title: "SQLMentor - Profile",
+	icons: {
+		icon: "/logo.ico",
+		apple: "/logo.png",
+	},
+};
+
 export default function Profile() {
 	return (
 		<div>

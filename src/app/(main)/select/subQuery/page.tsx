@@ -1,6 +1,14 @@
 import SubQuery from '@/components/pages/select/subQuery'
 import React from 'react'
 import { getAuthorizedPage } from '../../layout'
+import { Metadata } from "next";
+export const metadata: Metadata = {
+	title: "SQLMentor - Subqueries",
+	icons: {
+		icon: "/logo.ico",
+		apple: "/logo.png",
+	},
+};
 
 export default function page() {
   return (

@@ -9,6 +9,14 @@ import {
 	QuizView,
 	TrueFalseExercise,
 } from "@/lib/types/exerciseTypes";
+import { Metadata } from "next";
+export const metadata: Metadata = {
+	title: "SQLMentor - Quiz Details",
+	icons: {
+		icon: "/logo.ico",
+		apple: "/logo.png",
+	},
+};
 
 export default function QuizDetalis({ params }: { params: { id: string } }) {
 	return (

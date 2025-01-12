@@ -1,6 +1,14 @@
 import Where from '@/components/pages/select/where'
 import React from 'react'
 import { getAuthorizedPage } from '../../layout'
+import { Metadata } from "next";
+export const metadata: Metadata = {
+	title: "SQLMentor - Where Clause",
+	icons: {
+		icon: "/logo.ico",
+		apple: "/logo.png",
+	},
+};
 
 export default function page() {
   return (

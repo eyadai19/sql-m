@@ -12,6 +12,14 @@ import {
 } from "@/lib/ServerAction/chatBotNLP";
 import { ChatbotExpAction } from "@/lib/ServerAction/chatbotExp";
 import Popup from "@/components/home/Popup";
+import { Metadata } from "next";
+export const metadata: Metadata = {
+	title: "SQLMentor - Home",
+	icons: {
+		icon: "/logo.ico",
+		apple: "/logo.png",
+	},
+};
 
 export default function HomePage() {
   return (

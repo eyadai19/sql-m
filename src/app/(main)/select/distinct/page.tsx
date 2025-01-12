@@ -1,6 +1,14 @@
 import Distinct from '@/components/pages/select/distinct'
 import React from 'react'
 import { getAuthorizedPage } from '../../layout'
+import { Metadata } from "next";
+export const metadata: Metadata = {
+	title: "SQLMentor - Distinct Clause",
+	icons: {
+		icon: "/logo.ico",
+		apple: "/logo.png",
+	},
+};
 
 export default function page() {
   return (

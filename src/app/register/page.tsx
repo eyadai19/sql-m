@@ -9,6 +9,14 @@ import { nanoid } from "nanoid";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import { z } from "zod";
+import { Metadata } from "next";
+export const metadata: Metadata = {
+	title: "SQLMentor - Register",
+	icons: {
+		icon: "/logo.ico",
+		apple: "/logo.png",
+	},
+};
 
 export default function RegisterPage() {
 	return <RegisterForm registerAction={RegisterAction} />;

@@ -13,6 +13,15 @@ import {
 } from "../../lib/ServerAction/postsAction";
 import { logoutAction } from "../Profile/page";
 
+import { Metadata } from "next";
+export const metadata: Metadata = {
+	title: "SQLMentor - Community",
+	icons: {
+		icon: "/logo.ico",
+		apple: "/logo.png",
+	},
+};
+
 export default function Community() {
 	return (
 		<div>
