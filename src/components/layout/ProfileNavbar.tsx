@@ -1,15 +1,19 @@
 "use client";
+
 import Link from "next/link";
-import { useState, useEffect } from "react";
-import { FaDatabase, FaEdit, FaUserCircle, FaBook } from "react-icons/fa";
-import { RiCommunityFill } from "react-icons/ri";
+import { useEffect, useState } from "react";
 import {
 	FaArrowLeft,
 	FaBars,
+	FaBook,
+	FaDatabase,
+	FaEdit,
 	FaHome,
 	FaSignOutAlt,
 	FaTimes,
+	FaUserCircle,
 } from "react-icons/fa";
+import { RiCommunityFill } from "react-icons/ri";
 
 export function ProfileNavbar({
 	logoutAction,
@@ -17,203 +21,129 @@ export function ProfileNavbar({
 	logoutAction: () => Promise<void>;
 }) {
 	const [isDrawerOpen, setIsDrawerOpen] = useState(false);
-	const [scrollY, setScrollY] = useState(0);
-	const [isVisible, setIsVisible] = useState(true);
+	const [lastScrollY, setLastScrollY] = useState(0);
+	const [isNavbarVisible, setIsNavbarVisible] = useState(true);
 
-	const toggleDrawer = () => {
-		setIsDrawerOpen(!isDrawerOpen);
-	};
+	const toggleDrawer = () => setIsDrawerOpen((prev) => !prev);
 
 	const handleLogout = async () => {
 		await logoutAction();
+		setIsDrawerOpen(false); // Close the drawer after logout
 	};
 
 	useEffect(() => {
 		const handleScroll = () => {
-			if (window.scrollY > scrollY) {
-				setIsVisible(false); // Scroll down: hide navbar
-			} else {
-				setIsVisible(true); // Scroll up: show navbar
-			}
-			setScrollY(window.scrollY);
+			setIsNavbarVisible(window.scrollY <= lastScrollY);
+			setLastScrollY(window.scrollY);
 		};
 
 		window.addEventListener("scroll", handleScroll);
-		return () => {
-			window.removeEventListener("scroll", handleScroll);
+		return () => window.removeEventListener("scroll", handleScroll);
+	}, [lastScrollY]);
+
+	useEffect(() => {
+		const handleResize = () => {
+			// Close drawer if the screen width is large (>= 640px)
+			if (window.innerWidth >= 640 && isDrawerOpen) {
+				setIsDrawerOpen(false);
+			}
 		};
-	}, [scrollY]);
+
+		window.addEventListener("resize", handleResize);
+		return () => window.removeEventListener("resize", handleResize);
+	}, [isDrawerOpen]);
+
+	const navLinks = [
+		{ href: "/home", icon: FaHome, label: "Home" },
+		{ href: "/Profile", icon: FaUserCircle, label: "Profile" },
+		{ href: "/UserDbEditor", icon: FaEdit, label: "Compiler" },
+		{ href: "/DataBaseExeplorer", icon: FaDatabase, label: "Explore Database" },
+		{ href: "/Community", icon: RiCommunityFill, label: "Community" },
+		{
+			href: "http://localhost:3000/basic/dataType",
+			icon: FaBook,
+			label: "Learning",
+		},
+	];
 
 	return (
 		<>
-			{/* Navbar with scroll behavior */}
+			{/* Navbar */}
 			<nav
-				className={`fixed top-0 left-0 right-0 z-50 flex items-center justify-between bg-[#00203F] p-5 text-[#ADF0D1] shadow-md transition-transform duration-300 ${
-					isVisible ? "transform translate-y-0" : "transform -translate-y-full"
-				}`}
+				className={`fixed left-0 right-0 top-0 flex items-center justify-between bg-[#00203F] p-5 text-[#ADF0D1] shadow-md transition-transform duration-300 ${
+					isNavbarVisible ? "translate-y-0" : "-translate-y-full"
+				} ${isDrawerOpen ? "z-40" : "z-50"}`}
 			>
 				{/* Logo */}
 				<div className="text-2xl font-bold">sqlmentor</div>
 
-				{/* Navigation Icons (Only visible if Drawer is not open) */}
-				{!isDrawerOpen && (
-					<div>
-						<div className="hidden sm:flex items-center space-x-4">
-							{/* Home Icon */}
-							<Link
-								href="/home"
-								className="transition-colors hover:text-white"
-								title="Home"
-							>
-								<FaHome size={27} />
-							</Link>
-							{/* Profile Icon */}
-							<Link
-								href="/Profile"
-								className="transition-colors hover:text-white"
-								title="Profile"
-							>
-								<FaUserCircle size={24} />
-							</Link>
-							{/* user compiler Icon */}
-							<Link
-								href="/UserDbEditor"
-								className="transition-colors hover:text-white"
-								title="Compiler"
-							>
-								<FaEdit size={24} />
-							</Link>
-							{/* Database Icon */}
-							<Link
-								href="/DataBaseExeplorer"
-								className="transition-colors hover:text-white"
-								title="Explore My Database"
-							>
-								<FaDatabase size={24} />
-							</Link>
-							{/* Community Icon */}
-							<Link
-								href="/Community"
-								className="transition-colors hover:text-white"
-								title="Community"
-							>
-								<RiCommunityFill size={24} />
-							</Link>
-							{/* Learning Icon */}
-							<Link
-								href="http://localhost:3000/basic/dataType"
-								className="transition-colors hover:text-white"
-								title="Learning"
-							>
-								<FaBook size={24} />
-							</Link>
-							<button
-								onClick={() => {
-									handleLogout();
-								}}
-								className="transition-colors hover:text-white"
-								title="Logout"
-							>
-								<FaSignOutAlt size={24} />
-							</button>
-						</div>
-						{/* Hamburger icon for mobile */}
-						<div className="sm:hidden">
-							<button onClick={toggleDrawer} className="text-[#ADF0D1]">
-								{isDrawerOpen ? <FaTimes size={24} /> : <FaBars size={24} />}
-							</button>
-						</div>
-					</div>
-				)}
+				{/* Desktop Navigation */}
+				<div className="hidden items-center space-x-4 sm:flex">
+					{navLinks.map(({ href, icon: Icon, label }) => (
+						<Link
+							key={label}
+							href={href}
+							className="transition-colors hover:text-white"
+							title={label}
+						>
+							<Icon size={24} />
+						</Link>
+					))}
+					<button
+						onClick={handleLogout}
+						className="transition-colors hover:text-white"
+						title="Logout"
+					>
+						<FaSignOutAlt size={24} />
+					</button>
+				</div>
 
-				{/* Drawer with links (Visible only on mobile when the Drawer is open) */}
-				{isDrawerOpen && (
-					<div className ="bg=[#00203F]  fixed top-0 right-0 z-10 flex flex-col items-start justify-start space-y-6 text-lg h-full w-64 py-4 px-6">
-						{/* Back Button in Drawer */}
-						<button
-							onClick={() => {
-								toggleDrawer();
-							}}
-							className="  transition-colors hover:text-white mb-4"
-							title="Go Back"
-						>
-							<FaArrowLeft size={40} />
-						</button>
-
-						{/* Home Icon with Text */}
-						<Link
-							href="/home"
-							className="flex items-center space-x-4 transition-colors hover:text-white"
-							title="Home"
-						>
-							<FaHome size={40} />
-							<span>Home</span>
-						</Link>
-						{/* Profile Icon with Text */}
-						<Link
-							href="/Profile"
-							className="flex items-center space-x-4 transition-colors hover:text-white"
-							title="Profile"
-						>
-							<FaUserCircle size={40} />
-							<span>Profile</span>
-						</Link>
-						{/* user compiler Icon with Text */}
-						<Link
-							href="/UserDbEditor"
-							className="flex items-center space-x-4 transition-colors hover:text-white"
-							title="Compiler"
-						>
-							<FaEdit size={40} />
-							<span>Compiler</span>
-						</Link>
-						{/* Database Icon with Text */}
-						<Link
-							href="/DataBaseExeplorer"
-							className="flex items-center space-x-4 transition-colors hover:text-white"
-							title="Explore My Database"
-						>
-							<FaDatabase size={40} />
-							<span>Explore Database</span>
-						</Link>
-						{/* Community Icon with Text */}
-						<Link
-							href="/Community"
-							className="flex items-center space-x-4 transition-colors hover:text-white"
-							title="Community"
-						>
-							<RiCommunityFill size={40} />
-							<span>Community</span>
-						</Link>
-						{/* Learning Icon with Text */}
-						<Link
-							href="http://localhost:3000/basic/dataType"
-							className="flex items-center space-x-4 transition-colors hover:text-white"
-							title="Learning"
-						>
-							<FaBook size={40} />
-							<span>Learning</span>
-						</Link>
-						{/* Logout Button with Text */}
-						<button
-							onClick={() => {
-								handleLogout();
-								toggleDrawer();
-							}}
-							className="flex items-center space-x-4 transition-colors hover:text-white"
-							title="Logout"
-						>
-							<FaSignOutAlt size={40} />
-							<span>Logout</span>
-						</button>
-					</div>
-				)}
+				{/* Mobile Hamburger Menu */}
+				<div className="sm:hidden">
+					<button onClick={toggleDrawer} className="text-[#ADF0D1]">
+						{isDrawerOpen ? <FaTimes size={24} /> : <FaBars size={24} />}
+					</button>
+				</div>
 			</nav>
 
-			{/* Add a margin to ensure the content doesn't get overlapped by the fixed navbar */}
-			<div className="mt-[72px]">
-				{/* The rest of your page content goes here */}
-			</div>
+			{/* Drawer */}
+			{isDrawerOpen && (
+				<div className="fixed right-0 top-0 z-50 flex h-full w-64 flex-col space-y-6 bg-[#00203F] p-6 text-[#ADF0D1] shadow-lg">
+					{/* Close Drawer Button */}
+					<button
+						onClick={toggleDrawer}
+						className="mb-4 text-left transition-colors hover:text-white"
+						title="Close Drawer"
+					>
+						<FaArrowLeft size={24} />
+					</button>
+
+					{navLinks.map(({ href, icon: Icon, label }) => (
+						<Link
+							key={label}
+							href={href}
+							className="flex items-center space-x-4 transition-colors hover:text-white"
+							onClick={toggleDrawer}
+							title={label}
+						>
+							<Icon size={24} />
+							<span>{label}</span>
+						</Link>
+					))}
+
+					<button
+						onClick={handleLogout}
+						className="flex items-center space-x-4 transition-colors hover:text-white"
+						title="Logout"
+					>
+						<FaSignOutAlt size={24} />
+						<span>Logout</span>
+					</button>
+				</div>
+			)}
+
+			{/* Page Content Padding */}
+			<div className="mt-[72px]">{/* Your page content here */}</div>
 		</>
 	);
 }

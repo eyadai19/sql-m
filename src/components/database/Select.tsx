@@ -37,6 +37,7 @@ export default function SelectData() {
 	}, [popupVisible]);
 
 	const validateAndSelectData = async () => {
+		setSelectResults([]);
 		setErrorMessage(null);
 		try {
 			const response = await fetch(userDbApi, {
