@@ -1,7 +1,7 @@
 import Link from "next/link";
 
 export function HomeComponent() {
-  return (
+	return (
 		<div className="section px-4 py-8" id="home">
 			<div className="flex flex-col items-center justify-evenly md:flex-row md:space-x-6">
 				{/* Text Content */}
