@@ -15,12 +15,28 @@ import {
 	userExcerciseAnswerError,
 	userQuizAnswerSchema,
 } from "@/lib/types/userSchema";
+import {
+	closestCenter,
+	DndContext,
+	DragOverlay,
+	KeyboardSensor,
+	PointerSensor,
+	useSensor,
+	useSensors,
+} from "@dnd-kit/core";
+import {
+	arrayMove,
+	SortableContext,
+	verticalListSortingStrategy,
+} from "@dnd-kit/sortable";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { Check, X } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
+import { DraggableItem } from "./Exercise/DragDropExercise/DraggableItem";
 
 export default function SqlQuiz({
 	quizAction,
@@ -69,6 +85,7 @@ export default function SqlQuiz({
 	const [isSubmitting, setIsSubmitting] = useState(false);
 	const [isDisabled, setIsDisabled] = useState(false);
 	const [isOverlayVisible, setIsOverlayVisible] = useState(false);
+	const [activeId, setActiveId] = useState<string | null>(null); // لتتبع العنصر النشط أثناء السحب
 
 	useEffect(() => {
 		const checkAccess = async () => {
@@ -224,7 +241,7 @@ export default function SqlQuiz({
 											render={({ field }) => (
 												<FormItem>
 													<FormLabel className="text-lg font-medium text-gray-700">
-														{q.question}
+														{q.type !== "TrueFalseExercise" ? q.question : null}
 													</FormLabel>
 													<FormControl>
 														{q.type === "NormalExercise" ? (
@@ -235,35 +252,120 @@ export default function SqlQuiz({
 																disabled={isDisabled}
 															/>
 														) : q.type === "TrueFalseExercise" ? (
-															<Input
-																{...field}
-																placeholder="Type your answer..."
-															/>
+															<div className="flex items-center gap-2">
+																<div className="flex gap-2">
+																	<Button
+																		type="button"
+																		onClick={() => field.onChange("true")}
+																		variant={
+																			field.value === "true"
+																				? "default"
+																				: "outline"
+																		}
+																		disabled={isDisabled}
+																		className="flex w-8 items-center justify-center text-center"
+																		size="sm"
+																	>
+																		<Check className="h-4 w-4" />
+																	</Button>
+																	<Button
+																		type="button"
+																		onClick={() => field.onChange("false")}
+																		variant={
+																			field.value === "false"
+																				? "default"
+																				: "outline"
+																		}
+																		disabled={isDisabled}
+																		className="flex w-8 items-center justify-center"
+																		size="sm"
+																	>
+																		<X className="h-4 w-4" />
+																	</Button>
+																</div>
+																<p className="text-base">{q.question}</p>
+															</div>
 														) : q.type === "MultipleChoiceExercise" ? (
-															<div>
-																{q.options.map(
-																	(option: string, optIndex: number) => (
-																		<label key={optIndex} className="block">
-																			<input
-																				type="radio"
-																				value={option}
-																				checked={field.value === option}
-																				onChange={() => field.onChange(option)}
-																			/>
-																			<span>{option}</span>
-																		</label>
-																	),
-																)}
+															<div className="grid gap-2">
+																{q.options.map((option, optIndex) => (
+																	<Button
+																		key={optIndex}
+																		type="button"
+																		onClick={() => field.onChange(option)}
+																		variant={
+																			field.value === option
+																				? "default"
+																				: "outline"
+																		}
+																		className={`flex h-auto w-full flex-col items-center justify-center p-2 ${
+																			field.value !== option
+																				? "bg-white/30"
+																				: ""
+																		}`}
+																	>
+																		<span className="text-center">
+																			{option}
+																		</span>
+																	</Button>
+																))}
 															</div>
 														) : q.type === "DragDropExercise" ? (
-															<div>
-																{/* Drag and drop implementation */}
-																
-																<p>Drag and drop question interface here</p>
-															</div>
-														) : (
-															<div></div>
-														)}
+															<DndContext
+																sensors={useSensors(
+																	useSensor(PointerSensor),
+																	useSensor(KeyboardSensor),
+																)}
+																collisionDetection={closestCenter}
+																onDragStart={({ active }) => {
+																	setActiveId(active.id as string); // تحديث العنصر النشط
+																}}
+																onDragEnd={(event) => {
+																	const { active, over } = event;
+																	if (active.id !== over?.id) {
+																		const oldIndex = q.options.findIndex(
+																			(item) => item === active.id,
+																		);
+																		const newIndex = q.options.findIndex(
+																			(item) => item === over?.id,
+																		);
+																		const newOptions = arrayMove(
+																			q.options,
+																			oldIndex,
+																			newIndex,
+																		);
+																		field.onChange(newOptions); // تحديث القيمة في النموذج
+																	}
+																	setActiveId(null); // إعادة تعيين العنصر النشط
+																}}
+															>
+																<SortableContext
+																	items={q.options}
+																	strategy={verticalListSortingStrategy}
+																>
+																	<div className="space-y-2">
+																		{q.options.map((option) => (
+																			<DraggableItem
+																				key={option}
+																				id={option}
+																				content={option}
+																			/>
+																		))}
+																	</div>
+																</SortableContext>
+																<DragOverlay>
+																	{activeId ? (
+																		<DraggableItem
+																			id={activeId}
+																			content={
+																				q.options.find(
+																					(item) => item === activeId,
+																				)!
+																			}
+																		/>
+																	) : null}
+																</DragOverlay>
+															</DndContext>
+														) : null}
 													</FormControl>
 													<FormMessage />
 													{results[index] != null && (
@@ -318,7 +420,6 @@ export default function SqlQuiz({
 						<h2 className="mb-4 text-2xl font-bold text-[#00203F]">
 							Your Score: {score?.toFixed(2)} / 100
 						</h2>
-
 						<Button
 							onClick={handleReviewAnswers}
 							className="bg-[#00203F] text-white"
