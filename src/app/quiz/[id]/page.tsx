@@ -269,12 +269,24 @@ async function quizAction(
 		const quizQuestions = [];
 		let score = 0;
 
+		const quizId = nanoid();
+
+		const user = await getUser();
+		if (!user) return;
+		const newQuiz = {
+			id: quizId,
+			userId: user.id,
+			mark: 0,
+			stageId: stageId,
+		};
+
+		await db.insert(TB_quiz).values(newQuiz);
+
 		for (let index = 0; index < data.length; index++) {
 			const currentQuestionData = data[index];
 			let questionScore = 0;
 			let newQuestion: any;
 
-			// Handle the different question types
 			switch (currentQuestionData.type) {
 				case "NormalExercise":
 					const question = await db.query.TB_question_bank.findFirst({
@@ -284,6 +296,7 @@ async function quizAction(
 					if (!question) return;
 					const answer = currentQuestionData.answer;
 					const realAnswer = question.answer;
+
 					const response = await axios.post(ngrok_url_compare, {
 						sentence1: answer,
 						sentence2: realAnswer,
@@ -293,13 +306,15 @@ async function quizAction(
 					correctAnswers.push(question.answer);
 					newQuestion = {
 						id: nanoid(),
-						quizId: "",
+						quizId: quizId,
 						question: currentQuestionData.question,
 						answer: answer,
 						score: questionScore,
 						type: currentQuestionData.type,
 					};
 					score += questionScore;
+
+					await db.insert(TB_quiz_questions).values(newQuestion);
 					break;
 
 				case "TrueFalseExercise":
@@ -316,13 +331,15 @@ async function quizAction(
 					correctAnswers.push(TrueFalsequestion.answer);
 					newQuestion = {
 						id: nanoid(),
-						quizId: "",
+						quizId: quizId,
 						question: currentQuestionData.question,
 						answer: TrueFalseAnswer,
 						score: questionScore,
 						type: currentQuestionData.type,
 					};
 					score += questionScore;
+
+					await db.insert(TB_quiz_questions).values(newQuestion);
 					break;
 
 				case "MultipleChoiceExercise":
@@ -341,14 +358,14 @@ async function quizAction(
 					correctAnswers.push(MultipleChoicequestion.answer);
 					newQuestion = {
 						id: nanoid(),
-						quizId: "",
+						quizId: quizId,
 						question: currentQuestionData.question,
-						options: currentQuestionData.options,
-						answer: MultipleChoiceAnswer,
+						answer: currentQuestionData.answer,
 						score: questionScore,
 						type: currentQuestionData.type,
 					};
-					score += questionScore;
+
+					await db.insert(TB_quiz_questions).values(newQuestion);
 
 					const multipleChoiceOptions = currentQuestionData.options.map(
 						(option, idx) => ({
@@ -391,18 +408,19 @@ async function quizAction(
 					correctAnswers.push(correctOrder.join(", "));
 					newQuestion = {
 						id: nanoid(),
-						quizId: "",
+						quizId: quizId,
 						question: currentQuestionData.question,
 						answer: DragDropAnswer.join(", "),
 						score: questionScore,
 						type: currentQuestionData.type,
 					};
-					score += questionScore;
+
+					await db.insert(TB_quiz_questions).values(newQuestion);
 
 					const dragDropOptions = currentQuestionData.order.map(
 						(option, idx) => ({
 							id: nanoid(),
-							questionId: newQuestion.id,
+							questionId: newQuestion.id, // استخدام معرف السؤال الذي تم إنشاؤه
 							option,
 							order: idx + 1,
 						}),
@@ -420,33 +438,7 @@ async function quizAction(
 
 		score = score / data.length;
 
-		const user = await getUser();
-		if (!user) return;
-		const newQuiz = {
-			id: nanoid(),
-			userId: user.id,
-			mark: score,
-			stageId: stageId,
-		};
-
-		try {
-			await db.insert(TB_quiz).values(newQuiz);
-		} catch (error) {
-			console.error("Error inserting into TB_quiz:", error);
-			return { field: "root", message: "Error inserting quiz data" };
-		}
-
-		quizQuestions.forEach((question) => (question.quizId = newQuiz.id));
-
-		try {
-			await db.insert(TB_quiz_questions).values(quizQuestions);
-		} catch (error) {
-			console.error("Error inserting into TB_quiz_questions:", error);
-			return {
-				field: "root",
-				message: "Error inserting quiz questions data",
-			};
-		}
+		await db.update(TB_quiz).set({ mark: score }).where(eq(TB_quiz.id, quizId));
 
 		const stage = await db.query.TB_stage.findFirst({
 			where: (stage, { eq }) => eq(stage.id, stageId),

@@ -34,5 +34,5 @@ export type ProfileData = {
 	createdTime: Date;
 	lastUpdateTime: Date;
 	stage: { id: string; stage: string; index: number };
-	quizzes: { id: string; mark: number | null }[];
+	quizzes: { id: string; stage: string; mark: number | null }[];
 };
