@@ -96,6 +96,7 @@ async function ProfileAction(): Promise<
 				},
 				quizzes: info.quizzes.map((quiz) => ({
 					id: quiz.id,
+					stage: quiz.stage.stage,
 					mark: quiz.mark ?? 0,
 				})),
 			};

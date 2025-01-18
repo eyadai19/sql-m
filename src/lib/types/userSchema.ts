@@ -42,7 +42,7 @@ export const userChatBotExpInputSchema = z.object({
 // });
 export const userQuizAnswerSchema = z.object({
 	question: z.array(z.string()),
-	answer: z.array(z.union([z.string(), z.array(z.string())])), // يدعم نصوص ومصفوفات (للاختيار المتعدد)
+	answer: z.array(z.union([z.string(), z.array(z.string())])),
 });
 
 export type UserView = z.infer<typeof userViewSchema>;

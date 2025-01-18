@@ -397,7 +397,7 @@ export default function ProfilePage({
 															Quiz {index + 1}
 														</td>
 														<td className="whitespace-nowrap px-6 py-4 text-sm text-gray-500">
-															Stage {info.stage.stage}
+															Stage {quiz.stage}
 														</td>
 														<td className="whitespace-nowrap px-6 py-4 text-sm font-medium text-[#00203F]">
 															{quiz.mark!.toFixed(1)}%

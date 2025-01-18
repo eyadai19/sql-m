@@ -87,6 +87,15 @@ export default function SqlQuiz({
 	const [isOverlayVisible, setIsOverlayVisible] = useState(false);
 	const [activeId, setActiveId] = useState<string | null>(null); // لتتبع العنصر النشط أثناء السحب
 
+	const form = useForm<z.infer<typeof userQuizAnswerSchema>>({
+		defaultValues: {
+			question: questions?.map((q) => q.question) || [],
+			answer:
+				questions?.map((q) => (q.type === "DragDropExercise" ? [] : "")) || [],
+		},
+		resolver: zodResolver(userQuizAnswerSchema),
+	});
+
 	useEffect(() => {
 		const checkAccess = async () => {
 			const access = await getAuthorizedQuiz();
@@ -104,22 +113,27 @@ export default function SqlQuiz({
 			const fetchedQuestions = await quizQuestionAction();
 			if (Array.isArray(fetchedQuestions)) {
 				setQuestions(fetchedQuestions);
-				if (!questions) return;
 				setResults(Array(fetchedQuestions.length).fill(null));
+				form.reset({
+					question: fetchedQuestions.map((q) => q.question),
+					answer: fetchedQuestions.map((q) =>
+						q.type === "DragDropExercise" ? [] : "",
+					),
+				});
 			}
 		};
 		fetchQuestions();
-	}, [quizQuestionAction]);
+	}, [quizQuestionAction, form]);
 
-	const form = useForm<z.infer<typeof userQuizAnswerSchema>>({
-		defaultValues: {
-			answer:
-				questions?.map((q) => (q.type === "DragDropExercise" ? [] : "")) || [],
-		},
-		resolver: zodResolver(userQuizAnswerSchema),
-	});
+	useEffect(() => {
+		if (form.formState.errors) {
+			console.log("Form errors:", form.formState.errors);
+		}
+	}, [form.formState.errors]);
 
 	const handleSubmit = async (data: z.infer<typeof userQuizAnswerSchema>) => {
+		console.log("data" + data);
+
 		if (!questions) {
 			console.error("No questions available.");
 			return;
@@ -321,6 +335,7 @@ export default function SqlQuiz({
 																}}
 																onDragEnd={(event) => {
 																	const { active, over } = event;
+																	console.log("Drag ended:", { active, over }); // Debugging line
 																	if (active.id !== over?.id) {
 																		const oldIndex = q.options.findIndex(
 																			(item) => item === active.id,
@@ -333,9 +348,9 @@ export default function SqlQuiz({
 																			oldIndex,
 																			newIndex,
 																		);
-																		field.onChange(newOptions); // تحديث القيمة في النموذج
+																		field.onChange(newOptions);
 																	}
-																	setActiveId(null); // إعادة تعيين العنصر النشط
+																	setActiveId(null);
 																}}
 															>
 																<SortableContext
