@@ -64,6 +64,7 @@ export async function GET(req: NextRequest) {
 		});
 
 		await db.close();
+
 		return NextResponse.json({
 			context: tablesDefinition.trim(),
 		});

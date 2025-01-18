@@ -284,13 +284,11 @@ export default function ChatBot({
 													? "أدخل السياق الجديد هنا"
 													: "Enter your new context"
 											}
-											className="resize-none overflow-hidden rounded-lg bg-[#D3D3D3] p-3 pr-10 text-sm text-[#00203F] shadow-sm transition-shadow focus:shadow-md"
+											className="h-32 resize-none overflow-auto rounded-lg bg-[#D3D3D3] p-3 pr-10 text-sm text-[#00203F] shadow-sm transition-shadow focus:shadow-md"
 											value={newContext}
 											onChange={(e) => {
 												setNewContext(e.target.value);
-												autoResize(e.target);
 											}}
-											rows={3}
 										/>
 										<div className="absolute right-2 top-2 cursor-pointer">
 											<FaInfoCircle
@@ -307,47 +305,91 @@ export default function ChatBot({
 										<div className="w-11/12 max-w-2xl rounded-lg bg-white p-6 shadow-lg">
 											{/* العنوان */}
 											<h2 className="mb-4 text-2xl font-bold text-[#00203F]">
-												How to Use This Field
+												{language === "AR"
+													? "كيفية استخدام هذا الحقل"
+													: "How to Use This Field"}
 											</h2>
 
 											{/* خطوات الشرح */}
 											<div className="space-y-4">
 												{/* الخطوة 1 */}
-												<div className="flex items-start space-x-4">
-													<div className="flex h-8 w-8 items-center justify-center rounded-full bg-[#ADF0D1] text-[#00203F]">
+												<div className="flex items-start space-x-4 rtl:space-x-reverse">
+													<div className="flex h-10 w-10 items-center justify-center rounded-full bg-[#ADF0D1] text-lg font-bold text-[#00203F]">
 														1
 													</div>
 													<div>
 														<h3 className="text-lg font-semibold text-[#00203F]">
-															Enter Your Context
+															{language === "AR"
+																? "أدخل السياق الخاص بك"
+																: "Enter Your Context"}
 														</h3>
-														<p className="text-sm text-gray-600">ss</p>
+														<p className="break-words text-sm text-gray-600">
+															{language === "AR"
+																? "قم بإدخال نص السياق الذي تريده هنا."
+																: "Provide the context text you wish to use."}
+														</p>
 													</div>
 												</div>
 
 												{/* الخطوة 2 */}
-												<div className="flex items-start space-x-4">
-													<div className="flex h-8 w-8 items-center justify-center rounded-full bg-[#ADF0D1] text-[#00203F]">
+												<div className="flex items-start space-x-4 rtl:space-x-reverse">
+													<div className="flex h-10 w-10 items-center justify-center rounded-full bg-[#ADF0D1] text-lg font-bold text-[#00203F]">
 														2
 													</div>
 													<div>
 														<h3 className="text-lg font-semibold text-[#00203F]">
-															Keep It Relevant
+															{language === "AR"
+																? "حافظ على السياق مناسبًا"
+																: "Keep It Relevant"}
 														</h3>
-														<p className="text-sm text-gray-600">hellooooooo</p>
+														<p className="break-words text-sm text-gray-600">
+															{language === "AR"
+																? "تأكد من أن النص الذي تدخله مناسب للسياق المطلوب."
+																: "Ensure the text you enter aligns with the desired context."}
+														</p>
 													</div>
 												</div>
 
 												{/* الخطوة 3 */}
-												<div className="flex items-start space-x-4">
-													<div className="flex h-8 w-8 items-center justify-center rounded-full bg-[#ADF0D1] text-[#00203F]">
+												<div className="flex items-start space-x-4 rtl:space-x-reverse">
+													<div className="flex h-10 w-10 items-center justify-center rounded-full bg-[#ADF0D1] text-lg font-bold text-[#00203F]">
 														3
 													</div>
 													<div>
 														<h3 className="text-lg font-semibold text-[#00203F]">
-															Use Examples
+															{language === "AR"
+																? "استخدم الأمثلة"
+																: "Use Examples"}
 														</h3>
-														<p className="text-sm text-gray-600">zzz</p>
+														<p className="break-words text-sm text-gray-600">
+															{language === "AR" ? (
+																<pre className="whitespace-pre-wrap break-words">
+																	على سبيل المثال:
+																	{"\n"}
+																	CREATE TABLE users (id INTEGER PRIMARY KEY,
+																	name TEXT NOT NULL, email TEXT UNIQUE NOT
+																	NULL);
+																	{"\n"}
+																	CREATE TABLE posts (id INTEGER PRIMARY KEY,
+																	user_id INTEGER NOT NULL, title TEXT NOT NULL,
+																	body TEXT, FOREIGN KEY(user_id) REFERENCES
+																	users(id));
+																</pre>
+															) : (
+																<pre className="whitespace-pre-wrap break-words">
+																	For example:
+																	{"\n"}
+																	CREATE TABLE users (id INTEGER PRIMARY KEY,
+																	name TEXT NOT NULL, email TEXT UNIQUE NOT
+																	NULL);
+																	{"\n"}
+																	CREATE TABLE posts (id INTEGER PRIMARY KEY,
+																	user_id INTEGER NOT NULL, title TEXT NOT NULL,
+																	body TEXT, FOREIGN KEY(user_id) REFERENCES
+																	users(id));
+																</pre>
+															)}
+														</p>
 													</div>
 												</div>
 											</div>
@@ -358,13 +400,12 @@ export default function ChatBot({
 													onClick={() => setShowInfoPopup(false)}
 													className="rounded-lg bg-[#00203F] px-6 py-2 text-white transition-all duration-200 hover:bg-[#00152A] hover:shadow-lg"
 												>
-													Close
+													{language === "AR" ? "إغلاق" : "Close"}
 												</button>
 											</div>
 										</div>
 									</div>
 								)}
-
 								{/* Query Input Field */}
 								<div className="relative m-3 mt-4 flex w-3/4 flex-col">
 									<textarea
