@@ -8,7 +8,6 @@ import {
 } from "@/lib/types/userSchema";
 
 import { userDbApi } from "@/utils/apis";
-import Tippy from "@tippyjs/react";
 import React, { useRef, useState } from "react";
 import {
 	AiOutlineArrowDown,
@@ -70,7 +69,7 @@ export default function ChatBot({
 	const [loading, setLoading] = useState(false);
 	const [selectResults, setSelectResults] = useState<QueryResult[]>([]);
 	const [errorMessage, setErrorMessage] = useState<string | null>(null);
-
+	const [showInfoPopup, setShowInfoPopup] = useState(false);
 	const handleQuerySubmit = async () => {
 		setLoading(true); // إظهار الـ loader
 		try {
@@ -294,9 +293,74 @@ export default function ChatBot({
 											rows={3}
 										/>
 										<div className="absolute right-2 top-2 cursor-pointer">
-											<Tippy content="أدخل السياق الجديد هنا (مثال: معلومات عن المشروع)">
-												<FaInfoCircle className="text-[#00203F] opacity-70 hover:opacity-100" />
-											</Tippy>
+											<FaInfoCircle
+												className="text-[#00203F] opacity-70 hover:opacity-100"
+												onClick={() => setShowInfoPopup(true)} // فتح النافذة المنبثقة عند النقر
+											/>
+										</div>
+									</div>
+								)}
+
+								{/* نافذة منبثقة لعرض المعلومات */}
+								{showInfoPopup && (
+									<div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
+										<div className="w-11/12 max-w-2xl rounded-lg bg-white p-6 shadow-lg">
+											{/* العنوان */}
+											<h2 className="mb-4 text-2xl font-bold text-[#00203F]">
+												How to Use This Field
+											</h2>
+
+											{/* خطوات الشرح */}
+											<div className="space-y-4">
+												{/* الخطوة 1 */}
+												<div className="flex items-start space-x-4">
+													<div className="flex h-8 w-8 items-center justify-center rounded-full bg-[#ADF0D1] text-[#00203F]">
+														1
+													</div>
+													<div>
+														<h3 className="text-lg font-semibold text-[#00203F]">
+															Enter Your Context
+														</h3>
+														<p className="text-sm text-gray-600">ss</p>
+													</div>
+												</div>
+
+												{/* الخطوة 2 */}
+												<div className="flex items-start space-x-4">
+													<div className="flex h-8 w-8 items-center justify-center rounded-full bg-[#ADF0D1] text-[#00203F]">
+														2
+													</div>
+													<div>
+														<h3 className="text-lg font-semibold text-[#00203F]">
+															Keep It Relevant
+														</h3>
+														<p className="text-sm text-gray-600">hellooooooo</p>
+													</div>
+												</div>
+
+												{/* الخطوة 3 */}
+												<div className="flex items-start space-x-4">
+													<div className="flex h-8 w-8 items-center justify-center rounded-full bg-[#ADF0D1] text-[#00203F]">
+														3
+													</div>
+													<div>
+														<h3 className="text-lg font-semibold text-[#00203F]">
+															Use Examples
+														</h3>
+														<p className="text-sm text-gray-600">zzz</p>
+													</div>
+												</div>
+											</div>
+
+											{/* زر الإغلاق */}
+											<div className="mt-6 flex justify-end">
+												<button
+													onClick={() => setShowInfoPopup(false)}
+													className="rounded-lg bg-[#00203F] px-6 py-2 text-white transition-all duration-200 hover:bg-[#00152A] hover:shadow-lg"
+												>
+													Close
+												</button>
+											</div>
 										</div>
 									</div>
 								)}
@@ -317,11 +381,6 @@ export default function ChatBot({
 										}}
 										rows={1}
 									/>
-									<div className="absolute right-2 top-2 cursor-pointer">
-										<Tippy content="أدخل سؤالك هنا (مثال: ما هي الخطوات التالية؟)">
-											<FaInfoCircle className="text-[#00203F] opacity-70 hover:opacity-100" />
-										</Tippy>
-									</div>
 								</div>
 
 								{/* Submit Button */}
