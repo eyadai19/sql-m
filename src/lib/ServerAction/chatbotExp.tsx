@@ -1,8 +1,3 @@
-// let isMoreThanTable: Boolean = false;
-// let selectCondition: Boolean = false;
-// let useAgFun: Boolean = false;
-// let useGroupBy: Boolean = false;
-
 import { eq } from "drizzle-orm";
 import { nanoid } from "nanoid";
 import { getUser } from "../auth";

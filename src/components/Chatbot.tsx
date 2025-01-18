@@ -7,6 +7,7 @@ import {
 	userExcerciseAnswerError,
 } from "@/lib/types/userSchema";
 
+import { userDbApi } from "@/utils/apis";
 import Tippy from "@tippyjs/react";
 import React, { useRef, useState } from "react";
 import {
@@ -18,8 +19,10 @@ import {
 } from "react-icons/ai";
 import { FaInfoCircle } from "react-icons/fa";
 import { z } from "zod";
-import ChatbotExpTest from "./ChatbotExpTest";
-
+import ChatbotExpTest from "./ChatbotExpComponent";
+interface QueryResult {
+	[key: string]: string | number | boolean | null;
+}
 export default function ChatBot({
 	ChatbotAction,
 	ChatbotExpAction,
@@ -65,6 +68,8 @@ export default function ChatBot({
 	const [contextOption, setContextOption] = useState("use my context");
 	const [newContext, setNewContext] = useState("");
 	const [loading, setLoading] = useState(false);
+	const [selectResults, setSelectResults] = useState<QueryResult[]>([]);
+	const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
 	const handleQuerySubmit = async () => {
 		setLoading(true); // إظهار الـ loader
@@ -132,6 +137,37 @@ export default function ChatBot({
 		setUserQuery("");
 		setQueryResult("");
 		setNewContext("");
+		setSelectResults([]);
+		setErrorMessage(null);
+	};
+
+	const validateAndSelectData = async () => {
+		setSelectResults([]);
+		setErrorMessage(null);
+		try {
+			const response = await fetch(userDbApi, {
+				method: "POST",
+				headers: { "Content-Type": "application/json" },
+				body: JSON.stringify({
+					query: queryResult,
+				}),
+			});
+
+			if (!response.ok) {
+				const errorData = await response.json();
+				setErrorMessage(
+					`${errorData.error} \n ${errorData.originalError}` ||
+						"Error executing query.",
+				);
+				return;
+			}
+
+			const data = await response.json();
+			setSelectResults(data.data); // عرض النتائج
+		} catch (error) {
+			console.error("Error executing query:", error);
+			setErrorMessage("An error occurred while executing the query.");
+		}
 	};
 
 	return (
@@ -317,7 +353,111 @@ export default function ChatBot({
 											}}
 											rows={1}
 										/>
+										{selectResults.length > 0 &&
+											Object.keys(selectResults[0]).length > 0 && (
+												<div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 transition-opacity duration-300 ease-in-out">
+													<div className="relative max-h-[90vh] w-11/12 max-w-3xl overflow-hidden rounded-xl bg-white p-6 shadow-xl">
+														<button
+															onClick={() => setSelectResults([])}
+															className="absolute right-4 top-4 text-2xl text-gray-600 transition-transform duration-200 hover:scale-110 hover:text-gray-900"
+														>
+															&times;
+														</button>
+														<h3 className="mb-6 text-2xl font-bold text-gray-800">
+															Query Results
+														</h3>
+														<div className="overflow-x-auto">
+															<table className="w-full border-collapse rounded-lg bg-white shadow">
+																<thead>
+																	<tr className="bg-gray-200 text-gray-700">
+																		{Object.keys(selectResults[0]).map(
+																			(key, index) => (
+																				<th
+																					key={index}
+																					className="border-b-2 border-gray-300 px-4 py-3 text-left text-sm font-semibold"
+																				>
+																					{key}
+																				</th>
+																			),
+																		)}
+																	</tr>
+																</thead>
+																<tbody>
+																	{selectResults.map((row, rowIndex) => (
+																		<tr
+																			key={rowIndex}
+																			className={`transition-colors duration-200 ${
+																				rowIndex % 2 === 0
+																					? "bg-gray-50 hover:bg-gray-100"
+																					: "bg-white hover:bg-gray-50"
+																			}`}
+																		>
+																			{Object.values(row).map(
+																				(value, colIndex) => (
+																					<td
+																						key={colIndex}
+																						className="border-t border-gray-200 px-4 py-2 text-sm text-gray-700"
+																					>
+																						{value != null
+																							? String(value)
+																							: "-"}
+																					</td>
+																				),
+																			)}
+																		</tr>
+																	))}
+																</tbody>
+															</table>
+														</div>
+														<div className="mt-6 flex justify-end">
+															<button
+																className="rounded-md bg-[#ADF0D1] px-6 py-2 text-white shadow-md transition-all duration-200 hover:bg-[#A1E7D8] hover:shadow-lg"
+																onClick={() => setSelectResults([])}
+															>
+																Close
+															</button>
+														</div>
+													</div>
+												</div>
+											)}
+										{errorMessage && (
+											<div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
+												<div className="relative w-11/12 max-w-lg overflow-hidden rounded-xl bg-white p-6 shadow-xl">
+													<button
+														onClick={() => setErrorMessage(null)}
+														className="absolute right-4 top-4 text-2xl text-gray-600 transition-transform duration-200 hover:scale-110 hover:text-gray-900"
+													>
+														&times;
+													</button>
+													<h3 className="mb-4 text-xl font-bold text-red-600">
+														Error
+													</h3>
+													<div className="max-h-[60vh] overflow-y-auto rounded-lg bg-red-100 p-4 text-red-700">
+														<pre className="whitespace-pre-wrap font-mono text-sm">
+															{errorMessage}
+														</pre>
+													</div>
+													<div className="mt-6 flex justify-end">
+														<button
+															className="rounded-md bg-red-500 px-6 py-2 text-white shadow-md transition-all duration-200 hover:bg-red-600 hover:shadow-lg"
+															onClick={() => setErrorMessage(null)}
+														>
+															Close
+														</button>
+													</div>
+												</div>
+											</div>
+										)}
 									</div>
+								)}
+								{/* Submit Button */}
+								{queryResult && (
+									<button
+										onClick={validateAndSelectData}
+										className="mt-4 w-32 rounded-lg bg-[#ADF0D1] p-2 text-sm font-semibold text-[#00203F] shadow-sm transition-all hover:bg-[#A1E7D8] hover:shadow-md"
+									>
+										{language === "AR" ? "تنفيذ الاستعلام" : "Run Query"}
+									</button>
 								)}
 							</div>
 						)}

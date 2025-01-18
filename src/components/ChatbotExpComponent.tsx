@@ -1,10 +1,15 @@
 "use client";
-import { useState } from "react";
+import { userDbApi } from "@/utils/apis";
+import { useEffect, useRef, useState } from "react"; // Import useRef
 import { AiOutlineClose, AiOutlineCopy, AiOutlineReload } from "react-icons/ai";
+
 interface Condition {
 	column: string;
 	operator: string;
 	value: string;
+}
+interface QueryResult {
+	[key: string]: string | number | boolean | null | undefined;
 }
 export default function ChatbotExpTest({
 	ChatbotExpAction,
@@ -66,9 +71,20 @@ export default function ChatbotExpTest({
 	const [columns, setColumns] = useState([{ name: "", type: "" }]);
 	const columnTypes = ["INTEGER", "VARCHAR", "DATE", "BOOLEAN"];
 	const [isLoading, setIsLoading] = useState<boolean>(false);
-	const [isModalOpen, setIsModalOpen] = useState<boolean>(false); // حالة التحكم في فتح وإغلاق الـ Modal
+	const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
 	const [isAddColumn, setIsAddColumn] = useState<boolean>(false);
 	const [isDropMode, setIsDropMode] = useState<boolean>(false);
+	const [selectResults, setSelectResults] = useState<QueryResult[]>([]);
+	const [errorMessage, setErrorMessage] = useState<string | null>(null);
+
+	const chatContainerRef = useRef<HTMLDivElement>(null);
+	useEffect(() => {
+		if (chatContainerRef.current) {
+			chatContainerRef.current.scrollTop =
+				chatContainerRef.current.scrollHeight;
+		}
+	}, [conversationHistory]);
+
 	const handleConditionChange = (
 		index: number,
 		field: keyof Condition,
@@ -141,7 +157,6 @@ export default function ChatbotExpTest({
 			if (result.answer.includes("CREATE")) setCreateTable(true);
 			setSyntax(result.answer);
 			setEndMessage("");
-			// setIsModalOpen(true);
 		} else if ("question" in result && "answers" in result) {
 			setQuestion(result.question);
 			setOptions(result.answers);
@@ -336,19 +351,16 @@ export default function ChatbotExpTest({
 	};
 
 	const generateAddColumnSQL = () => {
-		// التحقق من وجود اسم الجدول واسم العمود ونوعه
 		if (!selectedTable || !columns[0].name || !columns[0].type) {
 			alert("Please select a table and provide a column name and type.");
 			return;
 		}
 
-		// إنشاء الاستعلام SQL
 		const sqlQuery = syntax
-			.replace("{table_name}", selectedTable.split(":")[0]) // استبدال اسم الجدول
-			.replace("{column_name}", columns[0].name) // استبدال اسم العمود
-			.replace("{datatype}", columns[0].type); // استبدال نوع العمود
+			.replace("{table_name}", selectedTable.split(":")[0])
+			.replace("{column_name}", columns[0].name)
+			.replace("{datatype}", columns[0].type);
 
-		// تحديث الحالة بالاستعلام النهائي
 		setSyntax(sqlQuery);
 		setEndMessage("SQL query generated successfully.");
 	};
@@ -392,8 +404,38 @@ export default function ChatbotExpTest({
 		setIsModalOpen(false);
 		setIsAddColumn(false);
 		setIsDropMode(false);
+		setSelectResults([]);
+		setErrorMessage(null);
 	};
 
+	const validateAndSelectData = async () => {
+		setSelectResults([]);
+		setErrorMessage(null);
+		try {
+			const response = await fetch(userDbApi, {
+				method: "POST",
+				headers: { "Content-Type": "application/json" },
+				body: JSON.stringify({
+					query: syntax, // استخدم الاستعلام الحالي
+				}),
+			});
+
+			if (!response.ok) {
+				const errorData = await response.json();
+				setErrorMessage(
+					`${errorData.error} \n ${errorData.originalError}` ||
+						"Error executing query.",
+				);
+				return;
+			}
+
+			const data = await response.json();
+			setSelectResults(data.data); // عرض النتائج
+		} catch (error) {
+			console.error("Error executing query:", error);
+			setErrorMessage("An error occurred while executing the query.");
+		}
+	};
 	return (
 		<div
 			className="relative flex flex-col space-y-4 bg-[#00203F] p-4 text-white"
@@ -404,7 +446,6 @@ export default function ChatbotExpTest({
 				msOverflowStyle: "none",
 			}}
 		>
-			{/* عرض الرسالة النهائية فقط إذا كانت موجودة */}
 			{endMessage ? (
 				<div className="mt-20 rounded-lg bg-gray-400 p-6 text-white shadow-2xl">
 					<div className="mb-4 rounded-md bg-[#1E2A38] p-4 font-mono text-sm">
@@ -418,6 +459,15 @@ export default function ChatbotExpTest({
 							<AiOutlineCopy className="mr-2" />
 							Copy
 						</button>
+						{/* زر Run */}
+						{syntax.toUpperCase().startsWith("SELECT") && (
+							<button
+								className="flex items-center rounded-md bg-blue-500 px-4 py-2 text-white transition-all duration-300 hover:bg-blue-600 hover:shadow-lg"
+								onClick={validateAndSelectData}
+							>
+								Run
+							</button>
+						)}
 						<button
 							className="flex items-center rounded-md bg-red-500 px-4 py-2 text-white transition-all duration-300 hover:bg-red-600 hover:shadow-lg"
 							onClick={resetAll}
@@ -426,10 +476,74 @@ export default function ChatbotExpTest({
 							Close
 						</button>
 					</div>
+					{selectResults.length > 0 &&
+						Object.keys(selectResults[0]).length > 0 && (
+							<div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
+								<div className="max-h-[90vh] w-11/12 max-w-2xl overflow-y-auto rounded-lg bg-white p-6 shadow-lg">
+									<button
+										onClick={() => setSelectResults([])}
+										className="absolute right-4 top-4 text-gray-600 hover:text-gray-900"
+									>
+										&times;
+									</button>
+									<h3 className="mb-4 text-lg font-semibold">Query Results:</h3>
+									<div className="overflow-x-auto">
+										<table className="w-full border-collapse">
+											<thead>
+												<tr>
+													{Object.keys(selectResults[0]).map((key, index) => (
+														<th
+															key={index}
+															className="border border-gray-300 bg-gray-100 px-4 py-2 text-left text-gray-600"
+														>
+															{key}
+														</th>
+													))}
+												</tr>
+											</thead>
+											<tbody>
+												{selectResults.map((row, rowIndex) => (
+													<tr
+														key={rowIndex}
+														className={
+															rowIndex % 2 === 0 ? "bg-white" : "bg-gray-50"
+														}
+													>
+														{Object.values(row).map((value, colIndex) => (
+															<td
+																key={colIndex}
+																className="border border-gray-300 px-4 py-2 text-gray-600"
+															>
+																{value != null ? String(value) : ""}
+															</td>
+														))}
+													</tr>
+												))}
+											</tbody>
+										</table>
+									</div>
+									<div className="mt-4 flex justify-end">
+										<button
+											className="rounded-md bg-red-500 px-4 py-2 text-white hover:bg-red-600"
+											onClick={() => setSelectResults([])}
+										>
+											Close
+										</button>
+									</div>
+								</div>
+							</div>
+						)}
+					{/* عرض رسالة الخطأ */}
+					{errorMessage && (
+						<div className="mt-4 text-red-500">
+							<pre>{errorMessage}</pre>
+						</div>
+					)}
 				</div>
 			) : (
 				<>
 					<div
+						ref={chatContainerRef} // Attach the ref to the scrollable container
 						className="max-h-[65vh] overflow-y-auto"
 						style={{
 							maxHeight: "70vh",
@@ -658,11 +772,7 @@ export default function ChatbotExpTest({
 													Select a column
 												</option>
 												{tableColumns.map((column, index) => (
-													<option
-														key={index}
-														value={column}
-														// onClick={() => handleAggColumnSelection(column)}
-													>
+													<option key={index} value={column}>
 														{column}
 													</option>
 												))}

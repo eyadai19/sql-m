@@ -1,5 +1,5 @@
 import { ChatbotExpAction } from "@/lib/ServerAction/chatbotExp";
-import ChatbotExpTest from "../../components/ChatbotExpTest";
+import ChatbotExpTest from "../../components/ChatbotExpComponent";
 
 export default function page() {
 	return (
