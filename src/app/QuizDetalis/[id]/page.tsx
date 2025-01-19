@@ -49,27 +49,36 @@ async function QuizDetailsAction(
 		}
 
 		const quizNormalDetails = await db.query.TB_quiz_questions.findMany({
-			where: (question, { eq }) =>
-				eq(question.quizId, quizId) && eq(question.type, ExerciseTypes.Normal),
+			where: (question, { eq, and }) =>
+				and(
+					eq(question.quizId, quizId),
+					eq(question.type, ExerciseTypes.Normal),
+				),
 		});
 
 		const quizTrueAndFalseDetails = await db.query.TB_quiz_questions.findMany({
-			where: (question, { eq }) =>
-				eq(question.quizId, quizId) &&
-				eq(question.type, ExerciseTypes.TrueFalse),
+			where: (question, { eq, and }) =>
+				and(
+					eq(question.quizId, quizId),
+					eq(question.type, ExerciseTypes.TrueFalse),
+				),
 		});
 
 		const quizMcqDetails = await db.query.TB_quiz_questions.findMany({
-			where: (question, { eq }) =>
-				eq(question.quizId, quizId) &&
-				eq(question.type, ExerciseTypes.MultipleChoice),
+			where: (question, { eq, and }) =>
+				and(
+					eq(question.quizId, quizId),
+					eq(question.type, ExerciseTypes.MultipleChoice),
+				),
 			with: { multipleChoiceOptions: true },
 		});
 
 		const quizDragDropDetails = await db.query.TB_quiz_questions.findMany({
-			where: (question, { eq }) =>
-				eq(question.quizId, quizId) &&
-				eq(question.type, ExerciseTypes.DragDrop),
+			where: (question, { eq, and }) =>
+				and(
+					eq(question.quizId, quizId),
+					eq(question.type, ExerciseTypes.DragDrop),
+				),
 			with: { dragDropOptions: true },
 		});
 

@@ -19,10 +19,10 @@ export default function QuizDetalisPage({
 	QuizDetailsAction,
 }: {
 	QuizDetailsAction: () => Promise<
-		QuizView[] | { field: string; message: string } | undefined
+		QuizView | { field: string; message: string } | undefined
 	>;
 }) {
-	const [quizData, setQuizData] = useState<QuizView[] | null>(null);
+	const [quizData, setQuizData] = useState<QuizView | null>(null);
 	const [error, setError] = useState<string | null>(null);
 	const router = useRouter();
 

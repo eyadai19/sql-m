@@ -333,7 +333,7 @@ export default function ChatBot({
 
 												{/* الخطوة 2 */}
 												<div className="flex items-start space-x-4 rtl:space-x-reverse">
-													<div className="flex h-10 w-10 items-center justify-center rounded-full bg-[#ADF0D1] text-lg font-bold text-[#00203F]">
+													<div className="flex h-10 w-10 items-center justify-center rounded-full bg-[#ADF0D1] p-4 text-lg font-bold text-[#00203F]">
 														2
 													</div>
 													<div>
@@ -352,7 +352,7 @@ export default function ChatBot({
 
 												{/* الخطوة 3 */}
 												<div className="flex items-start space-x-4 rtl:space-x-reverse">
-													<div className="flex h-10 w-10 items-center justify-center rounded-full bg-[#ADF0D1] text-lg font-bold text-[#00203F]">
+													<div className="flex h-10 w-10 items-center justify-center rounded-full bg-[#ADF0D1] p-4 text-lg font-bold text-[#00203F]">
 														3
 													</div>
 													<div>
