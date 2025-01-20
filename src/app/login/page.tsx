@@ -31,8 +31,12 @@ async function LoginAction(
 			where: (user, { eq }) => eq(user.username, data.username),
 		});
 
-		if (!user || user.password != hash(data.password)) {
-			return { field: "root", message: "Email or password is incorrect" };
+		if (!user) {
+			return { field: "username", message: "Username not found" };
+		}
+
+		if (user.password !== hash(data.password)) {
+			return { field: "password", message: "Incorrect password" };
 		}
 
 		const session = await lucia.createSession(user.id, {});
@@ -46,7 +50,7 @@ async function LoginAction(
 	} catch (e) {
 		return {
 			field: "root",
-			message: "An unexpected error occured, please try again later",
+			message: "An unexpected error occurred, please try again later",
 		};
 	}
 

@@ -69,7 +69,8 @@ export async function getUnlockIndex(): Promise<
 	"use server";
 	try {
 		const user = await getUser();
-		if (!user) return;
+		if (!user) return { field: "root", message: "User not authenticated." };
+
 		const userInfo = await db.query.TB_user.findFirst({
 			where: (info, { eq }) => eq(info.id, user.id),
 			with: {

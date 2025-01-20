@@ -1,6 +1,10 @@
+"use client";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 
 export function HomeComponent() {
+	const router = useRouter();
+
 	return (
 		<div className="section px-4 py-8" id="home">
 			<div className="flex flex-col items-center justify-evenly md:flex-row md:space-x-6">
@@ -20,11 +24,14 @@ export function HomeComponent() {
 
 					{/* Buttons */}
 					<div className="mt-6 flex justify-center space-x-4 md:justify-start">
-						<Link href="/basic/dataType">
-							<button className="rounded-lg bg-[#00203F] px-6 py-3 text-sm font-bold text-[#ADF0D1] transition-colors hover:bg-[#004466]">
-								Get Started
-							</button>
-						</Link>
+						<button
+							className="rounded-lg bg-[#00203F] px-6 py-3 text-sm font-bold text-[#ADF0D1] transition-colors hover:bg-[#004466]"
+							onClick={() => {
+								router.push("/basic/dataType");
+							}}
+						>
+							Get Started
+						</button>
 						<button className="rounded-lg border border-solid border-[#00203F] px-6 py-3 text-sm font-bold transition-colors hover:bg-[#00203F] hover:text-[#ADF0D1]">
 							<Link href="#try" className="transition-colors hover:text-white">
 								Discover

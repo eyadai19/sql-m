@@ -31,15 +31,14 @@ export function CommentForm({
 		try {
 			const result = await postCommentAction(postId, content, userPhoto);
 			if (result) {
-				console.log(result.message);
+				// console.log(result.message);
 				console.error("Error posting comment:", result.message);
 			} else {
-				console.log("Comment posted successfully!");
+				// console.log("Comment posted successfully!");
 				setContent("");
 			}
 		} catch (error) {
 			console.error("Unexpected error while posting comment:", error);
-			console.log("An unexpected error occurred, please try again later.");
 		} finally {
 			setIsSubmitting(false);
 		}

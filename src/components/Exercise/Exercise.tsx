@@ -162,7 +162,7 @@ export default function Exercise({
 						setIsShowRealAnswer(true);
 					}
 				} catch (error) {
-					console.log("error in response" + error);
+					// console.log("error in response" + error);
 				}
 			}
 

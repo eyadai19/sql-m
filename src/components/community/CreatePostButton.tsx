@@ -17,7 +17,7 @@ import { toast } from "sonner";
 import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
 
 export function CreatePostButton({
-	infoAddPostAction, // return name and photo
+	infoAddPostAction,
 	addPostAction,
 }: {
 	infoAddPostAction: () => Promise<

@@ -29,7 +29,8 @@ export async function fetchAllPostsAction(): Promise<
 			},
 		});
 		const user = await getUser();
-		if (!user) return { field: "root", message: "error" };
+		if (!user) return { field: "root", message: "User not authenticated." };
+
 		const userCommentLikes = await db.query.TB_comment_likes.findMany({
 			where: (comment, { eq }) => eq(comment.userId, user.id),
 		});
@@ -72,7 +73,7 @@ export async function postLikeAction(
 ): Promise<{ field: string; message: string } | undefined> {
 	try {
 		const user = await getUser();
-		if (!user) return;
+		if (!user) return { field: "root", message: "User not authenticated." };
 
 		const existingLike = await db.query.TB_post_likes.findFirst({
 			where: (like, { eq }) =>
@@ -115,7 +116,7 @@ export async function postCommentLikeAction(
 ): Promise<{ field: string; message: string } | undefined> {
 	try {
 		const user = await getUser();
-		if (!user) return;
+		if (!user) return { field: "root", message: "User not authenticated." };
 
 		const existingLike = await db.query.TB_comment_likes.findFirst({
 			where: (comment, { eq }) =>
@@ -161,7 +162,7 @@ export async function postCommentAction(
 ): Promise<{ field: string; message: string } | undefined> {
 	try {
 		const user = await getUser();
-		if (!user) return;
+		if (!user) return { field: "root", message: "User not authenticated." };
 
 		const newComment = {
 			id: nanoid(),
@@ -192,7 +193,7 @@ export async function editPostAction(
 ): Promise<{ field: string; message: string } | undefined> {
 	try {
 		const user = await getUser();
-		if (!user) return { field: "root", message: "User not authenticated" };
+		if (!user) return { field: "root", message: "User not authenticated." };
 
 		const existingPost = await db.query.TB_posts.findFirst({
 			where: (post, { eq }) => eq(post.id, postId) && eq(post.userId, user.id),
@@ -232,7 +233,7 @@ export async function userPostAction(): Promise<
 > {
 	try {
 		const user = await getUser();
-		if (!user) return { field: "root", message: "error" };
+		if (!user) return { field: "root", message: "User not authenticated." };
 
 		const posts = await db.query.TB_posts.findMany({
 			where: (post, { eq }) => eq(post.userId, user.id),
@@ -293,7 +294,7 @@ export async function addPostAction(
 
 	try {
 		const user = await getUser();
-		if (!user) return { field: "root", message: "User not authenticated" };
+		if (!user) return { field: "root", message: "User not authenticated." };
 
 		const newPost = {
 			id: nanoid(),

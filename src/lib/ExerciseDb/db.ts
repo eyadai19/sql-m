@@ -109,7 +109,6 @@ export class TempDatabase {
 
 					for (const table of tables) {
 						await this.db.exec(`DROP TABLE IF EXISTS ${table.name}`);
-						console.log(`Dropped table: ${table.name}`);
 					}
 					if (operationType == "ALTER") {
 						await this.initialize();
@@ -190,7 +189,6 @@ export class TempDatabase {
 
 			// إذا لم تكن هناك جداول، فقط أغلق الاتصال
 			if (tables.length === 0) {
-				console.log("No tables to drop.");
 				await this.db.close();
 				return;
 			}
@@ -198,7 +196,6 @@ export class TempDatabase {
 			// حذف كل الجداول
 			for (const table of tables) {
 				await this.db.exec(`DROP TABLE IF EXISTS ${table.name}`);
-				console.log(`Dropped table: ${table.name}`);
 			}
 		} catch (err) {
 			console.error("Error cleaning up database:", err);

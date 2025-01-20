@@ -34,7 +34,8 @@ export default function RegisterForm({
 
 	const router = useRouter();
 	const [isLoading, setIsLoading] = useState(true);
-	const [photoUrl, setPhotoUrl] = useState<string | null>(null); // حفظ رابط الصورة
+	const [photoUrl, setPhotoUrl] = useState<string | null>(null);
+	const [isSubmitting, setIsSubmitting] = useState(false); // حالة التحميل
 
 	useEffect(() => {
 		async function checkLoginStatus() {
@@ -60,23 +61,22 @@ export default function RegisterForm({
 		checkLoginStatus();
 	}, [router]);
 
-	// const handleImageChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-	// 	const file = event.target.files?.[0];
-	// 	if (file) {
-	// 		setPhotoFile(file);
-	// 		const previewUrl = URL.createObjectURL(file);
-	// 		setPreview(previewUrl);
-	// 	} else {
-	// 		setPreview(null);
-	// 		setPhotoFile(null);
-	// 	}
-	// };
-
 	async function onSubmit(values: z.infer<typeof registerFormSchema>) {
-		const error = await registerAction(values, photoUrl);
+		setIsSubmitting(true); // بدء التحميل
 
-		if (error) {
-			form.setError(error.field, { message: error.message });
+		try {
+			const error = await registerAction(values, photoUrl);
+
+			if (error) {
+				form.setError(error.field, { message: error.message });
+			}
+		} catch (error) {
+			console.error("An unexpected error occurred:", error);
+			form.setError("root", {
+				message: "An unexpected error occurred, please try again later",
+			});
+		} finally {
+			setIsSubmitting(false); // إيقاف التحميل
 		}
 	}
 
@@ -87,6 +87,7 @@ export default function RegisterForm({
 			</div>
 		);
 	}
+
 	return (
 		<div
 			className="flex min-h-screen items-center justify-center bg-gradient-to-b from-[#00203F] to-[#00001a]"
@@ -114,6 +115,7 @@ export default function RegisterForm({
 							height: "450px",
 							boxShadow:
 								"0 10px 15px -3px rgba(0, 32, 63, 0.5), 0 4px 6px rgba(0, 32, 63, 0.3)",
+							overflowY: "auto",
 						}}
 					>
 						<div className="relative mb-3 flex flex-col items-center">
@@ -132,7 +134,6 @@ export default function RegisterForm({
 											<span className="text-lg text-white">+</span>
 										</div>
 									</label>
-									{/* إخفاء UploadButton خلف الدائرة */}
 									<div className="absolute inset-0 flex items-center justify-center opacity-0">
 										<UploadButton
 											endpoint="imageUploader"
@@ -141,7 +142,7 @@ export default function RegisterForm({
 												setPhotoUrl(uploadedFile.url);
 											}}
 											onUploadError={(error) => {
-												// console.error("Upload failed", error);
+												console.error("Upload failed", error);
 											}}
 										/>
 									</div>
@@ -245,8 +246,15 @@ export default function RegisterForm({
 								<Button
 									type="submit"
 									className="w-full bg-[#ADF0D1] text-[#00203F] hover:text-[#ADF0D1]"
+									disabled={isSubmitting} // تعطيل الزر أثناء التحميل
 								>
-									Create Account
+									{isSubmitting ? ( // عرض Spinner إذا كان isSubmitting = true
+										<div className="flex items-center justify-center">
+											<div className="h-5 w-5 animate-spin rounded-full border-b-2 border-t-2 border-[#00203F]"></div>
+										</div>
+									) : (
+										"Create Account"
+									)}
 								</Button>
 							</form>
 						</Form>

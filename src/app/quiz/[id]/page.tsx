@@ -97,7 +97,7 @@ async function quizQuestionAction(stageId: string): Promise<
 		});
 
 		const user = await getUser();
-		if (!user) return;
+		if (!user) return { field: "root", message: "User not authenticated." };
 
 		const userParams = await db.query.TB_user_excercise_summary.findMany({
 			where: (u, { eq }) => eq(u.userId, user.id),
@@ -272,7 +272,8 @@ async function quizAction(
 		const quizId = nanoid();
 
 		const user = await getUser();
-		if (!user) return;
+		if (!user) return { field: "root", message: "User not authenticated." };
+
 		const newQuiz = {
 			id: quizId,
 			userId: user.id,

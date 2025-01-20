@@ -74,7 +74,6 @@ export async function ChatbotExpAction(
 			}
 			const context = data.context;
 			const tableNames = extractTableNames(context);
-			console.log("Table Names:", tableNames);
 			return tableNames;
 		} catch (error) {
 			console.error("خطأ أثناء جلب الجداول:", error);
@@ -115,7 +114,6 @@ export async function ChatbotExpAction(
 
 			const context = data.context;
 			const tablesWithColumns = extractTablesWithColumns(context);
-			// console.log("Tables with Columns:", tablesWithColumns);
 			return tablesWithColumns;
 		} catch (error) {
 			console.error("خطأ أثناء جلب الجداول:", error);
@@ -377,7 +375,6 @@ export async function ChatbotExpAction(
 				useAgFun = false;
 				useGroupBy = false;
 				updateSession();
-				console.log(answer);
 				return {
 					message: message,
 					fun: fun,

@@ -6,10 +6,10 @@ import { RegisterFormError, registerFormSchema } from "@/lib/types/authSchemas";
 import hash from "@/lib/utils";
 import { eq } from "drizzle-orm";
 import { nanoid } from "nanoid";
+import { Metadata } from "next";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import { z } from "zod";
-import { Metadata } from "next";
 export const metadata: Metadata = {
 	title: "SQLMentor - Register",
 	icons: {
@@ -21,6 +21,7 @@ export const metadata: Metadata = {
 export default function RegisterPage() {
 	return <RegisterForm registerAction={RegisterAction} />;
 }
+
 export async function RegisterAction(
 	input: z.infer<typeof registerFormSchema>,
 	photoUrl: string | null,

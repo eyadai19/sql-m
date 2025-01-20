@@ -1,6 +1,6 @@
 "use client";
 
-import Link from "next/link";
+import { useRouter } from "next/navigation"; // استيراد useRouter
 import { useState } from "react";
 import {
 	FaArrowLeft,
@@ -20,13 +20,19 @@ export function ProfileNavbar({
 }: {
 	logoutAction: () => Promise<void>;
 }) {
+	const router = useRouter(); // استخدام useRouter
 	const [isDrawerOpen, setIsDrawerOpen] = useState(false);
 
 	const toggleDrawer = () => setIsDrawerOpen((prev) => !prev);
 
 	const handleLogout = async () => {
 		await logoutAction();
-		setIsDrawerOpen(false); // Close the drawer after logout
+		setIsDrawerOpen(false); // إغلاق الدراور بعد تسجيل الخروج
+	};
+
+	const handleNavigation = (href: string) => {
+		router.push(href); // التنقل إلى الصفحة المطلوبة
+		setIsDrawerOpen(false); // إغلاق الدراور بعد التنقل
 	};
 
 	const navLinks = [
@@ -52,14 +58,14 @@ export function ProfileNavbar({
 				{/* Desktop Navigation */}
 				<div className="hidden items-center space-x-4 sm:flex">
 					{navLinks.map(({ href, icon: Icon, label }) => (
-						<Link
+						<button
 							key={label}
-							href={href}
+							onClick={() => handleNavigation(href)} // استخدام handleNavigation
 							className="transition-colors hover:text-white"
 							title={label}
 						>
 							<Icon size={24} />
-						</Link>
+						</button>
 					))}
 					<button
 						onClick={handleLogout}
@@ -91,16 +97,15 @@ export function ProfileNavbar({
 					</button>
 
 					{navLinks.map(({ href, icon: Icon, label }) => (
-						<Link
+						<button
 							key={label}
-							href={href}
+							onClick={() => handleNavigation(href)} // استخدام handleNavigation
 							className="flex items-center space-x-4 transition-colors hover:text-white"
-							onClick={toggleDrawer}
 							title={label}
 						>
 							<Icon size={24} />
 							<span>{label}</span>
-						</Link>
+						</button>
 					))}
 
 					<button

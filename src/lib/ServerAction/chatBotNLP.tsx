@@ -32,9 +32,9 @@ export async function ChatbotAction(
 	}
 	try {
 		if (!input || !input.question) {
-			console.log(
-				"The 'input' object must contain a valid 'question' property.",
-			);
+			// console.log(
+			// 	"The 'input' object must contain a valid 'question' property.",
+			// );
 		}
 		const input_prompt = table + "\nquery for: " + input.question;
 		const response = await axios.post(ngrok_url_generate_sql, {
@@ -55,9 +55,9 @@ export async function ChatbotWithNewContextAction(
 
 	try {
 		if (!input || !input.question) {
-			console.log(
-				"The 'input' object must contain a valid 'question' property.",
-			);
+			// console.log(
+			// 	"The 'input' object must contain a valid 'question' property.",
+			// );
 		}
 		const input_prompt = context + "\nquery for: " + input.question;
 		const response = await axios.post(ngrok_url_generate_sql, {

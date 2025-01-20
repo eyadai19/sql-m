@@ -51,6 +51,7 @@ export default function ProfilePage({
 		commentId: string,
 	) => Promise<{ field: string; message: string } | undefined>;
 }) {
+	const router = useRouter();
 	const [isSaving, setIsSaving] = useState(false);
 	const [info, setInfo] = useState<ProfileData | null>(null);
 	const [error, setError] = useState<string | null>(null);
@@ -62,8 +63,6 @@ export default function ProfilePage({
 	const [achievements, setAchievements] = useState<string[]>([]);
 	const [posts, setPosts] = useState<Post[] | null>(null);
 	const [postsError, setPostError] = useState<string | null>(null);
-
-	const router = useRouter();
 	const swiperRef = useRef<any>(null);
 	let maxStage: number;
 
@@ -344,6 +343,7 @@ export default function ProfilePage({
 									modules={[Autoplay, Navigation]}
 									className="mt-6 rounded-xl"
 								>
+									{/* Slide for AI Learning */}
 									<SwiperSlide>
 										<div className="rounded-xl bg-gradient-to-br from-[#00203F] to-[#001529] p-8 text-center text-white">
 											<h2 className="text-xl font-bold">Learn With AI</h2>
@@ -351,8 +351,50 @@ export default function ProfilePage({
 												Enhance your SQL knowledge with our AI-powered learning
 												system
 											</p>
-											<button className="mt-4 rounded-lg bg-white px-6 py-2 font-medium text-[#00203F] transition-colors hover:bg-gray-100">
+											<button
+												className="mt-4 rounded-lg bg-white px-6 py-2 font-medium text-[#00203F] transition-colors hover:bg-gray-100"
+												onClick={() => {
+													router.push("/basic/dataType");
+												}}
+											>
 												Start Learning
+											</button>
+										</div>
+									</SwiperSlide>
+
+									{/* Slide for Community */}
+									<SwiperSlide>
+										<div className="rounded-xl bg-gradient-to-br from-[#4A00E0] to-[#8E2DE2] p-8 text-center text-white">
+											<h2 className="text-xl font-bold">Join Our Community</h2>
+											<p className="mt-2 text-gray-300">
+												Connect with other learners, share knowledge, and grow
+												together
+											</p>
+											<button
+												className="mt-4 rounded-lg bg-white px-6 py-2 font-medium text-[#4A00E0] transition-colors hover:bg-gray-100"
+												onClick={() => {
+													router.push("/Community");
+												}}
+											>
+												Join Now
+											</button>
+										</div>
+									</SwiperSlide>
+
+									{/* Slide for Compiler */}
+									<SwiperSlide>
+										<div className="rounded-xl bg-gradient-to-br from-[#00B4DB] to-[#0083B0] p-8 text-center text-white">
+											<h2 className="text-xl font-bold">Try Our Compiler</h2>
+											<p className="mt-2 text-gray-300">
+												Write, compile, and test your SQL queries in real-time
+											</p>
+											<button
+												className="mt-4 rounded-lg bg-white px-6 py-2 font-medium text-[#00B4DB] transition-colors hover:bg-gray-100"
+												onClick={() => {
+													router.push("/UserDbEditor");
+												}}
+											>
+												Start Coding
 											</button>
 										</div>
 									</SwiperSlide>

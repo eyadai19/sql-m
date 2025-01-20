@@ -1,6 +1,14 @@
 import CommunityPage from "@/components/community/Community";
 import { ProfileNavbar } from "@/components/layout/ProfileNavbar";
 
+import Chatbot from "@/components/Chatbot";
+import { ChatbotExpAction } from "@/lib/ServerAction/chatbotExp";
+import {
+	ChatbotAction,
+	ChatbotTrArToEn,
+	ChatbotTrEnToAr,
+	ChatbotWithNewContextAction,
+} from "@/lib/ServerAction/chatBotNLP";
 import {
 	addPostAction,
 	deletePostAction,
@@ -35,6 +43,13 @@ export default function Community() {
 				deletePostAction={deletePostAction}
 				editPostAction={editPostAction}
 				infoAddPostAction={infoAddPostAction}
+			/>
+			<Chatbot
+				ChatbotAction={ChatbotAction}
+				ChatbotExpAction={ChatbotExpAction}
+				ChatbotTrArToEn={ChatbotTrArToEn}
+				ChatbotTrEnToAr={ChatbotTrEnToAr}
+				ChatbotWithNewContextAction={ChatbotWithNewContextAction}
 			/>
 		</div>
 	);

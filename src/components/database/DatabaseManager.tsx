@@ -87,7 +87,7 @@ export default function DatabaseManager() {
 									Here you can manage your database such as:
 									<br />
 									- creating, updating, deleting tables
-									<br />- selecting, inserting, or deleting data.
+									<br />- selecting, inserting, updating, or deleting data.
 								</p>
 								<button
 									onClick={closePopup}

@@ -15,6 +15,14 @@ import { eq } from "drizzle-orm";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import { deletePostAction } from "../../lib/ServerAction/postsAction";
+import {
+	ChatbotAction,
+	ChatbotTrArToEn,
+	ChatbotTrEnToAr,
+	ChatbotWithNewContextAction,
+} from "@/lib/ServerAction/chatBotNLP";
+import Chatbot from "@/components/Chatbot";
+import { ChatbotExpAction } from "@/lib/ServerAction/chatbotExp";
 
 import { Metadata } from "next";
 export const metadata: Metadata = {
@@ -39,6 +47,13 @@ export default function Profile() {
 				postCommentLikeAction={postCommentLikeAction}
 				postLikeAction={postLikeAction}
 			/>
+			<Chatbot
+							ChatbotAction={ChatbotAction}
+							ChatbotExpAction={ChatbotExpAction}
+							ChatbotTrArToEn={ChatbotTrArToEn}
+							ChatbotTrEnToAr={ChatbotTrEnToAr}
+							ChatbotWithNewContextAction={ChatbotWithNewContextAction}
+						/>
 		</div>
 	);
 }
@@ -65,7 +80,7 @@ async function ProfileAction(): Promise<
 	try {
 		const user = await getUser();
 		if (!user) {
-			return;
+			return { field: "root", message: "User not authenticated." };
 		}
 
 		const info = await db.query.TB_user.findFirst({
@@ -127,7 +142,7 @@ async function UpdateProfileAction(
 
 		const user = await getUser();
 		if (!user) {
-			return { field: "root", message: "User not found" };
+			return { field: "root", message: "User not authenticated." };
 		}
 
 		const updateData: { firstName: string; lastName: string; photo?: string } =
