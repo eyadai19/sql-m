@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import {
 	FaArrowLeft,
 	FaBars,
@@ -21,8 +21,6 @@ export function ProfileNavbar({
 	logoutAction: () => Promise<void>;
 }) {
 	const [isDrawerOpen, setIsDrawerOpen] = useState(false);
-	const [lastScrollY, setLastScrollY] = useState(0);
-	const [isNavbarVisible, setIsNavbarVisible] = useState(true);
 
 	const toggleDrawer = () => setIsDrawerOpen((prev) => !prev);
 
@@ -30,28 +28,6 @@ export function ProfileNavbar({
 		await logoutAction();
 		setIsDrawerOpen(false); // Close the drawer after logout
 	};
-
-	useEffect(() => {
-		const handleScroll = () => {
-			setIsNavbarVisible(window.scrollY <= lastScrollY);
-			setLastScrollY(window.scrollY);
-		};
-
-		window.addEventListener("scroll", handleScroll);
-		return () => window.removeEventListener("scroll", handleScroll);
-	}, [lastScrollY]);
-
-	useEffect(() => {
-		const handleResize = () => {
-			// Close drawer if the screen width is large (>= 640px)
-			if (window.innerWidth >= 640 && isDrawerOpen) {
-				setIsDrawerOpen(false);
-			}
-		};
-
-		window.addEventListener("resize", handleResize);
-		return () => window.removeEventListener("resize", handleResize);
-	}, [isDrawerOpen]);
 
 	const navLinks = [
 		{ href: "/home", icon: FaHome, label: "Home" },
@@ -69,11 +45,7 @@ export function ProfileNavbar({
 	return (
 		<>
 			{/* Navbar */}
-			<nav
-				className={`fixed left-0 right-0 top-0 flex items-center justify-between bg-[#00203F] p-5 text-[#ADF0D1] shadow-md transition-transform duration-300 ${
-					isNavbarVisible ? "translate-y-0" : "-translate-y-full"
-				} ${isDrawerOpen ? "z-40" : "z-50"}`}
-			>
+			<nav className="fixed left-0 right-0 top-0 z-50 flex items-center justify-between bg-[#00203F] p-5 text-[#ADF0D1] shadow-md">
 				{/* Logo */}
 				<div className="text-2xl font-bold">sqlmentor</div>
 
