@@ -18,5 +18,6 @@ export const config = {
 		"/UserDbEditor/:path*",
 		"/QuizDetalis/:path*",
 		"/DataBaseExeplorer/:path*",
+		"/basic/dataType/:path*",
 	],
 };
