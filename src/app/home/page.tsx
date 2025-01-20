@@ -1,17 +1,18 @@
 // my-navbar-app/pages/navbar-test.tsx
-import { Navbar } from "@/components/home/Navbar";
-import { HomeComponent } from "@/components/home/HomeComponent";
-import { AboutComponent } from "@/components/home/AboutComponent";
-import { TryitCard } from "@/components/home/TryitCard";
 import Chatbot from "@/components/Chatbot";
+import { AboutComponent } from "@/components/home/AboutComponent";
 import { Footer } from "@/components/home/Footer";
+import { HomeComponent } from "@/components/home/HomeComponent";
+import { Navbar } from "@/components/home/Navbar";
+import Popup from "@/components/home/Popup";
+import { TryitCard } from "@/components/home/TryitCard";
 import {
-  ChatbotAction,
-  ChatbotTrArToEn,
-  ChatbotTrEnToAr,
+	ChatbotAction,
+	ChatbotTrArToEn,
+	ChatbotTrEnToAr,
+	ChatbotWithNewContextAction,
 } from "@/lib/ServerAction/chatBotNLP";
 import { ChatbotExpAction } from "@/lib/ServerAction/chatbotExp";
-import Popup from "@/components/home/Popup";
 import { Metadata } from "next";
 export const metadata: Metadata = {
 	title: "SQLMentor - Home",
@@ -22,24 +23,25 @@ export const metadata: Metadata = {
 };
 
 export default function HomePage() {
-  return (
-    <div className="">
-      <Navbar />
+	return (
+		<div className="">
+			<Navbar />
 
-      <HomeComponent />
-      <AboutComponent />
-      <TryitCard />
+			<HomeComponent />
+			<AboutComponent />
+			<TryitCard />
 
-      <Chatbot
-        ChatbotAction={ChatbotAction}
-        ChatbotExpAction={ChatbotExpAction}
-        ChatbotTrArToEn={ChatbotTrArToEn}
-        ChatbotTrEnToAr={ChatbotTrEnToAr}
-      />
+			<Chatbot
+				ChatbotAction={ChatbotAction}
+				ChatbotExpAction={ChatbotExpAction}
+				ChatbotTrArToEn={ChatbotTrArToEn}
+				ChatbotTrEnToAr={ChatbotTrEnToAr}
+				ChatbotWithNewContextAction={ChatbotWithNewContextAction}
+			/>
 
-      <Footer />
+			<Footer />
 
-      <Popup />
-    </div>
-  );
+			<Popup />
+		</div>
+	);
 }

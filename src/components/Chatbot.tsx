@@ -19,17 +19,24 @@ import {
 import { FaInfoCircle } from "react-icons/fa";
 import { z } from "zod";
 import ChatbotExpTest from "./ChatbotExpComponent";
+
 interface QueryResult {
 	[key: string]: string | number | boolean | null;
 }
+
 export default function ChatBot({
 	ChatbotAction,
+	ChatbotWithNewContextAction,
 	ChatbotExpAction,
 	ChatbotTrArToEn,
 	ChatbotTrEnToAr,
 }: {
 	ChatbotAction(
 		input: z.infer<typeof userChatBotInputSchema>,
+	): Promise<{ answer: string } | userExcerciseAnswerError | undefined>;
+	ChatbotWithNewContextAction(
+		input: z.infer<typeof userChatBotInputSchema>,
+		context: string,
 	): Promise<{ answer: string } | userExcerciseAnswerError | undefined>;
 	ChatbotExpAction(
 		question: string,
@@ -70,23 +77,37 @@ export default function ChatBot({
 	const [selectResults, setSelectResults] = useState<QueryResult[]>([]);
 	const [errorMessage, setErrorMessage] = useState<string | null>(null);
 	const [showInfoPopup, setShowInfoPopup] = useState(false);
+
 	const handleQuerySubmit = async () => {
-		setLoading(true); // إظهار الـ loader
+		setLoading(true);
 		try {
 			if (language == "AR") {
 				const questionEN = await ChatbotTrArToEn({ question: userQuery });
 				if (questionEN && "answer" in questionEN) {
-					const result = await ChatbotAction({ question: questionEN.answer });
+					var result;
+					if (newContext) {
+						result = await ChatbotWithNewContextAction(
+							{ question: questionEN.answer },
+							newContext,
+						);
+					} else {
+						result = await ChatbotAction({ question: questionEN.answer });
+					}
 					if (result && "answer" in result) setQueryResult(result.answer);
 					else return result?.message;
 				} else return questionEN?.message;
 			} else {
-				const result = await ChatbotAction({ question: userQuery });
+				const result = newContext
+					? await ChatbotWithNewContextAction(
+							{ question: userQuery },
+							newContext,
+						)
+					: await ChatbotAction({ question: userQuery });
 				if (result && "answer" in result) setQueryResult(result.answer);
 				else return result?.message;
 			}
 		} finally {
-			setLoading(false); // إخفاء الـ loader بعد إتمام العملية
+			setLoading(false);
 		}
 	};
 
@@ -143,6 +164,7 @@ export default function ChatBot({
 	const validateAndSelectData = async () => {
 		setSelectResults([]);
 		setErrorMessage(null);
+
 		try {
 			const response = await fetch(userDbApi, {
 				method: "POST",
@@ -162,7 +184,13 @@ export default function ChatBot({
 			}
 
 			const data = await response.json();
-			setSelectResults(data.data); // عرض النتائج
+
+			if (!data.data || data.data.length === 0) {
+				setErrorMessage("No data found for the given query.");
+				setSelectResults([]);
+			} else {
+				setSelectResults(data.data);
+			}
 		} catch (error) {
 			console.error("Error executing query:", error);
 			setErrorMessage("An error occurred while executing the query.");
@@ -276,6 +304,7 @@ export default function ChatBot({
 								</div>
 
 								{/* New Context Textarea */}
+								{/* New Context Textarea */}
 								{contextOption === "use new context" && (
 									<div className="relative m-3 mt-4 flex w-3/4 flex-col">
 										<textarea
@@ -290,12 +319,15 @@ export default function ChatBot({
 												setNewContext(e.target.value);
 											}}
 										/>
-										<div className="absolute right-2 top-2 cursor-pointer">
-											<FaInfoCircle
-												className="text-[#00203F] opacity-70 hover:opacity-100"
-												onClick={() => setShowInfoPopup(true)} // فتح النافذة المنبثقة عند النقر
-											/>
-										</div>
+										{/* إخفاء الأيقونة عند وجود نص */}
+										{!newContext && (
+											<div className="absolute right-2 top-2 cursor-pointer">
+												<FaInfoCircle
+													className="text-[#00203F] opacity-70 hover:opacity-100"
+													onClick={() => setShowInfoPopup(true)}
+												/>
+											</div>
+										)}
 									</div>
 								)}
 
@@ -333,7 +365,7 @@ export default function ChatBot({
 
 												{/* الخطوة 2 */}
 												<div className="flex items-start space-x-4 rtl:space-x-reverse">
-													<div className="flex h-10 w-10 items-center justify-center rounded-full bg-[#ADF0D1] text-lg font-bold text-[#00203F]">
+													<div className="flex h-10 w-10 items-center justify-center rounded-full bg-[#ADF0D1] p-4 text-lg font-bold text-[#00203F]">
 														2
 													</div>
 													<div>
@@ -352,7 +384,7 @@ export default function ChatBot({
 
 												{/* الخطوة 3 */}
 												<div className="flex items-start space-x-4 rtl:space-x-reverse">
-													<div className="flex h-10 w-10 items-center justify-center rounded-full bg-[#ADF0D1] text-lg font-bold text-[#00203F]">
+													<div className="flex h-10 w-10 items-center justify-center rounded-full bg-[#ADF0D1] p-4 text-lg font-bold text-[#00203F]">
 														3
 													</div>
 													<div>
@@ -551,7 +583,7 @@ export default function ChatBot({
 									</div>
 								)}
 								{/* Submit Button */}
-								{queryResult && (
+								{queryResult && newContext == "" && (
 									<button
 										onClick={validateAndSelectData}
 										className="mt-4 w-32 rounded-lg bg-[#ADF0D1] p-2 text-sm font-semibold text-[#00203F] shadow-sm transition-all hover:bg-[#A1E7D8] hover:shadow-md"

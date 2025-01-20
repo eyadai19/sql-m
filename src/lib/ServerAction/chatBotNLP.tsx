@@ -47,26 +47,28 @@ export async function ChatbotAction(
 	}
 }
 
-// export async function ChatbotExpAction(
-// 	input: z.infer<typeof userChatBotInputSchema>,
-// ): Promise<
-// 	| { answer: String }
-// 	| { question: String; answers: String[] }
-// 	| userExcerciseAnswerError
-// 	| undefined
-// > {
-// 	"use server";
-// 	try {
-// 		const choose = await userChatBotInputSchema.parseAsync({ input });
-// 		const response = await axios.post("chatBotApi", {
-// 			choose,
-// 		});
+export async function ChatbotWithNewContextAction(
+	input: z.infer<typeof userChatBotInputSchema>,
+	context: string,
+): Promise<{ answer: string } | userExcerciseAnswerError | undefined> {
+	"use server";
 
-// 	} catch (error) {
-// 		console.error("Error sending question to API:", error);
-// 		return { field: "root", message: "Failed to retrieve answer" };
-// 	}
-// }
+	try {
+		if (!input || !input.question) {
+			console.log(
+				"The 'input' object must contain a valid 'question' property.",
+			);
+		}
+		const input_prompt = context + "\nquery for: " + input.question;
+		const response = await axios.post(ngrok_url_generate_sql, {
+			input_prompt: input_prompt,
+		});
+		return { answer: response.data["generated_sql"] };
+	} catch (error) {
+		console.error("Error sending question to API:", error);
+		return { field: "root", message: "Failed to retrieve answer" };
+	}
+}
 
 export async function ChatbotTrEnToAr(
 	input: z.infer<typeof userChatBotInputSchema>,
@@ -99,5 +101,3 @@ export async function ChatbotTrArToEn(
 		return { field: "root", message: "Failed to retrieve answer" };
 	}
 }
-
-// when use ar in nlp => use ChatbotTrArToEn then ChatbotAction then ChatbotTrEnToAr

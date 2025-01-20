@@ -5,14 +5,15 @@ import RenderHeadings from "@/components/layout/RenderHeadings";
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { getUser } from "@/lib/auth";
 import { db } from "@/lib/db";
+import { ChatbotExpAction } from "@/lib/ServerAction/chatbotExp";
 import {
 	ChatbotAction,
 	ChatbotTrArToEn,
 	ChatbotTrEnToAr,
+	ChatbotWithNewContextAction,
 } from "@/lib/ServerAction/chatBotNLP";
 import React from "react";
 import { logoutAction } from "../Profile/page";
-import { ChatbotExpAction } from "@/lib/ServerAction/chatbotExp";
 
 export default function DashboardLayout({
 	children,
@@ -39,6 +40,7 @@ export default function DashboardLayout({
 				ChatbotExpAction={ChatbotExpAction}
 				ChatbotTrArToEn={ChatbotTrArToEn}
 				ChatbotTrEnToAr={ChatbotTrEnToAr}
+				ChatbotWithNewContextAction={ChatbotWithNewContextAction}
 			/>
 		</div>
 	);

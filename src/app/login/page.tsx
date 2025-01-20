@@ -3,10 +3,10 @@ import { lucia } from "@/lib/auth";
 import { db } from "@/lib/db";
 import { LoginFormError, loginFormSchema } from "@/lib/types/authSchemas";
 import hash from "@/lib/utils";
+import { Metadata } from "next";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import { z } from "zod";
-import { Metadata } from "next";
 export const metadata: Metadata = {
 	title: "SQLMentor - Login",
 	icons: {
@@ -50,5 +50,5 @@ async function LoginAction(
 		};
 	}
 
-	redirect("/Profile");
+	redirect("/basic/dataType");
 }

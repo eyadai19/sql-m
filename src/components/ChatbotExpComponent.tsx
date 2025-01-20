@@ -176,7 +176,6 @@ export default function ChatbotExpTest({
 		setSelectedTable(table);
 
 		if (!table) {
-			console.error("Table name is empty.");
 			setTableColumns([]);
 			setSelectedColumns([]);
 			setSelectedColumn("");
@@ -411,12 +410,13 @@ export default function ChatbotExpTest({
 	const validateAndSelectData = async () => {
 		setSelectResults([]);
 		setErrorMessage(null);
+
 		try {
 			const response = await fetch(userDbApi, {
 				method: "POST",
 				headers: { "Content-Type": "application/json" },
 				body: JSON.stringify({
-					query: syntax, // استخدم الاستعلام الحالي
+					query: syntax, // استخدام الاستعلام الحالي
 				}),
 			});
 
@@ -430,11 +430,22 @@ export default function ChatbotExpTest({
 			}
 
 			const data = await response.json();
-			setSelectResults(data.data); // عرض النتائج
+
+			if (!data.data || data.data.length === 0) {
+				setErrorMessage("No data found for the given query.");
+				setSelectResults([]);
+			} else {
+				setSelectResults(data.data);
+			}
 		} catch (error) {
 			console.error("Error executing query:", error);
 			setErrorMessage("An error occurred while executing the query.");
 		}
+	};
+
+	const autoResize = (element: HTMLTextAreaElement) => {
+		element.style.height = "auto"; // إعادة تعيين الارتفاع
+		element.style.height = `${element.scrollHeight}px`; // تعيين الارتفاع الجديد
 	};
 	return (
 		<div
@@ -449,7 +460,22 @@ export default function ChatbotExpTest({
 			{endMessage ? (
 				<div className="mt-20 rounded-lg bg-gray-400 p-6 text-white shadow-2xl">
 					<div className="mb-4 rounded-md bg-[#1E2A38] p-4 font-mono text-sm">
-						<pre className="whitespace-pre-wrap break-words">{syntax}</pre>
+						{/* <pre className="whitespace-pre-wrap break-words">{syntax}</pre> */}
+						<textarea
+							className="resize-none overflow-hidden whitespace-pre-wrap break-words rounded-lg bg-[#D3D3D3] p-3 text-sm text-[#00203F] shadow-sm"
+							value={syntax}
+							onChange={(e) => {
+								setSyntax(e.target.value);
+								autoResize(e.target);
+							}}
+							ref={(textarea) => {
+								if (textarea) {
+									textarea.style.height = "auto";
+									textarea.style.height = `${textarea.scrollHeight}px`;
+								}
+							}}
+							rows={1}
+						/>
 					</div>
 					<div className="flex justify-center space-x-4">
 						<button
@@ -478,23 +504,25 @@ export default function ChatbotExpTest({
 					</div>
 					{selectResults.length > 0 &&
 						Object.keys(selectResults[0]).length > 0 && (
-							<div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
-								<div className="max-h-[90vh] w-11/12 max-w-2xl overflow-y-auto rounded-lg bg-white p-6 shadow-lg">
+							<div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 transition-opacity duration-300 ease-in-out">
+								<div className="relative max-h-[90vh] w-11/12 max-w-3xl overflow-hidden rounded-xl bg-white p-6 shadow-xl">
 									<button
 										onClick={() => setSelectResults([])}
-										className="absolute right-4 top-4 text-gray-600 hover:text-gray-900"
+										className="absolute right-4 top-4 text-2xl text-gray-600 transition-transform duration-200 hover:scale-110 hover:text-gray-900"
 									>
 										&times;
 									</button>
-									<h3 className="mb-4 text-lg font-semibold">Query Results:</h3>
+									<h3 className="mb-6 text-2xl font-bold text-gray-800">
+										Query Results
+									</h3>
 									<div className="overflow-x-auto">
-										<table className="w-full border-collapse">
+										<table className="w-full border-collapse rounded-lg bg-white shadow">
 											<thead>
-												<tr>
+												<tr className="bg-gray-200 text-gray-700">
 													{Object.keys(selectResults[0]).map((key, index) => (
 														<th
 															key={index}
-															className="border border-gray-300 bg-gray-100 px-4 py-2 text-left text-gray-600"
+															className="border-b-2 border-gray-300 px-4 py-3 text-left text-sm font-semibold"
 														>
 															{key}
 														</th>
@@ -505,26 +533,56 @@ export default function ChatbotExpTest({
 												{selectResults.map((row, rowIndex) => (
 													<tr
 														key={rowIndex}
-														className={
-															rowIndex % 2 === 0 ? "bg-white" : "bg-gray-50"
-														}
+														className={`transition-colors duration-200 ${
+															rowIndex % 2 === 0
+																? "bg-gray-50 hover:bg-gray-100"
+																: "bg-white hover:bg-gray-50"
+														}`}
 													>
 														{Object.values(row).map((value, colIndex) => (
 															<td
 																key={colIndex}
-																className="border border-gray-300 px-4 py-2 text-gray-600"
+																className="border-t border-gray-200 px-4 py-2 text-sm text-gray-700"
 															>
-																{value != null ? String(value) : ""}
+																{value != null ? String(value) : "-"}
 															</td>
 														))}
 													</tr>
 												))}
+												{errorMessage && (
+													<div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
+														<div className="relative w-11/12 max-w-lg overflow-hidden rounded-xl bg-white p-6 shadow-xl">
+															<button
+																onClick={() => setErrorMessage(null)}
+																className="absolute right-4 top-4 text-2xl text-gray-600 transition-transform duration-200 hover:scale-110 hover:text-gray-900"
+															>
+																&times;
+															</button>
+															<h3 className="mb-4 text-xl font-bold text-red-600">
+																Error
+															</h3>
+															<div className="max-h-[60vh] overflow-y-auto rounded-lg bg-red-100 p-4 text-red-700">
+																<pre className="whitespace-pre-wrap font-mono text-sm">
+																	{errorMessage}
+																</pre>
+															</div>
+															<div className="mt-6 flex justify-end">
+																<button
+																	className="rounded-md bg-red-500 px-6 py-2 text-white shadow-md transition-all duration-200 hover:bg-red-600 hover:shadow-lg"
+																	onClick={() => setErrorMessage(null)}
+																>
+																	Close
+																</button>
+															</div>
+														</div>
+													</div>
+												)}
 											</tbody>
 										</table>
 									</div>
-									<div className="mt-4 flex justify-end">
+									<div className="mt-6 flex justify-end">
 										<button
-											className="rounded-md bg-red-500 px-4 py-2 text-white hover:bg-red-600"
+											className="rounded-md bg-[#ADF0D1] px-6 py-2 text-white shadow-md transition-all duration-200 hover:bg-[#A1E7D8] hover:shadow-lg"
 											onClick={() => setSelectResults([])}
 										>
 											Close
@@ -535,8 +593,29 @@ export default function ChatbotExpTest({
 						)}
 					{/* عرض رسالة الخطأ */}
 					{errorMessage && (
-						<div className="mt-4 text-red-500">
-							<pre>{errorMessage}</pre>
+						<div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
+							<div className="relative w-11/12 max-w-lg overflow-hidden rounded-xl bg-white p-6 shadow-xl">
+								<button
+									onClick={() => setErrorMessage(null)}
+									className="absolute right-4 top-4 text-2xl text-gray-600 transition-transform duration-200 hover:scale-110 hover:text-gray-900"
+								>
+									&times;
+								</button>
+								<h3 className="mb-4 text-xl font-bold text-red-600">Error</h3>
+								<div className="max-h-[60vh] overflow-y-auto rounded-lg bg-red-100 p-4 text-red-700">
+									<pre className="whitespace-pre-wrap font-mono text-sm">
+										{errorMessage}
+									</pre>
+								</div>
+								<div className="mt-6 flex justify-end">
+									<button
+										className="rounded-md bg-red-500 px-6 py-2 text-white shadow-md transition-all duration-200 hover:bg-red-600 hover:shadow-lg"
+										onClick={() => setErrorMessage(null)}
+									>
+										Close
+									</button>
+								</div>
+							</div>
 						</div>
 					)}
 				</div>

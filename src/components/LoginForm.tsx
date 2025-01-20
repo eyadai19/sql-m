@@ -162,7 +162,7 @@ export function LoginForm({
 
 						{/* زر هل لديك حساب مسبقًا */}
 						<div className="mt-4 text-center">
-							<span className="text-sm text-black">
+							<span className="text-sm text-white">
 								Don't have an account?{" "}
 							</span>
 							<Link
