@@ -18,7 +18,7 @@ import {
 } from "react-icons/ai";
 import { FaInfoCircle } from "react-icons/fa";
 import { z } from "zod";
-import ChatbotExpTest from "./ChatbotExpComponent";
+import ChatbotExpComponent from "./ChatbotExpComponent";
 
 interface QueryResult {
 	[key: string]: string | number | boolean | null;
@@ -271,7 +271,10 @@ export default function ChatBot({
 						)}
 						{inChatMode == "Syntax" && (
 							<>
-								<ChatbotExpTest ChatbotExpAction={ChatbotExpAction} />
+								<ChatbotExpComponent
+									ChatbotExpAction={ChatbotExpAction}
+									language={language}
+								/>
 							</>
 						)}
 						{/* When query */}

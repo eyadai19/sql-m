@@ -16,12 +16,14 @@ interface Condition {
 interface QueryResult {
 	[key: string]: string | number | boolean | null | undefined;
 }
-export default function ChatbotExpTest({
+export default function ChatbotExpComponent({
 	ChatbotExpAction,
+	language,
 }: {
 	ChatbotExpAction: (
 		question: string,
 		answer: string,
+		language: string,
 	) => Promise<
 		| { answer: string }
 		| {
@@ -37,9 +39,12 @@ export default function ChatbotExpTest({
 		| { question: string; answers: string[] }
 		| { field: string; message: string }
 	>;
+	language: string;
 }) {
 	const [question, setQuestion] = useState<string>(
-		"What kind of instructions do you want?",
+		language == "EN"
+			? "What kind of instructions do you want?"
+			: "ما نوع التعليمات التي تريدها؟",
 	);
 	const [options, setOptions] = useState<string[]>(["dml", "ddl"]);
 	const [endMessage, setEndMessage] = useState<string>("");
@@ -133,10 +138,23 @@ export default function ChatbotExpTest({
 
 		setConversationHistory((prev) => [...prev, { question, answer }]);
 
-		if (["min", "max", "sum", "avg", "count"].includes(answer)) {
+		if (
+			[
+				"min",
+				"max",
+				"sum",
+				"avg",
+				"count",
+				"الحد الأدنى",
+				"الحد الأقصى",
+				"المجموع",
+				"المتوسط",
+				"العدد",
+			].includes(answer)
+		) {
 			setAggregateFunction(answer);
 		}
-		const result = await ChatbotExpAction(question, answer);
+		const result = await ChatbotExpAction(question, answer, language);
 
 		if ("answer" in result && "message" in result && "fun" in result) {
 			if (result.answer == "DROP table {table_name}") setIsDropMode(true);
@@ -297,7 +315,11 @@ export default function ChatbotExpTest({
 		const finalCondition = conditions
 			.map((cond) => `${cond.column} ${cond.operator} '${cond.value}'`)
 			.join(` ${conditionLogic} `);
-		const agg = aggregateFunction + "(" + aggregateFunctionColumnName + ")";
+		const agg =
+			translateAgg(aggregateFunction, "EN") +
+			"(" +
+			aggregateFunctionColumnName +
+			")";
 		const semiColm = selectedColumns.length == 0 ? "" : ",";
 
 		const sqlQuery = syntax
@@ -380,7 +402,11 @@ export default function ChatbotExpTest({
 	};
 
 	const resetAll = () => {
-		setQuestion("What kind of instructions do you want?");
+		setQuestion(
+			language == "EN"
+				? "What kind of instructions do you want?"
+				: "ما نوع التعليمات التي تريدها؟",
+		);
 		setOptions(["dml", "ddl"]);
 		setEndMessage("");
 		setSyntax("");
@@ -456,6 +482,63 @@ export default function ChatbotExpTest({
 		element.style.height = `${element.scrollHeight}px`; // تعيين الارتفاع الجديد
 	};
 
+	function translateText(text: string, language: string): string {
+		if (language === "EN") {
+			return text;
+		}
+
+		const translations: Record<string, string> = {
+			min: "الحد الأدنى",
+			max: "الحد الأقصى",
+			sum: "المجموع",
+			avg: "المتوسط",
+			count: "العدد",
+			Run: "تشغيل",
+			Copy: "نسخ",
+			Close: "إغلاق",
+			"Query Results": "نتائج الاستعلام",
+			Error: "خطأ",
+			"Please choose a table:": "الرجاء اختيار جدول:",
+			"Select column for GROUP BY:": "اختر عمودًا للتجميع:",
+			"Select column for ORDER BY:": "اختر عمودًا للترتيب:",
+			"Select column for": "اختر عمودًا لـ",
+			"function:": "دالة:",
+			"Define conditions:": "حدد الشروط:",
+			"Select column": "اختر عمودًا",
+			"Select operator": "اختر عملية",
+			"Enter value": "أدخل قيمة",
+			Remove: "إزالة",
+			"Add Another Condition": "إضافة شرط جديد",
+			"Select columns from": "اختر الأعمدة من",
+			"Generate SQL Query": "إنشاء استعلام SQL",
+			"Please choose a table for drop:": "الرجاء اختيار جدول للحذف:",
+			"Table Name:": "اسم الجدول:",
+			"Column Name:": "اسم العمود:",
+			"Column Type:": "نوع العمود:",
+			"New Column": "عمود جديد",
+			"Confirm Selection": "تأكيد الاختيار",
+			"Select column type": "اختر نوع العامود",
+			"Select a column": "اختر عامود",
+		};
+
+		return translations[text] || text;
+	}
+	function translateAgg(text: string, language: string): string {
+		if (language === "AR") {
+			return text;
+		}
+
+		const translations: Record<string, string> = {
+			"الحد الأدنى": "min",
+			"الحد الأقصى": "max",
+			المجموع: "sum",
+			المتوسط: "avg",
+			العدد: "count",
+		};
+
+		return translations[text] || text;
+	}
+
 	return (
 		<div
 			className="relative flex flex-col space-y-4 bg-[#00203F] p-4 text-white"
@@ -492,7 +575,7 @@ export default function ChatbotExpTest({
 							onClick={() => navigator.clipboard.writeText(syntax)}
 						>
 							<AiOutlineCopy className="mr-2" />
-							Copy
+							{translateText("Copy", language)}
 						</button>
 						{/* زر Run */}
 						{syntax.toUpperCase().startsWith("SELECT") && (
@@ -501,7 +584,7 @@ export default function ChatbotExpTest({
 								onClick={validateAndSelectData}
 							>
 								<AiOutlineCode className="mr-2" />
-								Run
+								{translateText("Run", language)}
 							</button>
 						)}
 						<button
@@ -509,7 +592,7 @@ export default function ChatbotExpTest({
 							onClick={resetAll}
 						>
 							<AiOutlineClose className="mr-2" />
-							Close
+							{translateText("Close", language)}
 						</button>
 					</div>
 					{selectResults.length > 0 &&
@@ -523,7 +606,7 @@ export default function ChatbotExpTest({
 										&times;
 									</button>
 									<h3 className="mb-6 text-2xl font-bold text-gray-800">
-										Query Results
+										{translateText("Query Results", language)}
 									</h3>
 									<div className="overflow-x-auto">
 										<table className="w-full border-collapse rounded-lg bg-white shadow">
@@ -569,7 +652,7 @@ export default function ChatbotExpTest({
 																&times;
 															</button>
 															<h3 className="mb-4 text-xl font-bold text-red-600">
-																Error
+																{translateText("Error", language)}
 															</h3>
 															<div className="max-h-[60vh] overflow-y-auto rounded-lg bg-red-100 p-4 text-red-700">
 																<pre className="whitespace-pre-wrap font-mono text-sm">
@@ -581,7 +664,7 @@ export default function ChatbotExpTest({
 																	className="rounded-md bg-red-500 px-6 py-2 text-white shadow-md transition-all duration-200 hover:bg-red-600 hover:shadow-lg"
 																	onClick={() => setErrorMessage(null)}
 																>
-																	Close
+																	{translateText("Close", language)}
 																</button>
 															</div>
 														</div>
@@ -727,7 +810,7 @@ export default function ChatbotExpTest({
 									!isAddColumn && (
 										<div className="mt-4">
 											<p className="mb-2 font-medium text-[#00203F]">
-												Please choose a table:
+												{translateText("Please choose a table:", language)}
 											</p>
 											<ul className="space-y-4">
 												{extraOptions.map((extraOption, index) => (
@@ -771,7 +854,7 @@ export default function ChatbotExpTest({
 																	setX(true);
 																}}
 															>
-																Confirm Selection
+																{translateText("Confirm Selection", language)}
 															</button>
 														</div>
 													)}
@@ -787,14 +870,16 @@ export default function ChatbotExpTest({
 									!isAddColumn && (
 										<div className="mt-4">
 											<p className="mb-2 font-medium text-[#00203F]">
-												Select column for GROUP BY:
+												{translateText("Select column for GROUP BY:", language)}
 											</p>
 											<select
 												className="w-full rounded-md border-[#00203F] p-2 text-[#00203F] focus:ring-[#00203F]"
 												value={groupByColumnName}
 												onChange={(e) => setGroupByColumnName(e.target.value)}
 											>
-												<option value="">Select a column</option>
+												<option value="">
+													{translateText("Select a column", language)}
+												</option>
 												{tableColumns.map((column, index) => (
 													<option key={index} value={column}>
 														{column}
@@ -812,7 +897,7 @@ export default function ChatbotExpTest({
 									!isAddColumn && (
 										<div className="mt-4">
 											<p className="mb-2 font-medium text-[#00203F]">
-												Select column for ORDER BY:
+												{translateText("Select column for ORDER BY:", language)}
 											</p>
 											<div className="flex items-center space-x-2">
 												<select
@@ -820,7 +905,9 @@ export default function ChatbotExpTest({
 													value={orderByColumnName}
 													onChange={(e) => setOrderByColumnName(e.target.value)}
 												>
-													<option value="">Select a column</option>
+													<option value="">
+														{translateText("Select a column", language)}
+													</option>
 													{tableColumns.map((column, index) => (
 														<option key={index} value={column}>
 															{column}
@@ -847,8 +934,11 @@ export default function ChatbotExpTest({
 									!isAddColumn && (
 										<div className="mt-4">
 											<p className="mb-2 font-medium text-[#00203F]">
-												Select column for {aggregateFunction.toUpperCase()}{" "}
-												function:
+												<p className="mb-2 font-medium text-[#00203F]">
+													{translateText("Select column for", language)}{" "}
+													{translateText(aggregateFunction, language)}{" "}
+													{translateText("function:", language)}
+												</p>
 											</p>
 											<select
 												value={aggregateFunctionColumnName}
@@ -858,7 +948,7 @@ export default function ChatbotExpTest({
 												className="w-full rounded-md border-[#00203F] p-2 text-[#00203F]"
 											>
 												<option value="" disabled>
-													Select a column
+													{translateText("Select a column", language)}
 												</option>
 												{tableColumns.map((column, index) => (
 													<option key={index} value={column}>
@@ -877,7 +967,7 @@ export default function ChatbotExpTest({
 									!isAddColumn && (
 										<div className="mt-4 space-y-4">
 											<p className="mb-2 font-medium text-[#00203F]">
-												Define conditions:
+												{translateText("Define conditions:", language)}
 											</p>
 
 											{/* قائمة الشروط */}
@@ -899,7 +989,7 @@ export default function ChatbotExpTest({
 														className="rounded border-[#00203F] p-2 text-[#00203F] focus:ring-[#00203F]"
 													>
 														<option value="" disabled>
-															Select column
+															{translateText("Select column", language)}
 														</option>
 														{tableColumns.map((column, i) => (
 															<option key={i} value={column}>
@@ -921,7 +1011,7 @@ export default function ChatbotExpTest({
 														className="rounded border-[#00203F] p-2 text-[#00203F] focus:ring-[#00203F]"
 													>
 														<option value="" disabled>
-															Select operator
+															{translateText("Select operator", language)}
 														</option>
 														{[">", "<", ">=", "<=", "=", "!="].map((op, i) => (
 															<option key={i} value={op}>
@@ -941,7 +1031,7 @@ export default function ChatbotExpTest({
 																e.target.value,
 															)
 														}
-														placeholder="Enter value"
+														placeholder={translateText("Enter value", language)}
 														className="rounded border-[#00203F] p-2 text-[#00203F] focus:ring-[#00203F]"
 													/>
 
@@ -952,7 +1042,7 @@ export default function ChatbotExpTest({
 															onClick={() => removeCondition(index)}
 															className="text-[#00203F] hover:underline"
 														>
-															Remove
+															{translateText("Remove", language)}
 														</button>
 													)}
 												</div>
@@ -978,7 +1068,7 @@ export default function ChatbotExpTest({
 												onClick={addCondition}
 												className="mt-4 rounded bg-[#00203F] px-4 py-2 text-[#ADF0D1] hover:bg-opacity-90"
 											>
-												Add Another Condition
+												{translateText("Add Another Condition", language)}
 											</button>
 										</div>
 									)}
@@ -992,9 +1082,8 @@ export default function ChatbotExpTest({
 									!isAddColumn && (
 										<div className="mt-4">
 											<p className="mb-2 font-medium text-[#00203F]">
-												Select columns from{" "}
-												{selectedTable ? selectedTable.split(":")[0] : "tables"}
-												:
+												{translateText(`Select columns from`, language)}
+												{selectedTable}:
 											</p>
 											<div className="space-y-2">
 												{syntax.includes("[")
@@ -1058,7 +1147,7 @@ export default function ChatbotExpTest({
 												className="mt-4 w-full rounded-md bg-[#00203F] py-2 text-[#ADF0D1] transition duration-200 hover:bg-opacity-90"
 												onClick={generateSQL}
 											>
-												Generate SQL Query
+												{translateText("Generate SQL Query", language)}
 											</button>
 										</div>
 									)}
@@ -1067,7 +1156,10 @@ export default function ChatbotExpTest({
 								{isDropMode && (
 									<div className="mt-4">
 										<p className="mb-2 font-medium text-[#00203F]">
-											Please choose a table for drop:
+											{translateText(
+												"Please choose a table for drop:",
+												language,
+											)}
 										</p>
 										<ul className="space-y-4">
 											{extraOptions.map((extraOption, index) => (
@@ -1102,7 +1194,7 @@ export default function ChatbotExpTest({
 												htmlFor="tableName"
 												className="mb-2 block text-sm font-medium text-[#00203F]"
 											>
-												Table Name:
+												{translateText("Table Name:", language)}
 											</label>
 											<input
 												type="text"
@@ -1121,7 +1213,7 @@ export default function ChatbotExpTest({
 														htmlFor={`columnName${index}`}
 														className="block text-sm font-medium text-[#00203F]"
 													>
-														Column Name:
+														{translateText("Column Name:", language)}
 													</label>
 													<input
 														type="text"
@@ -1143,7 +1235,7 @@ export default function ChatbotExpTest({
 														htmlFor={`columnType${index}`}
 														className="block text-sm font-medium text-[#00203F]"
 													>
-														Column Type:
+														{translateText("Column Type:", language)}
 													</label>
 													<select
 														id={`columnType${index}`}
@@ -1157,7 +1249,9 @@ export default function ChatbotExpTest({
 														}
 														className="w-full rounded-md border border-[#00203F] p-2 text-[#00203F] focus:ring-[#00203F]"
 													>
-														<option value="">Select column type</option>
+														<option value="">
+															{translateText("Select column type", language)}
+														</option>
 														{columnTypes.map((type, i) => (
 															<option key={i} value={type}>
 																{type}
@@ -1174,13 +1268,13 @@ export default function ChatbotExpTest({
 												onClick={handleAddColumn}
 												className="rounded-md bg-[#00203F] px-4 py-2 text-[#ADF0D1] hover:bg-opacity-90"
 											>
-												New Column
+												{translateText("New Column", language)}
 											</button>
 											<button
 												className="rounded-md bg-[#00203F] px-4 py-2 text-[#ADF0D1] hover:bg-opacity-90"
 												onClick={generateCreateTableSQL}
 											>
-												Generate SQL Query
+												{translateText("Generate SQL Query", language)}
 											</button>
 										</div>
 									</div>
@@ -1218,7 +1312,7 @@ export default function ChatbotExpTest({
 															htmlFor={`columnName${index}`}
 															className="block text-sm font-medium text-[#00203F]"
 														>
-															Column Name:
+															{translateText("Column Name:", language)}
 														</label>
 														<input
 															type="text"
@@ -1240,7 +1334,7 @@ export default function ChatbotExpTest({
 															htmlFor={`columnType${index}`}
 															className="block text-sm font-medium text-[#00203F]"
 														>
-															Column Type:
+															{translateText("Column Type:", language)}
 														</label>
 														<select
 															id={`columnType${index}`}
@@ -1254,7 +1348,9 @@ export default function ChatbotExpTest({
 															}
 															className="w-full rounded-md border border-[#00203F] p-2 text-[#00203F] focus:ring-[#00203F]"
 														>
-															<option value="">Select column type</option>
+															<option value="">
+																{translateText("Column Type:", language)}
+															</option>
 															{columnTypes.map((type, i) => (
 																<option key={i} value={type}>
 																	{type}
@@ -1268,7 +1364,7 @@ export default function ChatbotExpTest({
 												className="rounded-md bg-[#00203F] px-4 py-2 text-[#ADF0D1] hover:bg-opacity-90"
 												onClick={generateAddColumnSQL}
 											>
-												Generate SQL Query
+												{translateText("Generate SQL Query", language)}
 											</button>
 										</div>
 									</div>
