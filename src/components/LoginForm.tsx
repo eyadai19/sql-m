@@ -112,6 +112,7 @@ export function LoginForm({
 							height: "250px",
 							boxShadow:
 								"0 10px 15px -3px rgba(0, 32, 63, 0.5), 0 4px 6px rgba(0, 32, 63, 0.3)",
+							overflow: "auto",
 						}}
 					>
 						<Form {...form}>

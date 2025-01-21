@@ -1,7 +1,12 @@
 "use client";
 import { userDbApi } from "@/utils/apis";
 import { useEffect, useRef, useState } from "react"; // Import useRef
-import { AiOutlineClose, AiOutlineCopy, AiOutlineReload } from "react-icons/ai";
+import {
+	AiOutlineClose,
+	AiOutlineCode,
+	AiOutlineCopy,
+	AiOutlineReload,
+} from "react-icons/ai";
 
 interface Condition {
 	column: string;
@@ -447,6 +452,7 @@ export default function ChatbotExpTest({
 		element.style.height = "auto"; // إعادة تعيين الارتفاع
 		element.style.height = `${element.scrollHeight}px`; // تعيين الارتفاع الجديد
 	};
+
 	return (
 		<div
 			className="relative flex flex-col space-y-4 bg-[#00203F] p-4 text-white"
@@ -477,7 +483,7 @@ export default function ChatbotExpTest({
 							rows={1}
 						/>
 					</div>
-					<div className="flex justify-center space-x-4">
+					<div className="flex flex-wrap justify-center gap-4">
 						<button
 							className="flex items-center rounded-md bg-[#ADF0D1] px-4 py-2 text-[#00203F] transition-all duration-300 hover:bg-[#00203F] hover:text-white hover:shadow-lg"
 							onClick={() => navigator.clipboard.writeText(syntax)}
@@ -491,6 +497,7 @@ export default function ChatbotExpTest({
 								className="flex items-center rounded-md bg-blue-500 px-4 py-2 text-white transition-all duration-300 hover:bg-blue-600 hover:shadow-lg"
 								onClick={validateAndSelectData}
 							>
+								<AiOutlineCode className="mr-2" />
 								Run
 							</button>
 						)}
