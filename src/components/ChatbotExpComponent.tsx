@@ -172,7 +172,7 @@ export default function ChatbotExpTest({
 
 		setIsLoading(false);
 
-		if (!result.question) {
+		if (!("question" in result)) {
 			setIsModalOpen(true);
 		}
 	};
@@ -246,7 +246,10 @@ export default function ChatbotExpTest({
 				}
 
 				const { columns } = await response.json();
-				return Array.isArray(columns) ? columns : [];
+				// إضافة اسم الجدول لكل عمود بشكل فردي
+				return Array.isArray(columns)
+					? columns.map((col) => `${selectedTable}.${col}`)
+					: [];
 			});
 
 			const allColumns = (await Promise.all(columnPromises)).flat();
