@@ -1,57 +1,63 @@
-'use client';
+"use client";
 
 import {
-  DndContext,
-  DragOverlay,
-  closestCenter,
-  type DragEndEvent,
-} from '@dnd-kit/core';
+	DndContext,
+	DragOverlay,
+	closestCenter,
+	type DragEndEvent,
+} from "@dnd-kit/core";
+import { restrictToVerticalAxis } from "@dnd-kit/modifiers";
 import {
-  SortableContext,
-  arrayMove,
-  verticalListSortingStrategy,
-} from '@dnd-kit/sortable';
-import { restrictToVerticalAxis } from '@dnd-kit/modifiers';
-import { useState } from 'react';
-import { DraggableItem } from './DraggableItem';
-import type { DragDropContainerProps, DragDropItem } from './types';
+	SortableContext,
+	arrayMove,
+	verticalListSortingStrategy,
+} from "@dnd-kit/sortable";
+import { useState } from "react";
+import { DraggableItem } from "./DraggableItem";
+import type { DragDropContainerProps } from "./types";
 
-export function DragDropContainer({ items, onReorder }: DragDropContainerProps) {
-  const [activeId, setActiveId] = useState<string | null>(null);
+export function DragDropContainer({
+	items,
+	onReorder,
+}: DragDropContainerProps) {
+	const [activeId, setActiveId] = useState<string | null>(null);
 
-  function handleDragEnd(event: DragEndEvent) {
-    const { active, over } = event;
+	function handleDragEnd(event: DragEndEvent) {
+		const { active, over } = event;
 
-    if (over && active.id !== over.id) {
-      const oldIndex = items.findIndex(item => item.id === active.id);
-      const newIndex = items.findIndex(item => item.id === over.id);
-      const newOrder = arrayMove(items, oldIndex, newIndex);
-      onReorder(newOrder.map(item => item.id));
-    }
+		if (over && active.id !== over.id) {
+			const oldIndex = items.findIndex((item) => item.id === active.id);
+			const newIndex = items.findIndex((item) => item.id === over.id);
+			const newOrder = arrayMove(items, oldIndex, newIndex);
+			onReorder(newOrder.map((item) => item.id));
+		}
 
-    setActiveId(null);
-  }
+		setActiveId(null);
+	}
 
-  return (
-    <DndContext
-      collisionDetection={closestCenter}
-      onDragStart={({ active }) => setActiveId(active.id as string)}
-      onDragEnd={handleDragEnd}
-      modifiers={[restrictToVerticalAxis]}
-    >
-      <SortableContext items={items.map(item => item.id)} strategy={verticalListSortingStrategy}>
-        <div className="space-y-2 my-2">
-          {items.map((item) => (
-            <DraggableItem key={item.id} {...item} />
-          ))}
-        </div>
-      </SortableContext>
+	return (
+		<DndContext
+			collisionDetection={closestCenter}
+			onDragStart={({ active }) => setActiveId(active.id as string)}
+			onDragEnd={handleDragEnd}
+			modifiers={[restrictToVerticalAxis]}
+		>
+			<SortableContext
+				items={items.map((item) => item.id)}
+				strategy={verticalListSortingStrategy}
+			>
+				<div className="my-2 space-y-2">
+					{items.map((item) => (
+						<DraggableItem key={item.id} {...item} />
+					))}
+				</div>
+			</SortableContext>
 
-      <DragOverlay>
-        {activeId ? (
-          <DraggableItem {...items.find(item => item.id === activeId)!} />
-        ) : null}
-      </DragOverlay>
-    </DndContext>
-  );
+			<DragOverlay>
+				{activeId ? (
+					<DraggableItem {...items.find((item) => item.id === activeId)!} />
+				) : null}
+			</DragOverlay>
+		</DndContext>
+	);
 }

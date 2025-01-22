@@ -32,7 +32,7 @@ export function CommentList({
 	}>(
 		comments.reduce(
 			(acc, comment) => {
-				acc[comment.id] = comment.isLiked || false; // تعيين isLiked بناءً على comment.isLiked
+				acc[comment.id] = comment.isLiked || false;
 				return acc;
 			},
 			{} as { [key: string]: boolean },

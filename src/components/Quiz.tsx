@@ -130,7 +130,8 @@ export default function SqlQuiz({
 				form.reset({
 					question: fetchedQuestions.map((q) => q.question),
 					answer: fetchedQuestions.map((q) =>
-						q.type === "DragDropExercise" ? [] : "",
+						// q.type === "DragDropExercise" ? [] : "",
+						q.type === "DragDropExercise" ? [...q.options] : "",
 					),
 				});
 			}
@@ -366,15 +367,17 @@ export default function SqlQuiz({
 																}}
 																onDragEnd={(event) => {
 																	const { active, over } = event;
-																	if (active.id !== over?.id) {
-																		const oldIndex = q.options.findIndex(
-																			(item) => item === active.id,
+																	if (over && active.id !== over.id) {
+																		const currentOrder =
+																			field.value as string[];
+																		const oldIndex = currentOrder.indexOf(
+																			active.id as string,
 																		);
-																		const newIndex = q.options.findIndex(
-																			(item) => item === over?.id,
+																		const newIndex = currentOrder.indexOf(
+																			over.id as string,
 																		);
 																		const newOptions = arrayMove(
-																			q.options,
+																			currentOrder,
 																			oldIndex,
 																			newIndex,
 																		);
@@ -384,11 +387,11 @@ export default function SqlQuiz({
 																}}
 															>
 																<SortableContext
-																	items={q.options}
+																	items={field.value as string[]}
 																	strategy={verticalListSortingStrategy}
 																>
 																	<div className="space-y-2">
-																		{q.options.map((option) => (
+																		{(field.value as string[]).map((option) => (
 																			<DraggableItem
 																				key={option}
 																				id={option}
@@ -401,11 +404,7 @@ export default function SqlQuiz({
 																	{activeId ? (
 																		<DraggableItem
 																			id={activeId}
-																			content={
-																				q.options.find(
-																					(item) => item === activeId,
-																				)!
-																			}
+																			content={activeId}
 																		/>
 																	) : null}
 																</DragOverlay>
