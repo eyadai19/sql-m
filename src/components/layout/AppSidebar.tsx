@@ -57,14 +57,16 @@ export function AppSidebar({
 	}, [getQuizAction, getUnlockIndex]);
 
 	return (
-		
-		<Sidebar className="h-full w-60 border-0 bg-sailorBlue p-2"	>
-			<SidebarContent 	style={{
-		overflow: "auto", // يسمح بالتمرير
-		scrollbarWidth: "none", // لإخفاء شريط التمرير في Firefox
-		msOverflowStyle: "none", // لإخفاء شريط التمرير في Internet Explorer
-	}}>
-				<SidebarMenu className="border-0 bg-sailorBlue p-0">
+		<Sidebar className="h-full w-60 border-0 bg-sailorBlue">
+			<SidebarContent
+				className=""
+				style={{
+					overflow: "auto", // يسمح بالتمرير
+					scrollbarWidth: "none", // لإخفاء شريط التمرير في Firefox
+					msOverflowStyle: "none", // لإخفاء شريط التمرير في Internet Explorer
+				}}
+			>
+				<SidebarMenu className="mt-[70px] border-0 bg-sailorBlue p-0">
 					{allPath.map((group, groupIndex) => (
 						<SidebarGroup key={groupIndex}>
 							{/* تغيير لون العنوان الرئيسي لكل قسم */}

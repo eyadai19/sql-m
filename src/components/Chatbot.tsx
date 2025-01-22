@@ -79,7 +79,7 @@ export default function ChatBot({
 	const [showInfoPopup, setShowInfoPopup] = useState(false);
 
 	const handleQuerySubmit = async () => {
-		setLoading(true);
+		setLoading(true); // تفعيل حالة التحميل
 		try {
 			if (language == "AR") {
 				const questionEN = await ChatbotTrArToEn({ question: userQuery });
@@ -107,7 +107,7 @@ export default function ChatBot({
 				else return result?.message;
 			}
 		} finally {
-			setLoading(false);
+			setLoading(false); // إيقاف حالة التحميل
 		}
 	};
 
@@ -202,7 +202,7 @@ export default function ChatBot({
 			{isOpen && (
 				<div className="mb-2 h-[80vh] w-80 rounded-t-lg bg-[#00203F] p-4 text-white shadow-lg">
 					{/* Sticky top bar in the chat */}
-					<div className="sticky top-0 z-10 flex items-center justify-between bg-[#00203F] p-2">
+					<div className="z-5 sticky top-0 flex items-center justify-between bg-[#00203F] p-2">
 						{language && (
 							<button
 								onClick={goBack}
@@ -279,7 +279,15 @@ export default function ChatBot({
 						)}
 						{/* When query */}
 						{inChatMode === "Query" && (
-							<div className="mt-4 flex flex-col items-center justify-center">
+							<div
+								className="mt-4 flex flex-col items-center justify-center"
+								style={{
+									maxHeight: "65vh",
+									overflowY: "auto",
+									scrollbarWidth: "none",
+									msOverflowStyle: "none",
+								}}
+							>
 								{/* Tabs for Context Selection */}
 								<div className="mb-8 grid w-3/4 grid-cols-2 gap-2 rounded-xl bg-gray-300 p-1">
 									<button
@@ -305,8 +313,6 @@ export default function ChatBot({
 											: "Use New Context"}
 									</button>
 								</div>
-
-								{/* New Context Textarea */}
 								{/* New Context Textarea */}
 								{contextOption === "use new context" && (
 									<div className="relative m-3 mt-4 flex w-3/4 flex-col">
@@ -460,12 +466,19 @@ export default function ChatBot({
 								</div>
 
 								{/* Submit Button */}
-								<button
-									onClick={handleQuerySubmit}
-									className="mt-4 w-32 rounded-lg bg-[#ADF0D1] p-2 text-sm font-semibold text-[#00203F] shadow-sm transition-all hover:bg-[#A1E7D8] hover:shadow-md"
-								>
-									{language === "AR" ? "إرسال الاستعلام" : "Submit Query"}
-								</button>
+								{loading ? (
+									<div className="mt-4 flex w-32 items-center justify-center rounded-lg bg-[#ADF0D1] p-2 text-sm font-semibold text-[#00203F] shadow-sm transition-all hover:bg-[#A1E7D8] hover:shadow-md">
+										<div className="h-7 w-7 animate-spin rounded-full border-b-2 border-t-2 border-black"></div>
+									</div>
+								) : (
+									<button
+										onClick={handleQuerySubmit}
+										className="mt-4 w-32 rounded-lg bg-[#ADF0D1] p-2 text-sm font-semibold text-[#00203F] shadow-sm transition-all hover:bg-[#A1E7D8] hover:shadow-md"
+										disabled={loading}
+									>
+										{language === "AR" ? "إرسال الاستعلام" : "Submit Query"}
+									</button>
+								)}
 
 								{/* Loading Indicator */}
 								{loading && <div className="loader"></div>}

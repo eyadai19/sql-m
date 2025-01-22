@@ -23,7 +23,6 @@ export default function DashboardLayout({
 	return (
 		<div className="relative h-full before:absolute before:inset-0 before:-z-10 before:bg-gradient-to-r before:from-teal-400 before:to-blue-500 before:opacity-25">
 			<ProfileNavbar logoutAction={logoutAction} />
-
 			<SidebarProvider>
 				<AppSidebar
 					getQuizAction={getQuizAction}

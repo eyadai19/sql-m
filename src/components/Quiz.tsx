@@ -76,6 +76,7 @@ export default function SqlQuiz({
 		  )[]
 		| undefined
 	>();
+	const [isLoading, setIsLoading] = useState(true);
 	const [results, setResults] = useState<(boolean | null)[]>([]);
 	const [correctAnswers, setCorrectAnswers] = useState<string[]>([]);
 	const [isSubmitted, setIsSubmitted] = useState(false);
@@ -95,6 +96,18 @@ export default function SqlQuiz({
 		},
 		resolver: zodResolver(userQuizAnswerSchema),
 	});
+
+	useEffect(() => {
+		if (questions) {
+			// إذا كانت الأسئلة موجودة، أظهر التحميل لمدة 5 ثوانٍ
+			const timer = setTimeout(() => {
+				setIsLoading(false);
+			}, 10000);
+
+			// تنظيف المؤقت إذا تم إلغاء التحميل قبل انتهاء الوقت
+			return () => clearTimeout(timer);
+		}
+	}, [questions]);
 
 	useEffect(() => {
 		const checkAccess = async () => {
@@ -221,9 +234,25 @@ export default function SqlQuiz({
 		);
 	}
 
+	if (!questions) {
+		return (
+			<div className="flex h-screen items-center justify-center">
+				<div className="h-16 w-16 animate-spin rounded-full border-b-4 border-t-4 border-[#ADF0D1]"></div>
+			</div>
+		);
+	}
+
+	if (isLoading) {
+		return (
+			<div className="flex h-screen items-center justify-center">
+				<div className="h-16 w-16 animate-spin rounded-full border-b-4 border-t-4 border-[#ADF0D1]"></div>
+			</div>
+		);
+	}
+
 	return (
 		<div
-			className="relative flex min-h-screen items-center justify-center px-8"
+			className="relative flex min-h-screen items-center justify-center px-4 sm:px-8"
 			style={{
 				background: "linear-gradient(to bottom, #00203F, #ADF0D1)",
 			}}
@@ -231,11 +260,13 @@ export default function SqlQuiz({
 			{isOverlayVisible && (
 				<div className="absolute inset-0 z-50 bg-gray-600 bg-opacity-50"></div>
 			)}
-			<div className="container relative z-10 mx-auto max-w-3xl rounded-lg bg-white px-4 py-8">
-				<div className="mb-8 flex items-center justify-between">
-					<h1 className="text-3xl font-bold text-[#00203F]">Quiz</h1>
+			<div className="container relative z-10 mx-auto max-w-3xl rounded-lg bg-white px-4 py-8 sm:px-6 sm:py-8">
+				<div className="mb-8 flex flex-col items-center justify-between sm:flex-row">
+					<h1 className="text-2xl font-bold text-[#00203F] sm:text-3xl">
+						Quiz
+					</h1>
 					{score !== null && (
-						<span className="text-xl font-semibold text-[#00203F]">
+						<span className="mt-2 text-xl font-semibold text-[#00203F] sm:mt-0">
 							Score: {score?.toFixed(2)} / 100
 						</span>
 					)}
@@ -243,7 +274,7 @@ export default function SqlQuiz({
 
 				<Form {...form}>
 					<form onSubmit={form.handleSubmit(handleSubmit)}>
-						<div className="space-y-6">
+						<div className="space-y-4 sm:space-y-6">
 							{questions &&
 								questions.map((q, index) => (
 									<div
@@ -254,7 +285,7 @@ export default function SqlQuiz({
 											name={`answer.${index}`}
 											render={({ field }) => (
 												<FormItem>
-													<FormLabel className="text-lg font-medium text-gray-700">
+													<FormLabel className="text-base font-medium text-gray-700 sm:text-lg">
 														{q.type !== "TrueFalseExercise" ? q.question : null}
 													</FormLabel>
 													<FormControl>
@@ -262,11 +293,11 @@ export default function SqlQuiz({
 															<Input
 																{...field}
 																placeholder="Type your answer here..."
-																className="text-lg"
+																className="text-base sm:text-lg"
 																disabled={isDisabled}
 															/>
 														) : q.type === "TrueFalseExercise" ? (
-															<div className="flex items-center gap-2">
+															<div className="flex flex-col gap-2 sm:flex-row sm:items-center">
 																<div className="flex gap-2">
 																	<Button
 																		type="button"
@@ -331,11 +362,10 @@ export default function SqlQuiz({
 																)}
 																collisionDetection={closestCenter}
 																onDragStart={({ active }) => {
-																	setActiveId(active.id as string); // تحديث العنصر النشط
+																	setActiveId(active.id as string);
 																}}
 																onDragEnd={(event) => {
 																	const { active, over } = event;
-																	console.log("Drag ended:", { active, over }); // Debugging line
 																	if (active.id !== over?.id) {
 																		const oldIndex = q.options.findIndex(
 																			(item) => item === active.id,
@@ -403,7 +433,7 @@ export default function SqlQuiz({
 								))}
 						</div>
 
-						<div className="mt-4 flex space-x-4">
+						<div className="mt-4 flex flex-col space-y-4 sm:flex-row sm:space-x-4 sm:space-y-0">
 							<Button
 								type="submit"
 								className="w-full bg-[#00203F] text-white"
@@ -431,7 +461,7 @@ export default function SqlQuiz({
 
 			{showModal && (
 				<div className="fixed inset-0 z-50 flex items-center justify-center bg-gray-600 bg-opacity-50">
-					<div className="w-full max-w-lg rounded-lg bg-white p-8 text-center shadow-lg">
+					<div className="w-full max-w-lg rounded-lg bg-white p-6 text-center shadow-lg sm:p-8">
 						<h2 className="mb-4 text-2xl font-bold text-[#00203F]">
 							Your Score: {score?.toFixed(2)} / 100
 						</h2>
