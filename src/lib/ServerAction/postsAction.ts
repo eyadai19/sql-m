@@ -28,12 +28,18 @@ export async function fetchAllPostsAction(): Promise<
 				likes: true,
 			},
 		});
+
 		const user = await getUser();
 		if (!user) return { field: "root", message: "User not authenticated." };
 
-		const userCommentLikes = await db.query.TB_comment_likes.findMany({
-			where: (comment, { eq }) => eq(comment.userId, user.id),
-		});
+		const [userCommentLikes, userPostLikes] = await Promise.all([
+			db.query.TB_comment_likes.findMany({
+				where: (comment, { eq }) => eq(comment.userId, user.id),
+			}),
+			db.query.TB_post_likes.findMany({
+				where: (post, { eq }) => eq(post.userId, user.id),
+			}),
+		]);
 
 		return posts.map((post) => ({
 			id: post.id,
@@ -60,7 +66,8 @@ export async function fetchAllPostsAction(): Promise<
 				isLiked: userCommentLikes.some((like) => like.commentId === comment.id),
 			})),
 			likesCount: post.likes.length,
-			canEdit: post.userId == user.id ? true : false,
+			isLiked: userPostLikes.some((like) => like.postId === post.id),
+			canEdit: post.userId === user.id,
 		}));
 	} catch (error) {
 		console.error("Error fetching posts:", error);
@@ -75,35 +82,31 @@ export async function postLikeAction(
 		const user = await getUser();
 		if (!user) return { field: "root", message: "User not authenticated." };
 
-		const existingLike = await db.query.TB_post_likes.findFirst({
-			where: (like, { eq }) =>
-				eq(like.postId, postId) && eq(like.userId, user.id),
-		});
+		// استخدام معاملة (transaction) لضمان الذرية
+		await db.transaction(async (tx) => {
+			const existingLike = await tx.query.TB_post_likes.findFirst({
+				where: (like, { eq, and }) =>
+					and(eq(like.postId, postId), eq(like.userId, user.id)),
+			});
 
-		if (existingLike) {
-			try {
-				await db
+			if (existingLike) {
+				await tx
 					.delete(TB_post_likes)
 					.where(eq(TB_post_likes.id, existingLike.id));
-				return { field: "postId", message: "Like removed successfully" };
-			} catch {
-				return { field: "root", message: "Failed to remove like" };
+			} else {
+				const newLike = {
+					id: nanoid(),
+					userId: user.id,
+					postId: postId,
+					createdTime: new Date(),
+				};
+				await tx.insert(TB_post_likes).values(newLike);
 			}
-		}
+		});
 
-		const newLike = {
-			id: nanoid(),
-			userId: user.id,
-			postId: postId,
-			createdTime: new Date(),
-		};
-
-		try {
-			await db.insert(TB_post_likes).values(newLike);
-		} catch {
-			return { field: "username", message: "can't like" };
-		}
+		return; // نجاح العملية
 	} catch (e) {
+		console.error("Error in postLikeAction:", e);
 		return {
 			field: "root",
 			message: "An unexpected error occurred, please try again later",
@@ -118,36 +121,31 @@ export async function postCommentLikeAction(
 		const user = await getUser();
 		if (!user) return { field: "root", message: "User not authenticated." };
 
-		const existingLike = await db.query.TB_comment_likes.findFirst({
-			where: (comment, { eq }) =>
-				eq(comment.userId, user.id) && eq(comment.commentId, commentId),
-		});
-		if (existingLike) {
-			try {
-				await db
+		// استخدام معاملة (transaction) لضمان الذرية
+		await db.transaction(async (tx) => {
+			const existingLike = await tx.query.TB_comment_likes.findFirst({
+				where: (comment, { eq, and }) =>
+					and(eq(comment.userId, user.id), eq(comment.commentId, commentId)),
+			});
+
+			if (existingLike) {
+				await tx
 					.delete(TB_comment_likes)
 					.where(eq(TB_comment_likes.id, existingLike.id));
-				return {
-					field: "commentId",
-					message: "Comment like removed successfully",
+			} else {
+				const newCommentLike = {
+					id: nanoid(),
+					userId: user.id,
+					createdTime: new Date(),
+					commentId: commentId,
 				};
-			} catch {
-				return { field: "root", message: "Failed to remove comment like" };
+				await tx.insert(TB_comment_likes).values(newCommentLike);
 			}
-		}
+		});
 
-		const newCommentLike = {
-			id: nanoid(),
-			userId: user.id,
-			createdTime: new Date(),
-			commentId: commentId,
-		};
-		try {
-			await db.insert(TB_comment_likes).values(newCommentLike);
-		} catch {
-			return { field: "username", message: "can't comment like" };
-		}
+		return; // نجاح العملية
 	} catch (e) {
+		console.error("Error in postCommentLikeAction:", e);
 		return {
 			field: "root",
 			message: "An unexpected error occurred, please try again later",
@@ -248,9 +246,15 @@ export async function userPostAction(): Promise<
 				likes: true,
 			},
 		});
-		const userCommentLikes = await db.query.TB_comment_likes.findMany({
-			where: (comment, { eq }) => eq(comment.userId, user.id),
-		});
+
+		const [userCommentLikes, userPostLikes] = await Promise.all([
+			db.query.TB_comment_likes.findMany({
+				where: (comment, { eq }) => eq(comment.userId, user.id),
+			}),
+			db.query.TB_post_likes.findMany({
+				where: (post, { eq }) => eq(post.userId, user.id),
+			}),
+		]);
 
 		return posts.map((post) => ({
 			id: post.id,
@@ -277,6 +281,7 @@ export async function userPostAction(): Promise<
 				isLiked: userCommentLikes.some((like) => like.commentId === comment.id),
 			})),
 			likesCount: post.likes.length,
+			isLiked: userPostLikes.some((like) => like.postId === post.id),
 			canEdit: true,
 		}));
 	} catch (error) {

@@ -22,6 +22,7 @@ export interface Post {
 	lastUpdateTime: Date;
 	user: User;
 	comments: Comment[];
+	isLiked: boolean;
 	likesCount: number;
 	canEdit: boolean;
 }

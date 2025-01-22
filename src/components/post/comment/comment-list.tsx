@@ -1,8 +1,11 @@
+"use client";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Button } from "@/components/ui/button";
 import { Comment } from "@/lib/types/post";
+import { cn } from "@/lib/utils";
 import { formatDistanceToNow } from "date-fns";
+import { Heart } from "lucide-react";
 import { useState } from "react";
-import { FaHeart } from "react-icons/fa";
 
 export function CommentList({
 	comments,
@@ -28,7 +31,7 @@ export function CommentList({
 	}>(
 		comments.reduce(
 			(acc, comment) => {
-				acc[comment.id] = comment.isLiked || false;
+				acc[comment.id] = comment.isLiked || false; // تعيين isLiked بناءً على comment.isLiked
 				return acc;
 			},
 			{} as { [key: string]: boolean },
@@ -42,6 +45,7 @@ export function CommentList({
 		try {
 			const result = await postCommentLikeAction(commentId);
 			if (!result) {
+				// تحديث الحالة المحلية
 				setLikedComments((prev) => ({
 					...prev,
 					[commentId]: !prev[commentId],
@@ -97,22 +101,24 @@ export function CommentList({
 								</div>
 							</div>
 							<div className="flex items-center gap-2">
-								<button
+								<Button
+									variant="ghost"
+									size="sm"
+									className={cn(
+										"flex items-center gap-2",
+										likedComments[comment.id] && "text-red-500",
+									)}
 									onClick={() => handleLike(comment.id)}
-									className="focus:outline-none"
 									disabled={isLiking[comment.id]}
 								>
-									<FaHeart
-										className={`text-xl ${
-											likedComments[comment.id]
-												? "text-red-500"
-												: "text-gray-400"
-										}`}
+									<Heart
+										className={cn(
+											"h-5 w-5",
+											likedComments[comment.id] && "fill-current",
+										)}
 									/>
-								</button>
-								<span className="text-sm text-muted-foreground">
-									{likeCounts[comment.id]}
-								</span>
+									<span>{likeCounts[comment.id]}</span>
+								</Button>
 							</div>
 						</div>
 					))}

@@ -61,11 +61,10 @@ export default function PostCard({
 	) => Promise<{ field: string; message: string } | undefined>;
 	useImage: string | null;
 }) {
-	// Use local state to manage the post data
 	const [post, setPost] = useState(initialPost);
 	const [isLiking, setIsLiking] = useState(false);
 	const [likesCount, setLikesCount] = useState(post.likesCount);
-	const [isLiked, setIsLiked] = useState(false);
+	const [isLiked, setIsLiked] = useState(initialPost.isLiked);
 	const [showComments, setShowComments] = useState(false);
 	const [feedbackMessage, setFeedbackMessage] = useState<string | null>(null);
 	const [isDeleting, setIsDeleting] = useState(false);
@@ -74,7 +73,6 @@ export default function PostCard({
 	const [editContent, setEditContent] = useState(post.content);
 	const [isSaving, setIsSaving] = useState(false);
 
-	// Update local state when initial post changes
 	useEffect(() => {
 		setPost(initialPost);
 	}, [initialPost]);
