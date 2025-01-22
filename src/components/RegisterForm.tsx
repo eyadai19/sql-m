@@ -3,6 +3,7 @@
 import { registerFormSchema } from "@/lib/types/authSchemas";
 import { UploadButton } from "@/utils/uploadthing";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { Eye, EyeOff } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
@@ -210,37 +211,72 @@ export default function RegisterForm({
 								<FormField
 									control={form.control}
 									name="password"
-									render={({ field }) => (
-										<FormItem>
-											<FormControl>
-												<Input
-													type="password"
-													placeholder="Password"
-													{...field}
-													className="w-full rounded border border-gray-300 bg-gray-100 px-4 py-2 text-gray-800"
-												/>
-											</FormControl>
-											<FormMessage />
-										</FormItem>
-									)}
+									render={({ field }) => {
+										const [showPassword, setShowPassword] = useState(false); // حالة لعرض أو إخفاء كلمة المرور
+										return (
+											<FormItem>
+												<FormControl>
+													<div className="relative">
+														<Input
+															type={showPassword ? "text" : "password"} // تغيير نوع الحقل بناءً على الحالة
+															placeholder="Password"
+															{...field}
+															className="w-full rounded border border-gray-300 bg-gray-100 px-4 py-2 text-gray-800"
+														/>
+														<button
+															type="button"
+															onClick={() => setShowPassword(!showPassword)} // تبديل الحالة عند الضغط
+															className="absolute inset-y-0 right-0 flex items-center px-3 text-gray-500"
+														>
+															{showPassword ? (
+																<EyeOff className="h-5 w-5" /> // أيقونة إخفاء كلمة المرور
+															) : (
+																<Eye className="h-5 w-5" /> // أيقونة عرض كلمة المرور
+															)}
+														</button>
+													</div>
+												</FormControl>
+												<FormMessage />
+											</FormItem>
+										);
+									}}
 								/>
 
 								<FormField
 									control={form.control}
 									name="confirmPassword"
-									render={({ field }) => (
-										<FormItem>
-											<FormControl>
-												<Input
-													type="password"
-													placeholder="Confirm Password"
-													{...field}
-													className="w-full rounded border border-gray-300 bg-gray-100 px-4 py-2 text-gray-800"
-												/>
-											</FormControl>
-											<FormMessage />
-										</FormItem>
-									)}
+									render={({ field }) => {
+										const [showConfirmPassword, setShowConfirmPassword] =
+											useState(false); // حالة لعرض أو إخفاء تأكيد كلمة المرور
+										return (
+											<FormItem>
+												<FormControl>
+													<div className="relative">
+														<Input
+															type={showConfirmPassword ? "text" : "password"} // تغيير نوع الحقل بناءً على الحالة
+															placeholder="Confirm Password"
+															{...field}
+															className="w-full rounded border border-gray-300 bg-gray-100 px-4 py-2 text-gray-800"
+														/>
+														<button
+															type="button"
+															onClick={() =>
+																setShowConfirmPassword(!showConfirmPassword)
+															} // تبديل الحالة عند الضغط
+															className="absolute inset-y-0 right-0 flex items-center px-3 text-gray-500"
+														>
+															{showConfirmPassword ? (
+																<EyeOff className="h-5 w-5" /> // أيقونة إخفاء كلمة المرور
+															) : (
+																<Eye className="h-5 w-5" /> // أيقونة عرض كلمة المرور
+															)}
+														</button>
+													</div>
+												</FormControl>
+												<FormMessage />
+											</FormItem>
+										);
+									}}
 								/>
 
 								<Button
