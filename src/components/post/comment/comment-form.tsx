@@ -3,8 +3,9 @@
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
+import { Comment } from "@/lib/types/post";
 import { useState } from "react";
-
+import { useCommentContext } from "./CommentContext";
 export function CommentForm({
 	userPhoto,
 	postId,
@@ -16,8 +17,11 @@ export function CommentForm({
 		postId: string,
 		content: string,
 		photo: string | null,
-	) => Promise<{ field: string; message: string } | undefined>;
+	) => Promise<
+		{ newComment: Comment } | { field: string; message: string } | undefined
+	>;
 }) {
+	const { addComment } = useCommentContext();
 	const [content, setContent] = useState("");
 	const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -30,12 +34,18 @@ export function CommentForm({
 		setIsSubmitting(true);
 		try {
 			const result = await postCommentAction(postId, content, userPhoto);
-			if (result) {
-				// console.log(result.message);
-				console.error("Error posting comment:", result.message);
-			} else {
-				// console.log("Comment posted successfully!");
+			if (result && "newComment" in result) {
+				addComment({
+					...result.newComment,
+					likes: 0,
+				});
+				// setLikeCounts((prev) => ({
+				// 	...prev,
+				// 	[result.newComment.id]: 0, // تعيين عدد اللايكات إلى 0 للكومنت الجديد
+				// }));
 				setContent("");
+			} else {
+				console.error("Error posting comment:", result?.message);
 			}
 		} catch (error) {
 			console.error("Unexpected error while posting comment:", error);
@@ -43,7 +53,6 @@ export function CommentForm({
 			setIsSubmitting(false);
 		}
 	};
-
 
 	return (
 		<form onSubmit={handleSubmit} className="flex items-start gap-4">

@@ -8,7 +8,7 @@ import {
 	SelectTrigger,
 	SelectValue,
 } from "@/components/ui/select";
-import { Post } from "@/lib/types/post";
+import { Comment, Post } from "@/lib/types/post";
 import { useEffect, useState } from "react";
 import PostCard from "../post/post-card";
 import { CreatePostButton } from "./CreatePostButton";
@@ -31,7 +31,7 @@ export default function CommunityPage({
 		postId: string,
 		content: string,
 		photo: string | null,
-	) => Promise<{ field: string; message: string } | undefined>;
+	) => Promise<{ newComment: Comment } |{ field: string; message: string } | undefined>;
 	postLikeAction: (
 		postId: string,
 	) => Promise<{ field: string; message: string } | undefined>;
@@ -42,7 +42,7 @@ export default function CommunityPage({
 		title: string,
 		content: string,
 		photo: string | null,
-	) => Promise<{ field: string; message: string } | undefined>;
+	) => Promise<{ newPost: Post } |{ field: string; message: string } | undefined>;
 	editPostAction: (
 		postId: string,
 		title: string | null,
@@ -59,7 +59,7 @@ export default function CommunityPage({
 }) {
 	const [posts, setPosts] = useState<Post[] | null>(null);
 	const [error, setError] = useState<string | null>(null);
-	const [filter, setFilter] = useState<string>("all"); // الافتراضي هو "all"
+	const [filter, setFilter] = useState<string>("all");
 	const [sort, setSort] = useState<string>("latest");
 	const [userInfo, setUserInfo] = useState<{
 		name: string;
@@ -68,6 +68,7 @@ export default function CommunityPage({
 		name: "",
 		photo: null,
 	});
+
 	useEffect(() => {
 		const fetchData = async () => {
 			const result = await fetchAllPostsAction();
@@ -91,6 +92,16 @@ export default function CommunityPage({
 		};
 		fetchUserInfo();
 	}, [fetchAllPostsAction, infoAddPostAction]);
+
+	const handlePostDelete = (postId: string) => {
+		setPosts(
+			(prevPosts) => prevPosts?.filter((post) => post.id !== postId) || null,
+		);
+	};
+
+	const handlePostAdd = (newPost: Post) => {
+		setPosts((prevPosts) => (prevPosts ? [newPost, ...prevPosts] : [newPost]));
+	};
 
 	const filterAndSortPosts = (posts: Post[]) => {
 		let filteredPosts = posts;
@@ -123,6 +134,7 @@ export default function CommunityPage({
 		}
 		return filteredPosts;
 	};
+
 	const displayedPosts = posts ? filterAndSortPosts(posts) : [];
 
 	if (error) {
@@ -151,6 +163,7 @@ export default function CommunityPage({
 					<CreatePostButton
 						addPostAction={addPostAction}
 						infoAddPostAction={infoAddPostAction}
+						onPostAdd={handlePostAdd}
 					/>
 				</div>
 
@@ -214,6 +227,7 @@ export default function CommunityPage({
 								deletePostAction={deletePostAction}
 								editPostAction={editPostAction}
 								useImage={userInfo.photo}
+								onPostDelete={handlePostDelete} // تمرير الدالة كـ prop
 							/>
 						))}
 

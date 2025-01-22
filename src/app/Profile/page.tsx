@@ -1,8 +1,16 @@
+import Chatbot from "@/components/Chatbot";
 import { ProfileNavbar } from "@/components/layout/ProfileNavbar";
 import ProfilePage from "@/components/profile";
 import { getUser, lucia } from "@/lib/auth";
 import { db } from "@/lib/db";
 import { TB_user } from "@/lib/schema";
+import { ChatbotExpAction } from "@/lib/ServerAction/chatbotExp";
+import {
+	ChatbotAction,
+	ChatbotTrArToEn,
+	ChatbotTrEnToAr,
+	ChatbotWithNewContextAction,
+} from "@/lib/ServerAction/chatBotNLP";
 import {
 	editPostAction,
 	postCommentAction,
@@ -15,14 +23,6 @@ import { eq } from "drizzle-orm";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import { deletePostAction } from "../../lib/ServerAction/postsAction";
-import {
-	ChatbotAction,
-	ChatbotTrArToEn,
-	ChatbotTrEnToAr,
-	ChatbotWithNewContextAction,
-} from "@/lib/ServerAction/chatBotNLP";
-import Chatbot from "@/components/Chatbot";
-import { ChatbotExpAction } from "@/lib/ServerAction/chatbotExp";
 
 import { Metadata } from "next";
 export const metadata: Metadata = {
@@ -48,12 +48,12 @@ export default function Profile() {
 				postLikeAction={postLikeAction}
 			/>
 			<Chatbot
-							ChatbotAction={ChatbotAction}
-							ChatbotExpAction={ChatbotExpAction}
-							ChatbotTrArToEn={ChatbotTrArToEn}
-							ChatbotTrEnToAr={ChatbotTrEnToAr}
-							ChatbotWithNewContextAction={ChatbotWithNewContextAction}
-						/>
+				ChatbotAction={ChatbotAction}
+				ChatbotExpAction={ChatbotExpAction}
+				ChatbotTrArToEn={ChatbotTrArToEn}
+				ChatbotTrEnToAr={ChatbotTrEnToAr}
+				ChatbotWithNewContextAction={ChatbotWithNewContextAction}
+			/>
 		</div>
 	);
 }

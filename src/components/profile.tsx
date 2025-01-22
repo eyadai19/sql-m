@@ -1,6 +1,6 @@
 "use client";
 import { ProfileData } from "@/lib/types/authSchemas";
-import { Post } from "@/lib/types/post";
+import { Comment, Post } from "@/lib/types/post";
 import { UploadButton } from "@/utils/uploadthing";
 import { useRouter } from "next/navigation";
 import React, { useEffect, useRef, useState } from "react";
@@ -43,7 +43,9 @@ export default function ProfilePage({
 		postId: string,
 		content: string,
 		photo: string | null,
-	) => Promise<{ field: string; message: string } | undefined>;
+	) => Promise<
+		{ newComment: Comment } | { field: string; message: string } | undefined
+	>;
 	postLikeAction: (
 		postId: string,
 	) => Promise<{ field: string; message: string } | undefined>;
@@ -185,6 +187,12 @@ export default function ProfilePage({
 			</div>
 		);
 	}
+
+	const handlePostDelete = (postId: string) => {
+		setPosts(
+			(prevPosts) => prevPosts?.filter((post) => post.id !== postId) || null,
+		);
+	};
 
 	return (
 		<div className="min-h-screen bg-gradient-to-b from-[#00203F] to-[#ADF0D1] px-4 py-8 md:px-8">
@@ -508,6 +516,7 @@ export default function ProfilePage({
 									deletePostAction={deletePostAction}
 									editPostAction={editPostAction}
 									useImage={info.photo}
+									onPostDelete={handlePostDelete}
 								/>
 							</div>
 						))}

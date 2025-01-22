@@ -8,7 +8,7 @@ import {
 	TB_post_likes,
 	TB_posts,
 } from "@/lib/schema";
-import { Post } from "@/lib/types/post";
+import { Comment, Post } from "@/lib/types/post";
 import { eq } from "drizzle-orm";
 import { nanoid } from "nanoid";
 
@@ -157,10 +157,17 @@ export async function postCommentAction(
 	postId: string,
 	content: string,
 	photo: string | null,
-): Promise<{ field: string; message: string } | undefined> {
+): Promise<
+	{ newComment: Comment } | { field: string; message: string } | undefined
+> {
 	try {
 		const user = await getUser();
 		if (!user) return { field: "root", message: "User not authenticated." };
+
+		const userInfo = await db.query.TB_user.findFirst({
+			where: (searchUser, { eq }) => eq(searchUser.id, user.id),
+		});
+		if (!userInfo) return { field: "root", message: "User not found" };
 
 		const newComment = {
 			id: nanoid(),
@@ -173,10 +180,27 @@ export async function postCommentAction(
 
 		try {
 			await db.insert(TB_comments).values(newComment);
-		} catch {
-			return { field: "username", message: "can't comment" };
+
+			const comment: Comment = {
+				id: newComment.id,
+				content: newComment.content,
+				createdTime: newComment.createdTime,
+				user: {
+					id: user.id,
+					name: userInfo.firstName + " " + userInfo.lastName,
+					photo: userInfo.photo,
+				},
+				likes: 0,
+				isLiked: false,
+			};
+
+			return { newComment: comment };
+		} catch (error) {
+			console.error("Error inserting comment:", error);
+			return { field: "root", message: "Failed to add comment" };
 		}
-	} catch (e) {
+	} catch (error) {
+		console.error("Unexpected error:", error);
 		return {
 			field: "root",
 			message: "An unexpected error occurred, please try again later",
@@ -212,7 +236,7 @@ export async function editPostAction(
 
 		try {
 			await db.update(TB_posts).set(updatedPost).where(eq(TB_posts.id, postId));
-			return undefined; // Success case
+			return; // Success case
 		} catch (e) {
 			console.error("Error updating post:", e);
 			return { field: "root", message: "Failed to update post" };
@@ -294,12 +318,16 @@ export async function addPostAction(
 	title: string,
 	content: string,
 	photo: string | null,
-): Promise<{ field: string; message: string } | undefined> {
+): Promise<{ newPost: Post } | { field: string; message: string } | undefined> {
 	"use server";
 
 	try {
 		const user = await getUser();
 		if (!user) return { field: "root", message: "User not authenticated." };
+		const userInfo = await db.query.TB_user.findFirst({
+			where: (searchUser, { eq }) => eq(searchUser.id, user.id),
+		});
+		if (!userInfo) return { field: "root", message: "User not found" };
 
 		const newPost = {
 			id: nanoid(),
@@ -309,11 +337,34 @@ export async function addPostAction(
 			photo: photo,
 			createdTime: new Date(),
 			lastUpdateTime: new Date(),
+			likesCount: 0,
+			isLiked: false,
+			comments: [],
+			canEdit: true,
 		};
 
 		try {
 			await db.insert(TB_posts).values(newPost);
-			return { field: "root", message: "Post added successfully" };
+
+			const post: Post = {
+				id: newPost.id,
+				title: newPost.title,
+				content: newPost.content,
+				photo: newPost.photo,
+				createdTime: newPost.createdTime,
+				lastUpdateTime: newPost.lastUpdateTime,
+				user: {
+					id: user.id,
+					name: userInfo.firstName + " " + userInfo.lastName,
+					photo: userInfo.photo,
+				},
+				likesCount: newPost.likesCount,
+				isLiked: newPost.isLiked,
+				comments: newPost.comments,
+				canEdit: newPost.canEdit,
+			};
+
+			return { newPost: post };
 		} catch (error) {
 			console.error("Error inserting post:", error);
 			return { field: "root", message: "Failed to add post" };
@@ -347,7 +398,7 @@ export async function deletePostAction(
 
 		try {
 			await db.delete(TB_posts).where(eq(TB_posts.id, postId));
-			return { field: "root", message: "Post deleted successfully" };
+			return;
 		} catch (error) {
 			console.error("Error deleting post:", error);
 			return { field: "root", message: "Failed to delete post" };

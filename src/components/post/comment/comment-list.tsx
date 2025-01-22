@@ -1,26 +1,27 @@
 "use client";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
-import { Comment } from "@/lib/types/post";
 import { cn } from "@/lib/utils";
 import { formatDistanceToNow } from "date-fns";
 import { Heart } from "lucide-react";
 import { useState } from "react";
+import { useCommentContext } from "./CommentContext";
 
 export function CommentList({
-	comments,
+	// comments,
 	postCommentLikeAction,
 }: {
-	comments: Comment[];
+	// comments: Comment[];
 	postCommentLikeAction: (
 		commentId: string,
 	) => Promise<{ field: string; message: string } | undefined>;
 }) {
+	const { comments } = useCommentContext();
 	const [isLiking, setIsLiking] = useState<{ [key: string]: boolean }>({});
 	const [likeCounts, setLikeCounts] = useState<{ [key: string]: number }>(
 		comments.reduce(
 			(acc, comment) => {
-				acc[comment.id] = comment.likes || 0;
+				acc[comment.id] = Number.isFinite(comment.likes) ? comment.likes : 0;
 				return acc;
 			},
 			{} as { [key: string]: number },
@@ -39,13 +40,14 @@ export function CommentList({
 	);
 
 	const handleLike = async (commentId: string) => {
+		if (!likeCounts[commentId]) likeCounts[commentId] = 0;
+
 		if (isLiking[commentId]) return;
 
 		setIsLiking((prev) => ({ ...prev, [commentId]: true }));
 		try {
 			const result = await postCommentLikeAction(commentId);
 			if (!result) {
-				// تحديث الحالة المحلية
 				setLikedComments((prev) => ({
 					...prev,
 					[commentId]: !prev[commentId],
@@ -117,7 +119,8 @@ export function CommentList({
 											likedComments[comment.id] && "fill-current",
 										)}
 									/>
-									<span>{likeCounts[comment.id]}</span>
+									{/* <span>{likeCounts[comment.id]}</span> */}
+									<span>{likeCounts[comment.id] || 0}</span>
 								</Button>
 							</div>
 						</div>

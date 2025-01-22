@@ -11,15 +11,13 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { Post } from "@/lib/types/post";
 import { ImagePlus, Loader2, PenSquare, X } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
 import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
 
-export function CreatePostButton({
-	infoAddPostAction,
-	addPostAction,
-}: {
+interface CreatePostButtonProps {
 	infoAddPostAction: () => Promise<
 		| { field: string; message: string }
 		| undefined
@@ -29,8 +27,17 @@ export function CreatePostButton({
 		title: string,
 		content: string,
 		photo: string | null,
-	) => Promise<{ field: string; message: string } | undefined>;
-}) {
+	) => Promise<
+		{ newPost: Post } | { field: string; message: string } | undefined
+	>;
+	onPostAdd?: (newPost: Post) => void;
+}
+
+export function CreatePostButton({
+	infoAddPostAction,
+	addPostAction,
+	onPostAdd,
+}: CreatePostButtonProps) {
 	const [open, setOpen] = useState(false);
 	const [title, setTitle] = useState("");
 	const [content, setContent] = useState("");
@@ -76,10 +83,14 @@ export function CreatePostButton({
 		setIsSubmitting(true);
 		try {
 			const result = await addPostAction(title, content, photo);
-			if (result?.message === "Post added successfully") {
+			if (result && "newPost" in result) {
 				toast.success("Post created successfully!");
 				setOpen(false);
 				resetForm();
+
+				if (onPostAdd) {
+					onPostAdd(result.newPost);
+				}
 			} else {
 				toast.error(result?.message || "Failed to create post");
 			}
