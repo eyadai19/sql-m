@@ -1,4 +1,5 @@
 import "@fortawesome/fontawesome-free/css/all.min.css";
+import Image from "next/image";
 
 export function Footer() {
 	return (
@@ -10,7 +11,12 @@ export function Footer() {
 						className="mb-4 flex items-center space-x-3 sm:mb-0 rtl:space-x-reverse"
 					>
 						<span className="self-center whitespace-nowrap text-2xl font-semibold text-[#ADF0D1]">
-							<img src="/logo.png" alt="Your Logo" className="h-20" />
+							<Image
+								src="/LogoSizeTrue.png"
+								alt="Logo"
+								width={45}
+								height={45}
+							/>
 						</span>
 					</a>
 					<ul className="mb-6 flex flex-wrap items-center text-sm font-medium text-[#ADF0D1] sm:mb-0">

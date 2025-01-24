@@ -14,7 +14,7 @@ import {
 	AiOutlineArrowLeft,
 	AiOutlineArrowUp,
 	AiOutlineClose,
-	AiOutlineReload, // استيراد أيقونة إعادة التحميل
+	AiOutlineReload,
 } from "react-icons/ai";
 import { FaInfoCircle } from "react-icons/fa";
 import { z } from "zod";
@@ -79,7 +79,7 @@ export default function ChatBot({
 	const [showInfoPopup, setShowInfoPopup] = useState(false);
 
 	const handleQuerySubmit = async () => {
-		setLoading(true); // تفعيل حالة التحميل
+		setLoading(true);
 		try {
 			if (language == "AR") {
 				const questionEN = await ChatbotTrArToEn({ question: userQuery });
@@ -107,12 +107,8 @@ export default function ChatBot({
 				else return result?.message;
 			}
 		} finally {
-			setLoading(false); // إيقاف حالة التحميل
+			setLoading(false);
 		}
-	};
-
-	const handleResultChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-		setQueryResult(e.target.value);
 	};
 
 	const chatEndRef = useRef<HTMLDivElement>(null);

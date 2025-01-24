@@ -99,11 +99,14 @@ body {
 
 /* شريط التمرير */
 ::-webkit-scrollbar-thumb {
-	background: #adf0d1; /* لون النص الرئيسي */
+	background: #adf0d1;
 	border-radius: 5px;
+	-webkit-border-radius: 5px;
+	-moz-border-radius: 5px;
+	-ms-border-radius: 5px;
+	-o-border-radius: 5px;
 }
 
-/* شريط التمرير عند التحويم */
 ::-webkit-scrollbar-thumb:hover {
 	background: #8fd8c4; /* لون أفتح قليلاً */
 }

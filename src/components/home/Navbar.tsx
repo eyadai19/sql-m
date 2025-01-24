@@ -1,4 +1,5 @@
 "use client";
+import Image from "next/image";
 import Link from "next/link";
 import { useState } from "react";
 import { FaBars, FaTimes } from "react-icons/fa";
@@ -14,7 +15,16 @@ export function Navbar() {
 		<nav className="flex items-center justify-between bg-[#00203F] p-4 text-[#ADF0D1] shadow-md">
 			{/* Logo */}
 			<div className="text-2xl font-bold">
-				<Link href="/home">sqlmentor</Link>
+				<div className="flex items-center space-x-3">
+					<Image
+						src="/LogoSizeTrue.png"
+						alt="Logo"
+						width={45}
+						height={45}
+						className="cursor-pointer"
+					/>
+					<div className="text-2xl font-bold">sqlmentor</div>
+				</div>
 			</div>
 
 			{/* Hamburger icon for mobile */}

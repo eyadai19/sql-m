@@ -99,8 +99,7 @@ export class TempDatabase {
 
 			// Handle non-SELECT operations
 			if (operationType !== "SELECT") {
-				await this.db.run(query); // Execute user query
-				if (operationType == "CREATE" || operationType == "ALTER") {
+				if (operationType === "CREATE" || operationType === "ALTER") {
 					const tables = await this.db.all(`
 						SELECT name 
 						FROM sqlite_master 
@@ -167,6 +166,7 @@ export class TempDatabase {
 
 	private getOperationType(query: string): OperationType {
 		const normalizedQuery = query.trim().toLowerCase();
+
 		if (normalizedQuery.startsWith("select")) return "SELECT";
 		if (normalizedQuery.startsWith("insert")) return "INSERT";
 		if (normalizedQuery.startsWith("update")) return "UPDATE";
@@ -180,27 +180,21 @@ export class TempDatabase {
 
 	async cleanup() {
 		try {
-			// الحصول على أسماء جميع الجداول في قاعدة البيانات
 			const tables = await this.db.all(`
 			SELECT name 
 			FROM sqlite_master 
 			WHERE type = 'table' AND name NOT LIKE 'sqlite_%';
 		`);
-
-			// إذا لم تكن هناك جداول، فقط أغلق الاتصال
 			if (tables.length === 0) {
 				await this.db.close();
 				return;
 			}
-
-			// حذف كل الجداول
 			for (const table of tables) {
 				await this.db.exec(`DROP TABLE IF EXISTS ${table.name}`);
 			}
 		} catch (err) {
 			console.error("Error cleaning up database:", err);
 		} finally {
-			// التأكد من إغلاق الاتصال بقاعدة البيانات
 			try {
 				await this.db.close();
 			} catch (closeErr) {

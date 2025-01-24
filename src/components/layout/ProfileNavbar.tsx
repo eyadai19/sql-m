@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import { useRouter } from "next/navigation"; // استيراد useRouter
 import { useState } from "react";
 import {
@@ -20,19 +21,19 @@ export function ProfileNavbar({
 }: {
 	logoutAction: () => Promise<void>;
 }) {
-	const router = useRouter(); // استخدام useRouter
+	const router = useRouter();
 	const [isDrawerOpen, setIsDrawerOpen] = useState(false);
 
 	const toggleDrawer = () => setIsDrawerOpen((prev) => !prev);
 
 	const handleLogout = async () => {
 		await logoutAction();
-		setIsDrawerOpen(false); // إغلاق الدراور بعد تسجيل الخروج
+		setIsDrawerOpen(false);
 	};
 
 	const handleNavigation = (href: string) => {
-		router.push(href); // التنقل إلى الصفحة المطلوبة
-		setIsDrawerOpen(false); // إغلاق الدراور بعد التنقل
+		router.push(href);
+		setIsDrawerOpen(false);
 	};
 
 	const navLinks = [
@@ -51,10 +52,19 @@ export function ProfileNavbar({
 	return (
 		<>
 			{/* Navbar */}
-			<nav className="fixed left-0 right-0 top-0 z-50 flex items-center justify-between bg-[#00203F] p-5 text-[#ADF0D1] shadow-md">
+			<nav className="fixed left-0 right-0 top-0 z-50 flex items-center justify-between bg-[#00203F] p-3 text-[#ADF0D1] shadow-md">
 				{/* Logo */}
-				<div className="text-2xl font-bold">sqlmentor</div>
-
+				<div className="flex items-center space-x-3">
+					<Image
+						src="/LogoSizeTrue.png"
+						alt="Logo"
+						width={45}
+						height={45}
+						className="cursor-pointer"
+						onClick={() => handleNavigation("/home")}
+					/>
+					<div className="text-2xl font-bold">sqlmentor</div>
+				</div>
 				{/* Desktop Navigation */}
 				<div className="hidden items-center space-x-4 sm:flex">
 					{navLinks.map(({ href, icon: Icon, label }) => (
@@ -120,7 +130,7 @@ export function ProfileNavbar({
 			)}
 
 			{/* Page Content Padding */}
-			<div className="mt-[72px]">{/* Your page content here */}</div>
+			<div className="mt-[60px]">{/* Your page content here */}</div>
 		</>
 	);
 }

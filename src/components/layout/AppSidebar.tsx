@@ -66,7 +66,7 @@ export function AppSidebar({
 					msOverflowStyle: "none", // لإخفاء شريط التمرير في Internet Explorer
 				}}
 			>
-				<SidebarMenu className="mt-[70px] border-0 bg-sailorBlue p-0">
+				<SidebarMenu className="mt-[60px] border-0 bg-sailorBlue p-0">
 					{allPath.map((group, groupIndex) => (
 						<SidebarGroup key={groupIndex}>
 							{/* تغيير لون العنوان الرئيسي لكل قسم */}
