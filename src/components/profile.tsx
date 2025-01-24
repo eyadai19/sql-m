@@ -529,23 +529,72 @@ export default function ProfilePage({
 							)}
 							<div className="rounded-xl bg-white p-6 shadow-lg">
 								<div className="grid max-w-full grid-cols-1 gap-6">
-									{posts?.map((post) => (
-										<div
-											key={post.id}
-											className="w-full overflow-hidden rounded-xl  transition-all hover:shadow-xl"
-										>
-											<PostCard
-												post={post}
-												postLikeAction={postLikeAction}
-												postCommentAction={postCommentAction}
-												postCommentLikeAction={postCommentLikeAction}
-												deletePostAction={deletePostAction}
-												editPostAction={editPostAction}
-												useImage={info.photo}
-												onPostDelete={handlePostDelete}
-											/>
+									{posts?.length === 0 ? (
+										<div className="flex flex-col items-center justify-center p-8 text-center">
+											{/* أيقونة */}
+											<svg
+												xmlns="http://www.w3.org/2000/svg"
+												className="h-16 w-16 text-gray-400"
+												fill="none"
+												viewBox="0 0 24 24"
+												stroke="currentColor"
+											>
+												<path
+													strokeLinecap="round"
+													strokeLinejoin="round"
+													strokeWidth={2}
+													d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+												/>
+											</svg>
+
+											{/* الرسالة الرئيسية */}
+											<p className="mt-4 text-lg font-medium text-gray-600">
+												No posts available.
+											</p>
+
+											{/* الرسالة الثانوية */}
+											<p className="mt-2 text-sm text-gray-500">
+												Start sharing your thoughts!
+											</p>
+
+											{/* قسم الانضمام إلى المجتمع */}
+											<div className="mt-6 rounded-xl bg-gradient-to-br from-[#4A00E0] to-[#8E2DE2] p-6 text-white shadow-lg">
+												<h2 className="text-xl font-bold">
+													Join Our Community
+												</h2>
+												<p className="mt-2 text-gray-200">
+													Connect with other learners, share knowledge, and grow
+													together
+												</p>
+												<button
+													className="mt-4 rounded-lg bg-white px-6 py-2 font-medium text-[#4A00E0] transition-colors hover:bg-gray-100"
+													onClick={() => {
+														router.push("/Community");
+													}}
+												>
+													Join Now
+												</button>
+											</div>
 										</div>
-									))}
+									) : (
+										posts?.map((post) => (
+											<div
+												key={post.id}
+												className="w-full overflow-hidden rounded-xl transition-all hover:shadow-xl"
+											>
+												<PostCard
+													post={post}
+													postLikeAction={postLikeAction}
+													postCommentAction={postCommentAction}
+													postCommentLikeAction={postCommentLikeAction}
+													deletePostAction={deletePostAction}
+													editPostAction={editPostAction}
+													useImage={info.photo}
+													onPostDelete={handlePostDelete}
+												/>
+											</div>
+										))
+									)}
 								</div>
 							</div>
 						</>
