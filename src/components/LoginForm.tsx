@@ -35,7 +35,6 @@ export function LoginForm({
 				}
 
 				const data = await response.json();
-
 				if (data.isLoggedIn) {
 					router.push("/Profile");
 				} else {
@@ -59,7 +58,7 @@ export function LoginForm({
 	});
 
 	async function onSubmit(values: z.infer<typeof loginFormSchema>) {
-		setIsSubmitting(true); // بدء التحميل
+		setIsSubmitting(true); 
 		const error = await loginAction(values);
 
 		if (error) {
@@ -67,12 +66,13 @@ export function LoginForm({
 				form.setError("username", { message: error.message });
 			} else if (error.field === "password") {
 				form.setError("password", { message: error.message });
-			} else {
+			} else if (error.field === "root") {
 				form.setError("root", { message: error.message });
 			}
+			setIsSubmitting(false); // إيقاف التحميل
+		} else {
+			router.push("/Profile");
 		}
-
-		setIsSubmitting(false); // إيقاف التحميل
 	}
 
 	if (isLoading) {

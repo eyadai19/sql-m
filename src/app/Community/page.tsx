@@ -1,5 +1,5 @@
 import CommunityPage from "@/components/community/Community";
-import { ProfileNavbar } from "@/components/layout/ProfileNavbar";
+import { Navbar } from "@/components/layout/Navbar";
 
 import Chatbot from "@/components/Chatbot";
 import { ChatbotExpAction } from "@/lib/ServerAction/chatbotExp";
@@ -33,7 +33,7 @@ export const metadata: Metadata = {
 export default function Community() {
 	return (
 		<div>
-			<ProfileNavbar logoutAction={logoutAction} />
+			<Navbar logoutAction={logoutAction} />
 			<CommunityPage
 				fetchAllPostsAction={fetchAllPostsAction}
 				postLikeAction={postLikeAction}

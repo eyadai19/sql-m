@@ -8,7 +8,6 @@ import { eq } from "drizzle-orm";
 import { nanoid } from "nanoid";
 import { Metadata } from "next";
 import { cookies } from "next/headers";
-import { redirect } from "next/navigation";
 import { z } from "zod";
 export const metadata: Metadata = {
 	title: "SQLMentor - Register",
@@ -76,7 +75,7 @@ export async function RegisterAction(
 			sessionCookie.attributes,
 		);
 
-		redirect("/Profile");
+		// redirect("/Profile");
 	} catch (e) {
 		console.error("Unexpected error:", e);
 		return {

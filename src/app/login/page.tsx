@@ -54,5 +54,5 @@ async function LoginAction(
 		};
 	}
 
-	redirect("/basic/dataType");
+	// redirect("/basic/dataType");
 }

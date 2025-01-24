@@ -16,7 +16,7 @@ import {
 } from "react-icons/fa";
 import { RiCommunityFill } from "react-icons/ri";
 
-export function ProfileNavbar({
+export function Navbar({
 	logoutAction,
 }: {
 	logoutAction: () => Promise<void>;

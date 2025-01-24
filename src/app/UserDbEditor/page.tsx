@@ -1,6 +1,6 @@
 import Chatbot from "@/components/Chatbot";
 import DatabaseManager from "@/components/database/DatabaseManager";
-import { ProfileNavbar } from "@/components/layout/ProfileNavbar";
+import { Navbar } from "@/components/layout/Navbar";
 import { ChatbotExpAction } from "@/lib/ServerAction/chatbotExp";
 import {
 	ChatbotAction,
@@ -22,7 +22,7 @@ export const metadata: Metadata = {
 export default function UserComp() {
 	return (
 		<div>
-			<ProfileNavbar logoutAction={logoutAction} />
+			<Navbar logoutAction={logoutAction} />
 			<DatabaseManager />
 			<Chatbot
 				ChatbotAction={ChatbotAction}

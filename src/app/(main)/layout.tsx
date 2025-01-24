@@ -1,6 +1,6 @@
 import Chatbot from "@/components/Chatbot";
 import { AppSidebar } from "@/components/layout/AppSidebar";
-import { ProfileNavbar } from "@/components/layout/ProfileNavbar";
+import { Navbar } from "@/components/layout/Navbar";
 import RenderHeadings from "@/components/layout/RenderHeadings";
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { getUser } from "@/lib/auth";
@@ -22,7 +22,7 @@ export default function DashboardLayout({
 }) {
 	return (
 		<div className="relative h-full before:absolute before:inset-0 before:-z-10 before:bg-gradient-to-r before:from-teal-400 before:to-blue-500 before:opacity-25">
-			<ProfileNavbar logoutAction={logoutAction} />
+			<Navbar logoutAction={logoutAction} />
 			<SidebarProvider>
 				<AppSidebar
 					getQuizAction={getQuizAction}

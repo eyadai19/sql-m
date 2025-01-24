@@ -66,7 +66,6 @@ export default function ProfilePage({
 	const [posts, setPosts] = useState<Post[] | null>(null);
 	const [postsError, setPostError] = useState<string | null>(null);
 	const swiperRef = useRef<any>(null);
-	let maxStage: number;
 
 	useEffect(() => {
 		const fetchProfileData = async () => {
@@ -79,7 +78,6 @@ export default function ProfilePage({
 				setError(result.message);
 			} else {
 				setInfo(result as ProfileData);
-				maxStage = result.stage.index;
 				setFormData({
 					firstName: result.firstName,
 					lastName: result.lastName,
@@ -89,17 +87,27 @@ export default function ProfilePage({
 		fetchProfileData();
 	}, [ProfileAction]);
 
+	const [isLoadingPosts, setIsLoadingPosts] = useState(false);
+
 	useEffect(() => {
 		async function fetchPosts() {
-			const result = await userPostAction();
-			if ("field" in result) {
-				setPostError(result.message);
-			} else {
-				setPosts(result);
+			setIsLoadingPosts(true);
+			try {
+				const result = await userPostAction();
+				if ("field" in result) {
+					setPostError(result.message);
+				} else {
+					setPosts(result);
+					setPostError(null);
+				}
+			} catch (error) {
+				setPostError("Failed to fetch posts. Please try again later.");
+			} finally {
+				setIsLoadingPosts(false); // إيقاف التحميل
 			}
 		}
 		fetchPosts();
-	}, []);
+	}, [userPostAction]);
 
 	const handleReviewClick = (quizId: string) => {
 		router.push(`/QuizDetalis/${quizId}`);
@@ -150,7 +158,9 @@ export default function ProfilePage({
 		}
 	};
 
-	const handleAchievementsClick = () => {
+	const handleAchievementsClick = (maxStage: number) => {
+		maxStage += 1;
+
 		const stagesAchievements = [
 			{ message: "Welcome to the journey!", icon: "🎉" },
 			{ message: "Bronze Medal: Congrats on completing Stage 1!", icon: "🥉" },
@@ -162,8 +172,10 @@ export default function ProfilePage({
 			},
 		];
 
+		const validMaxStage = Math.min(maxStage, stagesAchievements.length);
+
 		const achievementsToShow = stagesAchievements
-			.slice(0, maxStage)
+			.slice(0, validMaxStage)
 			.map((stage) => `${stage.icon} ${stage.message}`);
 
 		setAchievements(achievementsToShow);
@@ -323,7 +335,9 @@ export default function ProfilePage({
 
 									<div className="mt-6 flex items-center justify-between">
 										<button
-											onClick={handleAchievementsClick}
+											onClick={() => {
+												handleAchievementsClick(info.stage.index);
+											}}
 											className="flex items-center rounded-lg bg-gradient-to-r from-[#00203F] to-[#001529] px-4 py-2 text-sm font-medium text-white transition-all hover:from-[#001529] hover:to-[#00203F]"
 										>
 											<FiAward className="mr-2" />
@@ -502,25 +516,40 @@ export default function ProfilePage({
 				</TabsContent>
 
 				<TabsContent value="posts" className="w-full">
-					<div className="grid max-w-full grid-cols-1 gap-6">
-						{posts?.map((post) => (
-							<div
-								key={post.id}
-								className="w-full overflow-hidden rounded-xl bg-white shadow-lg transition-all hover:shadow-xl"
-							>
-								<PostCard
-									post={post}
-									postLikeAction={postLikeAction}
-									postCommentAction={postCommentAction}
-									postCommentLikeAction={postCommentLikeAction}
-									deletePostAction={deletePostAction}
-									editPostAction={editPostAction}
-									useImage={info.photo}
-									onPostDelete={handlePostDelete}
-								/>
+					{isLoadingPosts ? (
+						<div className="flex items-center justify-center p-8">
+							<div className="h-12 w-12 animate-spin rounded-full border-b-2 border-t-2 border-[#00203F]"></div>
+						</div>
+					) : (
+						<>
+							{postsError && (
+								<div className="mb-6 rounded-lg bg-red-50 p-4 text-red-500 shadow-md">
+									{postsError}
+								</div>
+							)}
+							<div className="rounded-xl bg-white p-6 shadow-lg">
+								<div className="grid max-w-full grid-cols-1 gap-6">
+									{posts?.map((post) => (
+										<div
+											key={post.id}
+											className="w-full overflow-hidden rounded-xl  transition-all hover:shadow-xl"
+										>
+											<PostCard
+												post={post}
+												postLikeAction={postLikeAction}
+												postCommentAction={postCommentAction}
+												postCommentLikeAction={postCommentLikeAction}
+												deletePostAction={deletePostAction}
+												editPostAction={editPostAction}
+												useImage={info.photo}
+												onPostDelete={handlePostDelete}
+											/>
+										</div>
+									))}
+								</div>
 							</div>
-						))}
-					</div>
+						</>
+					)}
 				</TabsContent>
 			</Tabs>
 

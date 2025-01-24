@@ -1,5 +1,5 @@
 import Chatbot from "@/components/Chatbot";
-import { ProfileNavbar } from "@/components/layout/ProfileNavbar";
+import { Navbar } from "@/components/layout/Navbar";
 import ProfilePage from "@/components/profile";
 import { getUser, lucia } from "@/lib/auth";
 import { db } from "@/lib/db";
@@ -36,7 +36,7 @@ export const metadata: Metadata = {
 export default function Profile() {
 	return (
 		<div>
-			<ProfileNavbar logoutAction={logoutAction} />
+			<Navbar logoutAction={logoutAction} />
 			<ProfilePage
 				ProfileAction={ProfileAction}
 				UpdateProfileAction={UpdateProfileAction}

@@ -61,12 +61,12 @@ export function AppSidebar({
 			<SidebarContent
 				className=""
 				style={{
-					overflow: "auto", // يسمح بالتمرير
-					scrollbarWidth: "none", // لإخفاء شريط التمرير في Firefox
-					msOverflowStyle: "none", // لإخفاء شريط التمرير في Internet Explorer
+					overflow: "auto",
+					scrollbarWidth: "none",
+					msOverflowStyle: "none",
 				}}
 			>
-				<SidebarMenu className="mt-[60px] border-0 bg-sailorBlue p-0">
+				<SidebarMenu className="mt-[60px] border-0 bg-sailorBlue p-0 max-md:mt-0">
 					{allPath.map((group, groupIndex) => (
 						<SidebarGroup key={groupIndex}>
 							{/* تغيير لون العنوان الرئيسي لكل قسم */}

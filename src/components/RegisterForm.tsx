@@ -63,13 +63,15 @@ export default function RegisterForm({
 	}, [router]);
 
 	async function onSubmit(values: z.infer<typeof registerFormSchema>) {
-		setIsSubmitting(true); // بدء التحميل
+		setIsSubmitting(true);
 
 		try {
 			const error = await registerAction(values, photoUrl);
 
 			if (error) {
 				form.setError(error.field, { message: error.message });
+			} else {
+				router.push("/Profile");
 			}
 		} catch (error) {
 			console.error("An unexpected error occurred:", error);

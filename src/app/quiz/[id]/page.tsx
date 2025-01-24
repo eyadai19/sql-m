@@ -1,6 +1,6 @@
 import { getAuthorizedQuiz } from "@/app/(main)/layout";
 import { logoutAction } from "@/app/Profile/page";
-import { ProfileNavbar } from "@/components/layout/ProfileNavbar";
+import { Navbar } from "@/components/layout/Navbar";
 import SqlQuiz from "@/components/Quiz";
 import { getUser } from "@/lib/auth";
 import { db } from "@/lib/db";
@@ -29,7 +29,7 @@ export const metadata: Metadata = {
 export default function quiz({ params }: { params: { id: string } }) {
 	return (
 		<div>
-			<ProfileNavbar logoutAction={logoutAction} />
+			<Navbar logoutAction={logoutAction} />
 
 			<SqlQuiz
 				quizAction={quizAction.bind(null, params.id)}
