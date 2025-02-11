@@ -9,9 +9,9 @@ import {
 } from "@/components/ui/collapsible";
 import { cn } from "@/lib/utils";
 import { ChevronDown, Info } from "lucide-react";
+import ReactMarkDown from "react-markdown";
 import CodeBlock from "./CodeBlock";
 import { Section } from "./types";
-
 interface ExplanationSectionProps {
 	section: Section;
 	index: number;
@@ -63,9 +63,9 @@ export default function ExplanationSection({
 							</div>
 						)}
 						<div className="prose prose-sailorBlue max-w-none">
-							<p className="text-sm leading-relaxed text-sailorBlue sm:text-base">
+							<ReactMarkDown className="text-sm leading-relaxed text-sailorBlue sm:text-base">
 								{section.content}
-							</p>
+							</ReactMarkDown>
 						</div>
 						{section.code && (
 							<div className="mt-4">
