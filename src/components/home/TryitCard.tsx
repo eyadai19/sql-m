@@ -1,97 +1,112 @@
 "use client";
-import React, { useState } from 'react';
 import Link from "next/link";
+import { useState } from "react";
 
 export function TryitCard() {
-  const [inputValue, setInputValue] = useState("");
-  const [isCorrect, setIsCorrect] = useState(false);
+	const [inputValue, setInputValue] = useState("");
+	const [isCorrect, setIsCorrect] = useState(false);
 
-  function handleChange(e: { target: { value: any } }) {
-    const value = e.target.value;
-    setInputValue(value);
+	function handleChange(e: any) {
+		const value = e.target.value;
+		setInputValue(value);
+		setIsCorrect(value.trim().toLowerCase() === "select");
+	}
 
-    if (value.trim().toLowerCase() === "select") {
-      setIsCorrect(true);
-    } else {
-      setIsCorrect(false);
-    }
-  }
+	const [userInput, setUserInput] = useState("");
+	const [isAnswerCorrect, setIsAnswerCorrect] = useState(false);
 
-  const [userInput, setUserInput] = useState("");
-  const [isAnswerCorrect, setIsAnswerCorrect] = useState(false);
+	function handleInputChange(e: any) {
+		const value = e.target.value;
+		setUserInput(value);
+		setIsAnswerCorrect(value.trim().toLowerCase() === "delete");
+	}
 
-  function handleInputChange(event: { target: { value: any } }) {
-    const inputValue = event.target.value;
-    setUserInput(inputValue);
+	return (
+		<section id="try">
+			<div className="flex min-h-screen flex-col items-center justify-center gap-8 bg-gray-200 text-white md:flex-row">
+				{/* First Activity Card */}
+				<div className="max-w-lg transform rounded-2xl border border-gray-700 bg-[#012E57] p-8 shadow-xl transition hover:scale-105 hover:shadow-2xl">
+					<h2 className="mb-4 text-center text-3xl font-bold text-[#ADF0D1]">
+						Activity
+					</h2>
+					<div className="rounded-lg bg-gray-800 p-6">
+						<h3 className="mb-2 text-xl font-semibold">Get Data</h3>
+						<p className="mb-4">
+							Insert the missing statement to get all columns from the{" "}
+							<span className="text-[#ADF0D1]">Customers</span> table.
+						</p>
+						<div className="flex items-center rounded-md bg-gray-200 p-4 font-mono text-gray-900">
+							<input
+								type="text"
+								value={inputValue}
+								onChange={handleChange}
+								placeholder="..."
+								className={`rounded-md bg-white p-2 font-semibold text-black transition duration-300 focus:outline-none ${isCorrect ? "bg-green-300" : "bg-red-300"}`}
+							/>
+							<span className="ml-2">* FROM Customers;</span>
+						</div>
+						{isCorrect ? (
+							<p className="mt-2 text-center font-semibold text-green-400">
+								Correct!
+							</p>
+						) : (
+							inputValue && (
+								<p className="mt-2 text-center font-semibold text-red-400">
+									Keep trying!
+								</p>
+							)
+						)}
+					</div>
+					<Link
+						href="/login"
+						className="mt-4 block text-center text-[#ADF0D1] hover:underline"
+					>
+						Start your journey!
+					</Link>
+				</div>
 
-    if (inputValue.trim().toLowerCase() === "delete") {
-      setIsAnswerCorrect(true);
-    } else {
-      setIsAnswerCorrect(false);
-    }
-  }
-
-  return (
-    <div className=" flex flex-col md:flex-row justify-evenly p-6 space-y-6 md:space-y-0" id="try">
-      {/* First Activity Card */}
-      <div className="max-w-lg p-6 bg-[#00203F] text-white rounded-lg shadow-lg">
-        <h2 className="text-2xl font-bold mb-4">Activity</h2>
-        <div className="bg-black p-6 rounded-lg">
-          <h3 className="text-xl font-semibold mb-2">Get Data</h3>
-          <p className="mb-4">
-            Insert the missing statement to get all the columns from the <span className="text-[#ADF0D1]">Customers</span> table.
-          </p>
-          <div className="bg-gray-200 text-gray-900 p-4 rounded-md font-mono">
-            <code>
-              <input
-                type="text"
-                value={inputValue}
-                onChange={handleChange}
-                placeholder="..."
-                className={`bg-white rounded-md p-1 px-1 mr-1 ${isCorrect ? "bg-green-200" : "bg-red-200"}`} />
-              * FROM Customers;
-            </code>
-          </div>
-          {isCorrect ? (
-            <p className="text-green-400 mt-2 font-semibold">Correct!</p>
-          ) : (
-            inputValue && <p className="text-red-400 mt-2 font-semibold">Keep trying!</p>
-          )}
-        </div>
-        <Link href="/login" className="mt-4 block text-[#ADF0D1] hover:underline">
-          Start your journey!
-        </Link>
-      </div>
-      
-      {/* Second Activity Card */}
-      <div className="max-w-lg p-6 bg-[#00203F] text-white rounded-lg shadow-lg">
-        <h2 className="text-2xl font-bold mb-4">Activity</h2>
-        <div className="bg-black p-6 rounded-lg">
-          <h3 className="text-xl font-semibold mb-2">Delete Data</h3>
-          <p className="mb-4">
-            Insert the missing statement to delete all rows in the <span className="text-[#ADF0D1]">students</span> table, without deleting the table.
-          </p>
-          <div className="bg-gray-200 text-gray-900 p-4 rounded-md font-mono">
-            <code>
-              <input
-                type="text"
-                value={userInput}
-                onChange={handleInputChange}
-                placeholder="..."
-                className={`bg-white rounded-md p-1 px-1 mr-1 ${isAnswerCorrect ? "bg-green-200" : "bg-red-200"}`} />
-               FROM students;
-            </code>
-          </div>
-          {isAnswerCorrect ? (
-            <p className="text-green-400 mt-2 font-semibold">Correct!</p>
-          ) : (
-            userInput && <p className="text-red-400 mt-2 font-semibold">Keep trying!</p>
-          )}
-        </div>
-        <Link href="/login" className="mt-4 block text-[#ADF0D1] hover:underline">
-          Start your journey!
-        </Link>
-      </div>
-    </div>
-  );
+				{/* Second Activity Card */}
+				<div className="max-w-lg transform rounded-2xl border border-gray-700 bg-[#012E57] p-8 shadow-xl transition hover:scale-105 hover:shadow-2xl">
+					<h2 className="mb-4 text-center text-3xl font-bold text-[#ADF0D1]">
+						Activity
+					</h2>
+					<div className="rounded-lg bg-gray-800 p-6">
+						<h3 className="mb-2 text-xl font-semibold">Delete Data</h3>
+						<p className="mb-4">
+							Insert the missing statement to delete all rows in the{" "}
+							<span className="text-[#ADF0D1]">students</span> table, without
+							deleting the table.
+						</p>
+						<div className="flex items-center rounded-md bg-gray-200 p-4 font-mono text-gray-900">
+							<input
+								type="text"
+								value={userInput}
+								onChange={handleInputChange}
+								placeholder="..."
+								className={`rounded-md bg-white p-2 font-semibold text-black transition duration-300 focus:outline-none ${isAnswerCorrect ? "bg-green-300" : "bg-red-300"}`}
+							/>
+							<span className="ml-2">FROM students;</span>
+						</div>
+						{isAnswerCorrect ? (
+							<p className="mt-2 text-center font-semibold text-green-400">
+								Correct!
+							</p>
+						) : (
+							userInput && (
+								<p className="mt-2 text-center font-semibold text-red-400">
+									Keep trying!
+								</p>
+							)
+						)}
+					</div>
+					<Link
+						href="/login"
+						className="mt-4 block text-center text-[#ADF0D1] hover:underline"
+					>
+						Start your journey!
+					</Link>
+				</div>
+			</div>
+		</section>
+	);
 }

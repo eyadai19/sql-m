@@ -144,3 +144,121 @@ export async function getAuthorizedQuiz(
 		return false;
 	}
 }
+
+/*
+
+export async function getQuizAction(
+	index: number,
+): Promise<string | undefined | { field: string; message: string }> {
+	"use server";
+	try {
+		const stageId = await db.query.TB_stage.findFirst({
+			where: (stage, { eq }) => eq(stage.index, index),
+			columns: { id: true },
+		});
+
+		return stageId?.id;
+	} catch (error) {
+		console.error("Error fetching quiz:", error);
+		return { field: "root", message: "Error fetching quiz" };
+	}
+}
+
+export async function getUnlockIndex(): Promise<
+	number | undefined | { field: string; message: string }
+> {
+	"use server";
+	try {
+		const user = await getUser();
+		if (!user) return { field: "root", message: "User not authenticated." };
+
+		const userData = await db.query.TB_user.findFirst({
+			where: (info, { eq }) => eq(info.id, user.id),
+			columns: { stageId: true },
+		});
+
+		if (!userData) return undefined;
+
+		const stage = await db.query.TB_stage.findFirst({
+			where: (stage, { eq }) => eq(stage.id, userData.stageId),
+			columns: { index: true },
+		});
+
+		return stage?.index;
+	} catch (error) {
+		console.error("Error fetching unlock index:", error);
+		return { field: "root", message: "Error fetching unlock index" };
+	}
+}
+
+export async function getAuthorizedPage(levelName: string): Promise<boolean> {
+	"use server";
+	try {
+		const user = await getUser();
+		if (!user) return false;
+
+		const [userStage, levelStage] = await Promise.all([
+			db.query.TB_user.findFirst({
+				where: (info, { eq }) => eq(info.id, user.id),
+				columns: { stageId: true },
+			}),
+			db.query.TB_level.findFirst({
+				where: (level, { eq }) => eq(level.level, levelName),
+				columns: { stageId: true },
+			}),
+		]);
+
+		if (!userStage?.stageId || !levelStage?.stageId) return false;
+
+		const [userStageIndex, levelStageIndex] = await Promise.all([
+			db.query.TB_stage.findFirst({
+				where: (stage, { eq }) => eq(stage.id, userStage.stageId),
+				columns: { index: true },
+			}),
+			db.query.TB_stage.findFirst({
+				where: (stage, { eq }) => eq(stage.id, levelStage.stageId),
+				columns: { index: true },
+			}),
+		]);
+
+		return (
+			(levelStageIndex?.index ?? Infinity) <= (userStageIndex?.index ?? -1)
+		);
+	} catch (error) {
+		console.error("Error fetching authorized page:", error);
+		return false;
+	}
+}
+
+export async function getAuthorizedQuiz(stageId: string): Promise<boolean> {
+	"use server";
+	try {
+		const user = await getUser();
+		if (!user) return false;
+
+		const [userStage, targetStage] = await Promise.all([
+			db.query.TB_user.findFirst({
+				where: (info, { eq }) => eq(info.id, user.id),
+				columns: { stageId: true },
+			}),
+			db.query.TB_stage.findFirst({
+				where: (stage, { eq }) => eq(stage.id, stageId),
+				columns: { index: true },
+			}),
+		]);
+
+		if (!userStage?.stageId || !targetStage) return false;
+
+		const userStageIndex = await db.query.TB_stage.findFirst({
+			where: (stage, { eq }) => eq(stage.id, userStage.stageId),
+			columns: { index: true },
+		});
+
+		return (targetStage.index ?? Infinity) <= (userStageIndex?.index ?? -1);
+	} catch (error) {
+		console.error("Error fetching authorized quiz:", error);
+		return false;
+	}
+}
+
+*/

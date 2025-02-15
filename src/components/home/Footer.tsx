@@ -3,7 +3,7 @@ import Image from "next/image";
 
 export function Footer() {
 	return (
-		<footer className="mt-6 bg-[#00203F] shadow dark:bg-[#00203F]">
+		<footer className="mt-6 bg-gradient-to-b from-[#00203F] to-[#003B5C] shadow-xl dark:bg-[#00203F]">
 			<div className="mx-auto w-full max-w-screen-xl p-4 md:py-8">
 				<div className="sm:flex sm:items-center sm:justify-between">
 					<a
@@ -21,17 +21,26 @@ export function Footer() {
 					</a>
 					<ul className="mb-6 flex flex-wrap items-center text-sm font-medium text-[#ADF0D1] sm:mb-0">
 						<li>
-							<a href="#about" className="me-4 hover:underline md:me-6">
+							<a
+								href="#about"
+								className="me-4 transition-colors duration-300 ease-in-out hover:text-[#4db8b0] hover:underline md:me-6"
+							>
 								About
 							</a>
 						</li>
 						<li>
-							<a href="#try" className="me-4 hover:underline md:me-6">
-								Lets try
+							<a
+								href="#try"
+								className="me-4 transition-colors duration-300 ease-in-out hover:text-[#4db8b0] hover:underline md:me-6"
+							>
+								Let's Try
 							</a>
 						</li>
 						<li>
-							<a href="/login" className="hover:underline">
+							<a
+								href="/login"
+								className="transition-colors duration-300 ease-in-out hover:text-[#4db8b0] hover:underline"
+							>
 								Login
 							</a>
 						</li>
@@ -42,7 +51,7 @@ export function Footer() {
 					<span className="block text-sm text-[#ADF0D1] sm:text-center">
 						© 2025{" "}
 						<a href="/" className="hover:underline">
-							Eyad Company
+							SQL Mentor
 						</a>
 						. All Rights Reserved.
 					</span>
@@ -50,14 +59,14 @@ export function Footer() {
 						<a
 							href="https://www.facebook.com/eyad.sy.7890"
 							target="_blank"
-							className="text-[#ADF0D1] hover:text-blue-600"
+							className="text-[#ADF0D1] transition-colors duration-300 hover:text-[#1877f2]"
 						>
 							<i className="fab fa-facebook-f"></i>
-						</a>{" "}
+						</a>
 						<a
 							href="https://www.instagram.com/eyadd.18?igsh=dWFjYmViNm5qYW9x&utm_source=qr"
 							target="_blank"
-							className="text-[#ADF0D1] hover:text-pink-500"
+							className="text-[#ADF0D1] transition-colors duration-300 hover:text-[#e1306c]"
 						>
 							<i className="fab fa-instagram"></i>
 						</a>

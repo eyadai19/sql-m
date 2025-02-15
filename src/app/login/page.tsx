@@ -23,24 +23,18 @@ async function LoginAction(
 	input: z.infer<typeof loginFormSchema>,
 ): Promise<LoginFormError | undefined> {
 	"use server";
-
 	try {
 		const data = await loginFormSchema.parseAsync(input);
-
 		const user = await db.query.TB_user.findFirst({
 			where: (user, { eq }) => eq(user.username, data.username),
 		});
-
 		if (!user) {
 			return { field: "username", message: "Username not found" };
 		}
-
 		if (user.password !== hash(data.password)) {
 			return { field: "password", message: "Incorrect password" };
 		}
-
 		const session = await lucia.createSession(user.id, {});
-
 		const sessionCookie = lucia.createSessionCookie(session.id);
 		cookies().set(
 			sessionCookie.name,
@@ -53,6 +47,4 @@ async function LoginAction(
 			message: "An unexpected error occurred, please try again later",
 		};
 	}
-
-	// redirect("/basic/dataType");
 }
